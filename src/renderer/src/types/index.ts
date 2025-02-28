@@ -18,6 +18,8 @@ export type Assistant = {
   messages?: AssistantMessage[]
   enableWebSearch?: boolean
   groupId?: string
+  createTime?: number
+  updateTime?: number
 }
 
 export type AssistantGroup = {

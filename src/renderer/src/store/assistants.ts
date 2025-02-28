@@ -27,6 +27,7 @@ const getInitialDefaultAssistant = (): Assistant => {
       description: '默认助手',
       prompt: '',
       topics: [],
+      type: 'default',
       createTime: new Date().getTime(),
       updateTime: new Date().getTime(),
       model: 'gpt-3.5-turbo' as unknown as Model,
