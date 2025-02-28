@@ -27,12 +27,12 @@ interface AssistantItemProps {
   groups?: AssistantGroup[]
 }
 
-const AssistantItem: FC<AssistantItemProps> = ({ 
-  assistant, 
-  isActive, 
-  onSwitch, 
-  onDelete, 
-  addAgent, 
+const AssistantItem: FC<AssistantItemProps> = ({
+  assistant,
+  isActive,
+  onSwitch,
+  onDelete,
+  addAgent,
   addAssistant,
   onMoveToGroup,
   groups = []
@@ -89,8 +89,8 @@ const AssistantItem: FC<AssistantItemProps> = ({
             })
           }
         }
-      ];
-      
+      ]
+
       // 添加移至分组菜单
       if (onMoveToGroup && groups.length > 0) {
         const groupItems: ItemType[] = [
@@ -103,12 +103,16 @@ const AssistantItem: FC<AssistantItemProps> = ({
             icon: <FolderOutlined />,
             children: [
               // 只有当助手已经在某个分组中时，才显示"移出分组"选项
-              ...(assistant.groupId ? [{
-                label: t('assistants.move_to_no_group'),
-                key: 'move-to-no-group',
-                onClick: () => onMoveToGroup(assistant.id, undefined)
-              }] : []),
-              ...groups.map(group => ({
+              ...(assistant.groupId
+                ? [
+                    {
+                      label: t('assistants.move_to_no_group'),
+                      key: 'move-to-no-group',
+                      onClick: () => onMoveToGroup(assistant.id, undefined)
+                    }
+                  ]
+                : []),
+              ...groups.map((group) => ({
                 label: group.name,
                 key: `move-to-group-${group.id}`,
                 onClick: () => onMoveToGroup(assistant.id, group.id),
@@ -116,11 +120,11 @@ const AssistantItem: FC<AssistantItemProps> = ({
               }))
             ]
           }
-        ];
-        
-        baseItems.push(...groupItems);
+        ]
+
+        baseItems.push(...groupItems)
       }
-      
+
       baseItems.push(
         { type: 'divider' },
         {
@@ -138,9 +142,9 @@ const AssistantItem: FC<AssistantItemProps> = ({
             })
           }
         }
-      );
-      
-      return baseItems;
+      )
+
+      return baseItems
     },
     [addAgent, addAssistant, onSwitch, removeAllTopics, t, onDelete, onMoveToGroup, groups, assistant.groupId]
   )
