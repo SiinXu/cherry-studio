@@ -1,17 +1,24 @@
-import { FolderAddOutlined, PlusOutlined, DownOutlined, RightOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
-import DragableList from '@renderer/components/DragableList'
-import Scrollbar from '@renderer/components/Scrollbar'
+import {
+  DeleteOutlined,
+  DownOutlined,
+  EditOutlined,
+  FolderAddOutlined,
+  LoadingOutlined,
+  PlusOutlined,
+  RightOutlined
+} from '@ant-design/icons'
 import { useAgents } from '@renderer/hooks/useAgents'
 import { useAssistants } from '@renderer/hooks/useAssistant'
-import { useTranslation } from 'react-i18next'
-import { Assistant, AssistantGroup } from '@renderer/types'
-import { Dropdown, Form, Input, Menu, message, Modal } from 'antd'
-import { FC, useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { v4 as uuid } from 'uuid'
-import styled from 'styled-components'
-import AssistantItem from './AssistantItem'
 import { useAppSelector } from '@renderer/store'
+import { Assistant, AssistantGroup } from '@renderer/types'
+import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
+import { Alert, Form, Input, Modal, Spin } from 'antd'
+import { FC, useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import styled from 'styled-components'
+import { v4 as uuid } from 'uuid'
+
+import AssistantItem from './AssistantItem'
 
 interface AssistantsTabProps {
   activeAssistant: Assistant
@@ -20,17 +27,31 @@ interface AssistantsTabProps {
   onCreateDefaultAssistant: () => void
 }
 
-const Assistants: FC<AssistantsTabProps> = ({ activeAssistant, setActiveAssistant, onCreateAssistant, onCreateDefaultAssistant }) => {
-  const { assistants, updateAssistants, addGroup, updateGroup, removeGroup, updateAssistantGroup, addAssistant, removeAssistant } = useAssistants()
-  const { groups } = useAppSelector((state) => state.assistants) // 直接从store获取最新groups
+const Assistants: FC<AssistantsTabProps> = ({
+  activeAssistant,
+  setActiveAssistant,
+  onCreateAssistant,
+  onCreateDefaultAssistant
+}) => {
+  const { assistants, addGroup, updateGroup, removeGroup, updateAssistantGroup, addAssistant, removeAssistant } =
+    useAssistants()
+  const { groups, isLoading, loadingError } = useAppSelector((state) => state.assistants) // 直接从store获取状态
   const { addAgent } = useAgents()
   const [form] = Form.useForm()
   const [groupModalVisible, setGroupModalVisible] = useState(false)
   const [currentGroup, setCurrentGroup] = useState<AssistantGroup | null>(null)
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(groups.map(g => g.id))) // 默认展开所有分组
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(safeMap(groups, (g) => g.id))) // 默认展开所有分组
   const [dragging, setDragging] = useState(false)
   const dropTargetRef = useRef<string | null>(null)
   const { t } = useTranslation()
+
+  // 错误处理和数据加载检查
+  useEffect(() => {
+    if (loadingError) {
+      console.error('加载助手数据时出错:', loadingError)
+      // 可以在这里添加错误通知或重试逻辑
+    }
+  }, [loadingError])
 
   const onDelete = useCallback(
     (assistant: Assistant) => {
@@ -130,8 +151,8 @@ const Assistants: FC<AssistantsTabProps> = ({ activeAssistant, setActiveAssistan
   }
 
   // 将助手分类：未分组的和按组分类的
-  const ungroupedAssistants = assistants.filter(a => !a.groupId)
-  
+  const ungroupedAssistants = safeFilter(assistants, (a) => !a.groupId)
+
   // 处理将助手拖入分组
   const handleAssistantDragStart = (e: React.DragEvent, assistantId: string) => {
     setDragging(true)
@@ -167,53 +188,46 @@ const Assistants: FC<AssistantsTabProps> = ({ activeAssistant, setActiveAssistan
 
   // 渲染一个分组
   const renderGroup = (group: AssistantGroup) => {
-    const groupAssistants = assistants.filter(a => a.groupId === group.id)
+    const groupAssistants = safeFilter(assistants, (a) => a.groupId === group.id)
     // 删除空组过滤条件，允许显示空组
     const isExpanded = expandedGroups.has(group.id)
-    
+
     return (
-      <GroupContainer 
-        key={group.id} 
+      <GroupContainer
+        key={group.id}
         data-groupid={group.id}
         onDragOver={(e) => handleAssistantDragOver(e, group.id)}
         onDragLeave={handleAssistantDragLeave}
         onDrop={(e) => handleAssistantDrop(e, group.id)}
-        className={dropTargetRef.current === group.id ? 'drag-over' : ''}
-      >
-        <GroupHeader
-          onClick={(e) => toggleGroupExpanded(group.id, e)}
-          className="group-header-style"
-        >
+        className={dropTargetRef.current === group.id ? 'drag-over' : ''}>
+        <GroupHeader onClick={(e) => toggleGroupExpanded(group.id, e)} className="group-header-style">
           <GroupTitle>
-            <GroupIcon>
-              {isExpanded ? <DownOutlined /> : <RightOutlined />}
-            </GroupIcon>
+            <GroupIcon>{isExpanded ? <DownOutlined /> : <RightOutlined />}</GroupIcon>
             <div>{group.name}</div>
             <GroupCount>{groupAssistants.length}</GroupCount>
           </GroupTitle>
           <GroupActions className="group-actions">
             <EditOutlined onClick={(e) => handleEditGroup(group, e)} />
-            <DeleteOutlined 
+            <DeleteOutlined
               className="delete-icon"
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                handleDeleteGroup(group.id); 
-              }} 
+              onClick={(e) => {
+                e.stopPropagation()
+                handleDeleteGroup(group.id)
+              }}
             />
           </GroupActions>
         </GroupHeader>
         <GroupContent className={isExpanded ? 'expanded' : 'collapsed'}>
-          {groupAssistants.map((assistant) => (
-            <div 
+          {safeMap(groupAssistants, (assistant) => (
+            <div
               key={assistant.id}
               draggable="true"
               onDragStart={(e) => handleAssistantDragStart(e, assistant.id)}
               onDragEnd={handleAssistantDragEnd}
-              className="assistant-item-wrapper"
-            >
+              className="assistant-item-wrapper">
               <AssistantItem
                 assistant={assistant}
-                isActive={assistant.id === activeAssistant.id}
+                isActive={activeAssistant && assistant.id === activeAssistant.id}
                 onSwitch={setActiveAssistant}
                 onDelete={onDelete}
                 addAgent={addAgent}
@@ -231,86 +245,92 @@ const Assistants: FC<AssistantsTabProps> = ({ activeAssistant, setActiveAssistan
 
   return (
     <Container>
-      {/* 未分组的助手 */}
-      <UngroupedSection
-        onDragOver={(e) => handleAssistantDragOver(e, null)}
-        onDragLeave={handleAssistantDragLeave}
-        onDrop={(e) => handleAssistantDrop(e, null)}
-        className={dropTargetRef.current === null ? 'drag-over' : ''}
-      >
-        {ungroupedAssistants.map((assistant) => (
-          <div 
-            key={assistant.id}
-            draggable="true"
-            onDragStart={(e) => handleAssistantDragStart(e, assistant.id)}
-            onDragEnd={handleAssistantDragEnd}
-            className="assistant-item-wrapper"
-          >
-            <AssistantItem
-              assistant={assistant}
-              isActive={assistant.id === activeAssistant.id}
-              onSwitch={setActiveAssistant}
-              onDelete={onDelete}
-              addAgent={addAgent}
-              addAssistant={addAssistant}
-              onCreateDefaultAssistant={onCreateDefaultAssistant}
-              onMoveToGroup={(assistantId, groupId) => updateAssistantGroup(assistantId, groupId)}
-              groups={groups}
-            />
-          </div>
-        ))}
-      </UngroupedSection>
+      {isLoading ? (
+        <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
+      ) : (
+        <>
+          {loadingError ? (
+            <Alert message={t('assistants.load.error')} description={loadingError} type="error" showIcon />
+          ) : (
+            <>
+              {/* 未分组的助手 */}
+              <UngroupedSection
+                onDragOver={(e) => handleAssistantDragOver(e, null)}
+                onDragLeave={handleAssistantDragLeave}
+                onDrop={(e) => handleAssistantDrop(e, null)}
+                className={dropTargetRef.current === null ? 'drag-over' : ''}>
+                {safeMap(ungroupedAssistants, (assistant) => (
+                  <div
+                    key={assistant.id}
+                    draggable="true"
+                    onDragStart={(e) => handleAssistantDragStart(e, assistant.id)}
+                    onDragEnd={handleAssistantDragEnd}
+                    className="assistant-item-wrapper">
+                    <AssistantItem
+                      assistant={assistant}
+                      isActive={activeAssistant && assistant.id === activeAssistant.id}
+                      onSwitch={setActiveAssistant}
+                      onDelete={onDelete}
+                      addAgent={addAgent}
+                      addAssistant={addAssistant}
+                      onCreateDefaultAssistant={onCreateDefaultAssistant}
+                      onMoveToGroup={(assistantId, groupId) => updateAssistantGroup(assistantId, groupId)}
+                      groups={groups}
+                    />
+                  </div>
+                ))}
+              </UngroupedSection>
 
-      {/* 模块间分割线 */}
-      <SectionDivider />
+              {/* 模块间分割线 */}
+              <SectionDivider />
 
-      {/* 分组区域 */}
-      <GroupsContainer>
-        {groups.map(renderGroup)}
-      </GroupsContainer>
+              {/* 分组区域 */}
+              <GroupsContainer>{safeMap(groups, renderGroup)}</GroupsContainer>
 
-      {/* 添加按钮 */}
-      <ActionButtons>
-        {!dragging && (
-          <>
-            <CreateButton type="button" className="add-assistant-btn" onClick={onCreateAssistant}>
-              <PlusOutlined />
-              {t('chat.add.assistant.title')}
-            </CreateButton>
-            <GroupCreateButton type="button" className="add-group-btn" onClick={handleCreateGroup}>
-              <FolderAddOutlined />
-              {t('assistants.group.add')}
-            </GroupCreateButton>
-          </>
-        )}
-      </ActionButtons>
+              {/* 添加按钮 */}
+              <ActionButtons>
+                {!dragging && (
+                  <>
+                    <CreateButton type="button" className="add-assistant-btn" onClick={onCreateAssistant}>
+                      <PlusOutlined />
+                      {t('chat.add.assistant.title')}
+                    </CreateButton>
+                    <GroupCreateButton type="button" className="add-group-btn" onClick={handleCreateGroup}>
+                      <FolderAddOutlined />
+                      {t('assistants.group.add')}
+                    </GroupCreateButton>
+                  </>
+                )}
+              </ActionButtons>
 
-      {/* 创建/编辑分组模态框 */}
-      <Modal
-        title={currentGroup ? t('assistants.group.edit') : t('assistants.group.add')}
-        open={groupModalVisible}
-        onOk={handleGroupSubmit}
-        onCancel={() => setGroupModalVisible(false)}
-        destroyOnClose
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="name"
-            label={t('assistants.group.name')}
-            rules={[
-              {
-                required: true,
-                message: t('assistants.group.name.required')
-              }
-            ]}
-          >
-            <Input placeholder={t('assistants.group.name.placeholder')} />
-          </Form.Item>
-          <Form.Item name="description" label={t('assistants.group.description')}>
-            <Input.TextArea placeholder={t('assistants.group.description.placeholder')} rows={3} />
-          </Form.Item>
-        </Form>
-      </Modal>
+              {/* 创建/编辑分组模态框 */}
+              <Modal
+                title={currentGroup ? t('assistants.group.edit') : t('assistants.group.add')}
+                open={groupModalVisible}
+                onOk={handleGroupSubmit}
+                onCancel={() => setGroupModalVisible(false)}
+                destroyOnClose>
+                <Form form={form} layout="vertical">
+                  <Form.Item
+                    name="name"
+                    label={t('assistants.group.name')}
+                    rules={[
+                      {
+                        required: true,
+                        message: t('assistants.group.name.required')
+                      }
+                    ]}>
+                    <Input placeholder={t('assistants.group.name.placeholder')} />
+                  </Form.Item>
+                  <Form.Item name="description" label={t('assistants.group.description')}>
+                    <Input.TextArea placeholder={t('assistants.group.description.placeholder')} rows={3} />
+                  </Form.Item>
+                </Form>
+              </Modal>
+            </>
+          )}
+        </>
+      )}
     </Container>
   )
 }
@@ -324,15 +344,15 @@ const Container = styled.div`
   padding-bottom: 54px; /* 增加底部按钮区域的高度 */
   display: flex;
   flex-direction: column;
-  
-  .assistant-item-wrapper[draggable="true"] {
+
+  .assistant-item-wrapper[draggable='true'] {
     cursor: grab;
-    
+
     &:active {
       cursor: grabbing;
     }
   }
-  
+
   /* 解决拖拽时的白边问题 */
   [draggable] {
     -webkit-user-drag: element;
@@ -344,7 +364,7 @@ const UngroupedSection = styled.div`
   padding: 8px;
   border-radius: 8px;
   min-height: 60px;
-  
+
   &.drag-over {
     background-color: var(--color-bg-3);
   }
@@ -365,7 +385,7 @@ const GroupContainer = styled.div`
   margin-bottom: 4px; /* 减小Group间距 */
   position: relative;
   /* 移除Group间分割线 */
-  
+
   &.drag-over {
     background-color: var(--color-bg-3);
     border-radius: 6px;
@@ -381,10 +401,10 @@ const GroupHeader = styled.div`
   user-select: none;
   position: relative;
   border-radius: 6px;
-  
+
   &:hover {
     background-color: var(--color-bg-2);
-    
+
     .group-actions {
       opacity: 1;
       visibility: visible;
@@ -416,16 +436,16 @@ const GroupActions = styled.div`
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s;
-  
+
   svg {
     cursor: pointer;
     font-size: 14px;
-    
+
     &:hover {
       color: var(--color-primary);
     }
   }
-  
+
   /* 删除图标悬停时变为红色 - 提高优先级 */
   .delete-icon:hover {
     color: var(--color-error) !important; /* 使用!important确保优先级 */
@@ -446,7 +466,7 @@ const GroupContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px; /* 减小Assistant间距 */
-  
+
   &.collapsed {
     display: none;
   }
@@ -465,7 +485,7 @@ const ActionButtons = styled.div`
   border-top: 1px solid var(--color-border);
   height: 54px; /* 确保按钮区域有足够的高度 */
   box-sizing: border-box;
-  
+
   button {
     flex: 1;
     position: relative;
@@ -486,7 +506,7 @@ const CreateButton = styled.button`
   gap: 6px;
   transition: all 0.3s;
   z-index: 2;
-  
+
   &:hover {
     background-color: #05d47b; /* 使用更浅的绿色，但不透明 */
     transform: translateY(-1px);
@@ -498,7 +518,7 @@ const CreateButton = styled.button`
 const GroupCreateButton = styled(CreateButton)`
   background-color: var(--color-neutral-5);
   color: var(--color-text-1);
-  
+
   &:hover {
     background-color: var(--color-neutral-6);
     transform: translateY(-1px);
