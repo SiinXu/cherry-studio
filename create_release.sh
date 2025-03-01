@@ -5,8 +5,8 @@
 # 需要有repo权限
 GITHUB_TOKEN="你的github token"
 REPO="SiinXu/cherry-studio"
-TAG="v1.0.1"
-NAME="Cherry Studio v1.0.1"
+TAG="safe-array-utils"
+NAME="Cherry Studio - 安全数组工具增强版"
 BODY=$(cat RELEASE_NOTES.md)
 
 # 创建release
@@ -43,9 +43,9 @@ upload_asset() {
 }
 
 # 上传所有DMG和ZIP文件
-upload_asset "dist/Cherry Studio-1.0.1-x64.dmg"
-upload_asset "dist/Cherry Studio-1.0.1-arm64.dmg"
-upload_asset "dist/Cherry Studio-1.0.1-x64.zip"
-upload_asset "dist/Cherry Studio-1.0.1-arm64.zip"
+upload_asset "Releases/Cherry Studio-1.0.1-x64.dmg"
+upload_asset "Releases/Cherry Studio-1.0.1-arm64.dmg"
+upload_asset "Releases/Cherry Studio-1.0.1-x64.zip"
+upload_asset "Releases/Cherry Studio-1.0.1-arm64.zip"
 
 echo "Release created and assets uploaded successfully!"

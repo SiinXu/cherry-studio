@@ -1,49 +1,47 @@
-# Cherry Studio 1.0.1 发布说明
+# Cherry Studio v1.0.1 发布说明
 
-## 新特性
+## 新特性和改进
 
-- 增强的类型安全性，预防了"Cannot read properties of undefined"类型的运行时错误
-- 实现了安全的数组和对象访问工具函数，提高了应用程序稳定性
-- 修复了TypeScript类型定义问题，确保更好的开发体验
+- **助手分组管理功能**：
+  - 支持创建多个助手分组，便于分类管理不同用途的AI助手
+  - 提供直观的分组界面，支持拖放操作重新组织助手
+  - 分组支持展开/折叠功能，优化空间利用
+  - 支持为分组设置名称和图标
+- 修复类型错误和ESLint问题
+- 优化全局错误处理逻辑
+- 增强类型安全性
 
-## 安装说明
+## 修复
+
+- 修复了"TypeError: Cannot read properties of undefined (reading 'map')"错误
+- 实现了安全数组和对象访问工具函数，防止空引用
+- 在Assistant类型定义中添加createTime和updateTime属性
+- 在默认助手对象中添加必需的type属性
+
+## 安装包
 
 ### macOS
+- [Intel芯片版 (x64) DMG](https://github.com/SiinXu/cherry-studio/releases/download/v1.0.1/Cherry.Studio-1.0.1-x64.dmg)
+- [M系列芯片版 (arm64) DMG](https://github.com/SiinXu/cherry-studio/releases/download/v1.0.1/Cherry.Studio-1.0.1-arm64.dmg)
+- [Intel芯片版 (x64) ZIP](https://github.com/SiinXu/cherry-studio/releases/download/v1.0.1/Cherry.Studio-1.0.1-x64.zip)
+- [M系列芯片版 (arm64) ZIP](https://github.com/SiinXu/cherry-studio/releases/download/v1.0.1/Cherry.Studio-1.0.1-arm64.zip)
 
-1. 下载适合您的Mac处理器的版本:
-   - Apple Silicon (M系列芯片): `Cherry Studio-1.0.1-arm64.dmg`
-   - Intel处理器: `Cherry Studio-1.0.1-x64.dmg`
+### Windows (即将提供)
+- Windows安装包将在后续版本中提供
 
-2. 打开DMG文件，将Cherry Studio拖到Applications文件夹中
+## 重要更新说明
 
-3. 如果遇到"无法打开Cherry Studio，因为Apple无法检查其是否包含恶意软件"的提示，请在终端中运行以下命令:
-   ```bash
-   sudo xattr -r -d com.apple.quarantine /Applications/Cherry\ Studio.app
-   ```
+### 助手分组管理
+这个版本引入了全新的助手分组管理功能，让您能够更有效地组织和管理不同类型的AI助手：
 
-### Windows
+- **创建分组**：可以创建多个分组，如"工作"、"学习"、"娱乐"等
+- **分组管理**：支持将助手拖放到不同分组中，轻松调整组织结构
+- **快速访问**：通过折叠/展开分组，提高界面清晰度和导航效率
+- **个性化**：为每个分组设置独特的名称，便于识别
 
-Windows版本需要在Windows环境下构建。要在Windows上构建应用程序：
+### 健壮性提升
+通过实现全面的安全数组和对象访问工具函数，有效防止了"Cannot read properties of undefined"类型的错误，显著提高了应用的稳定性。
 
-1. 克隆代码库并安装依赖:
-   ```bash
-   git clone https://github.com/yourorg/cherry-studio.git
-   cd cherry-studio
-   yarn install
-   ```
-
-2. 构建Windows版本:
-   ```bash
-   yarn build:win
-   ```
-
-3. 构建完成后，安装包将位于`dist`目录中
-
-## 已知问题
-
-- 在macOS上构建Windows版本可能会遇到原生模块编译问题，建议在Windows环境下构建
-- 某些模型设置页面可能需要调整以适应不同的屏幕尺寸
-
-## 反馈与支持
-
-如有任何问题或建议，请通过GitHub issues提交反馈。
+## 打包信息
+- 构建时间: 2025-03-01
+- 版本号: 1.0.1
