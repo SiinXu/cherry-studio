@@ -5,7 +5,7 @@ import { useAssistant } from '@renderer/hooks/useAssistant'
 import { modelGenerating } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
 import AssistantSettingsPopup from '@renderer/pages/settings/AssistantSettings'
-import { getDefaultTopic } from '@renderer/services/AssistantService'
+import { getDefaultModel, getDefaultTopic } from '@renderer/services/AssistantService'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import { Assistant, AssistantGroup } from '@renderer/types'
 import { uuid } from '@renderer/utils'
@@ -148,7 +148,7 @@ const AssistantItem: FC<AssistantItemProps> = ({
 
       return baseItems
     },
-    [addAgent, addAssistant, onSwitch, removeAllTopics, t, onDelete, onMoveToGroup, groups, assistant.groupId]
+    [addAgent, addAssistant, onSwitch, removeAllTopics, t, onDelete, onMoveToGroup, groups]
   )
 
   const handleSwitch = useCallback(async () => {
