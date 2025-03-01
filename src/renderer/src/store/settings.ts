@@ -48,7 +48,6 @@ export interface SettingsState {
   gridColumns: number
   gridPopoverTrigger: 'hover' | 'click'
   // 是否显示助手图标
-  showAssistantIcon: boolean
   // webdav 配置 host, user, pass, path
   webdavHost: string
   webdavUser: string
@@ -112,7 +111,6 @@ const initialState: SettingsState = {
   mathEngine: 'KaTeX',
   messageStyle: 'plain',
   codeStyle: 'auto',
-  showAssistantIcon: true,
   gridColumns: 2,
   gridPopoverTrigger: 'hover',
   webdavHost: '',
@@ -325,9 +323,6 @@ const settingsSlice = createSlice({
     },
     setYuqueUrl: (state, action: PayloadAction<string>) => {
       state.yuqueUrl = action.payload
-    },
-    setShowAssistantIcon: (state, action: PayloadAction<boolean>) => {
-      state.showAssistantIcon = action.payload
     }
   }
 })
@@ -353,7 +348,6 @@ export const {
   setWindowStyle,
   setTopicPosition,
   setShowTopicTime,
-  setShowAssistantIcon,
   setPasteLongTextAsFile,
   setRenderInputMessageAsMarkdown,
   setClickAssistantToShowTopic,
