@@ -1,8 +1,7 @@
 // 这是针对@types/cacheable-request包中类型错误的修复，用于覆盖原有定义
-import { IncomingMessage, ServerResponse } from 'http'
+import { ServerResponse } from 'http'
 import { Readable } from 'stream'
 import { URL } from 'url'
-import { CacheableLookup } from 'cacheable-lookup'
 
 declare module 'cacheable-request' {
   export interface CacheableRequest {
