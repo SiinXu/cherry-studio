@@ -89,7 +89,7 @@ const MessageHeader: FC<Props> = memo(({ assistant, model, message }) => {
           />
         )}
         <UserWrap>
-          <UserName isBubbleStyle={isBubbleStyle} theme={theme}>
+          <UserName $isBubbleStyle={isBubbleStyle} theme={theme}>
             {username}
           </UserName>
           <MessageTime>{dayjs(message.createdAt).format('MM/DD HH:mm')}</MessageTime>
@@ -112,7 +112,7 @@ const AvatarWrapper = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 10px;
+  $gap: 10px;
 `
 
 const UserWrap = styled.div`
@@ -121,10 +121,10 @@ const UserWrap = styled.div`
   justify-content: space-between;
 `
 
-const UserName = styled.div<{ isBubbleStyle?: boolean; theme?: string }>`
+const UserName = styled.div<{ $isBubbleStyle?: boolean; theme?: string }>`
   font-size: 14px;
   font-weight: 600;
-  color: ${(props) => (props.isBubbleStyle && props.theme === 'dark' ? 'white' : 'var(--color-text)')};
+  color: ${(props) => (props.$isBubbleStyle && props.theme === 'dark' ? 'white' : 'var(--color-text)')};
 `
 
 const MessageTime = styled.div`
