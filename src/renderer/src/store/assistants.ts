@@ -306,6 +306,9 @@ const assistantsSlice = createSlice({
         }
         return assistant
       })
+    },
+    updateTopicGroups: (state, action: PayloadAction<TopicGroup[]>) => {
+      state.topicGroups = action.payload
     }
   }
 })
@@ -332,7 +335,8 @@ export const {
   removeTopicGroup,
   updateTopicGroupId,
   setAssistantsLoading,
-  setAssistantsError
+  setAssistantsError,
+  updateTopicGroups
 } = assistantsSlice.actions
 
 export default assistantsSlice.reducer

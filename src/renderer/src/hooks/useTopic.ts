@@ -58,15 +58,27 @@ export function useTopic(assistant: Assistant, topicId?: string) {
   return assistant?.topics.find((topic) => topic.id === topicId)
 }
 
-export function useTopicGroups() {
-  const topicGroups = useAppSelector((state) => state.assistants.topicGroups || [])
+export function useTopicGroups(assistantId?: string) {
+  const allTopicGroups = useAppSelector((state) => state.assistants.topicGroups || [])
+  // 如果提供了assistantId，则过滤该助手的分组，否则返回所有分组（兼容旧代码）
+  const topicGroups = assistantId 
+    ? allTopicGroups.filter((group) => group.assistantId === assistantId) 
+    : allTopicGroups
   const dispatch = useAppDispatch()
 
-  const addGroup = (name: string, description?: string) => {
+  const addGroup = (name: string, description?: string, specificAssistantId?: string): TopicGroup | null => {
+    // 使用传入的specificAssistantId或函数参数的assistantId
+    const targetAssistantId = specificAssistantId || assistantId
+    if (!targetAssistantId) {
+      console.error('无法创建分组：未提供助手ID')
+      return null
+    }
+    
     const newGroup: TopicGroup = {
       id: uuid(),
       name,
       description,
+      assistantId: targetAssistantId, // 关联到特定助手
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }

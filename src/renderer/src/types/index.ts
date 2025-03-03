@@ -112,6 +112,7 @@ export type TopicGroup = {
   id: string
   name: string
   description?: string
+  assistantId: string
   createdAt: string
   updatedAt: string
 }

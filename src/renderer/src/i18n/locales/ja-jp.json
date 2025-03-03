@@ -900,6 +900,22 @@
       "quit": "終了",
       "show_window": "ウィンドウを表示",
       "visualization": "可視化"
+    },
+    "topics": {
+      "add": "トピックを追加",
+      "group": {
+        "add": "グループを作成",
+        "edit": "グループを編集",
+        "name": "グループ名",
+        "name.required": "グループ名を入力してください",
+        "name.placeholder": "グループ名を入力",
+        "description": "グループの説明",
+        "description.placeholder": "グループの説明を入力（任意）"
+      },
+      "move_to_group": "グループに移動",
+      "no_group": "グループなし",
+      "new": "新しいトピック",
+      "ungrouped": "グループなし"
     }
   }
 }

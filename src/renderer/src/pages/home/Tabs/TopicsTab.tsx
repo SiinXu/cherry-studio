@@ -52,7 +52,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   const { assistant, removeTopic, moveTopic, updateTopic, addTopic } = useAssistant(_assistant.id)
   const { t } = useTranslation()
   const { showTopicTime, topicPosition } = useSettings()
-  const { topicGroups, addGroup, updateGroup, removeGroup, updateTopicGroup } = useTopicGroups()
+  const { topicGroups, addGroup, updateGroup, removeGroup, updateTopicGroup } = useTopicGroups(_assistant.id)
   const [form] = Form.useForm()
 
   const borderRadius = showTopicTime ? 12 : 'var(--list-item-border-radius)'
@@ -118,23 +118,27 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     })
   }
 
-  const handleGroupSubmit = async () => {
+  const handleGroupFormSubmit = async () => {
     try {
       const values = await form.validateFields()
       if (currentGroup) {
-        // 编辑分组
+        // 编辑现有分组
         updateGroup({
           ...currentGroup,
           name: values.name,
           description: values.description
         })
       } else {
-        // 创建分组
-        addGroup(values.name, values.description)
+        // 创建新分组
+        const newGroup = addGroup(values.name, values.description)
+        if (newGroup) {
+          // 展开新创建的分组
+          setExpandedGroups(new Set([...expandedGroups, newGroup.id]))
+        }
       }
       setGroupModalVisible(false)
     } catch (error) {
-      console.error('表单验证失败:', error)
+      console.error('分组表单验证错误:', error)
     }
   }
 
@@ -594,7 +598,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
       <Modal
         title={currentGroup ? t('topics.group.edit') || '编辑分组' : t('topics.group.add') || '添加分组'}
         open={groupModalVisible}
-        onOk={handleGroupSubmit}
+        onOk={handleGroupFormSubmit}
         onCancel={() => setGroupModalVisible(false)}
         destroyOnClose>
         <Form form={form} layout="vertical">

@@ -863,6 +863,22 @@
       },
       "display.assistant.title": "助手設定"
     },
+    "topics": {
+      "add": "添加話題",
+      "group": {
+        "add": "添加分組",
+        "edit": "編輯分組",
+        "name": "分組名稱",
+        "name.required": "請輸入分組名稱",
+        "name.placeholder": "輸入分組名稱",
+        "description": "分組描述",
+        "description.placeholder": "輸入分組描述（可選）"
+      },
+      "move_to_group": "移動到分組",
+      "no_group": "無分組",
+      "new": "新話題",
+      "ungrouped": "未分組"
+    },
     "translate": {
       "any.language": "任意語言",
       "button.translate": "翻譯",
