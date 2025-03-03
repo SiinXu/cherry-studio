@@ -61,10 +61,13 @@ export function useAssistant(id: string) {
   const safeAssistants = assistantsState?.assistants || []
   const assistant = safeFilter(safeAssistants, (a) => a.id === id)[0] || {
     id: '',
+    name: '默认助手',
+    prompt: '',
+    type: 'default',
     topics: [],
     model: defaultModel,
-    defaultModel: defaultModel // 添加defaultModel属性以匹配类型
-  }
+    defaultModel: defaultModel
+  } as Assistant
 
   return {
     assistant,

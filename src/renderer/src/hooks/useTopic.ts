@@ -10,17 +10,43 @@ import { useAssistant } from './useAssistant'
 let _activeTopic: Topic
 
 export function useActiveTopic(_assistant: Assistant, topic?: Topic) {
-  const { assistant } = useAssistant(_assistant.id)
-  const [activeTopic, setActiveTopic] = useState(topic || _activeTopic || assistant?.topics[0])
+  const assistantId = _assistant?.id || ''
+  const { assistant } = useAssistant(assistantId)
 
+  const hasValidTopics = assistant && Array.isArray(assistant.topics) && assistant.topics.length > 0
+  const defaultTopic = topic || _activeTopic || (hasValidTopics ? assistant.topics[0] : null)
+
+  const [activeTopic, setActiveTopic] = useState(defaultTopic)
   _activeTopic = activeTopic
 
   useEffect(() => {
-    // activeTopic not in assistant.topics
-    if (assistant && !find(assistant.topics, { id: activeTopic?.id })) {
-      setActiveTopic(assistant.topics[0])
+    if (!_assistant || !_assistant.id) {
+      console.error('useActiveTopic: 提供的assistant无效', _assistant)
+      return
     }
-  }, [activeTopic?.id, assistant])
+
+    if (
+      assistant &&
+      Array.isArray(assistant.topics) &&
+      activeTopic &&
+      !find(assistant.topics, { id: activeTopic.id })
+    ) {
+      const firstTopic = assistant.topics[0]
+      if (firstTopic) {
+        console.log('切换到assistant的第一个topic', firstTopic)
+        setActiveTopic(firstTopic)
+      } else {
+        console.error('assistant没有可用的topics', assistant)
+      }
+    }
+  }, [activeTopic, assistant, _assistant])
+
+  if (!_assistant || !_assistant.id) {
+    return {
+      activeTopic: null,
+      setActiveTopic: (t: Topic) => console.error('无法设置activeTopic，assistant无效', t)
+    }
+  }
 
   return { activeTopic, setActiveTopic }
 }
