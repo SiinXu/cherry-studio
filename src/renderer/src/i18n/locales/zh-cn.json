@@ -69,7 +69,7 @@
       "settings.reasoning_effort.low": "短",
       "settings.reasoning_effort.medium": "中",
       "settings.reasoning_effort.off": "关",
-      "settings.reasoning_effort.tip": "该设置仅支持推理模型",
+      "settings.reasoning_effort.tip": "仅支持 OpenAI o-series 和 Anthropic 推理模型",
       "title": "助手"
     },
     "auth": {
@@ -126,6 +126,7 @@
       "message.new.context": "清除上下文",
       "message.regenerate.model": "切换模型",
       "message.useful": "有用",
+      "message.quote": "引用",
       "resend": "重新发送",
       "save": "保存",
       "settings.code_collapsible": "代码块可折叠",
@@ -418,10 +419,10 @@
       "message.delete.content": "确定要删除此消息吗?",
       "message.delete.title": "删除消息",
       "message.multi_model_style": "多模型回答样式",
-      "message.multi_model_style.fold": "折叠",
-      "message.multi_model_style.grid": "网格",
-      "message.multi_model_style.horizontal": "水平",
-      "message.multi_model_style.vertical": "垂直",
+      "message.multi_model_style.fold": "标签模式",
+      "message.multi_model_style.grid": "卡片布局",
+      "message.multi_model_style.horizontal": "横向排列",
+      "message.multi_model_style.vertical": "纵向堆叠",
       "message.style": "消息样式",
       "message.style.bubble": "气泡",
       "message.style.plain": "简洁",
@@ -586,7 +587,8 @@
       "yi": "零一万物",
       "zhinao": "360智脑",
       "zhipu": "智谱AI",
-      "xirang": "天翼云息壤"
+      "xirang": "天翼云息壤",
+      "tencent-cloud-ti": "腾讯云TI"
     },
     "settings": {
       "about": "关于我们",
@@ -618,6 +620,10 @@
       "data": {
         "app_data": "应用数据",
         "app_logs": "应用日志",
+        "app_knowledge": "知识库文件",
+        "app_knowledge.remove_all": "删除文件",
+        "app_knowledge.remove_all_confirm": "删除知识库文件不会删除知识库本身，可以减少存储空间占用，删除之后文件无法再打开，是否继续？",
+        "app_knowledge.remove_all_success": "文件删除成功",
         "clear_cache": {
           "button": "清除缓存",
           "confirm": "清除缓存将删除应用缓存的数据，包括小程序数据。此操作不可恢复，是否继续？",
@@ -722,6 +728,9 @@
       "general.title": "常规设置",
       "general.user_name": "用户名",
       "general.user_name.placeholder": "请输入用户名",
+      "general.image_upload": "图片上传",
+      "general.emoji_picker": "表情选择器",
+      "general.avatar.reset": "重置头像",
       "general.view_webdav_settings": "查看 WebDAV 设置",
       "input.auto_translate_with_space": "快速敲击3次空格翻译",
       "input.target_language": "目标语言",
@@ -925,6 +934,34 @@
       "quit": "退出",
       "show_window": "显示窗口",
       "visualization": "可视化"
+    },
+    "backup": {
+      "title": "数据备份",
+      "confirm": "确定要备份数据吗？",
+      "confirm.button": "选择备份位置",
+      "content": "备份操作将涵盖所有应用数据，包括聊天记录、设置、知识库等所有数据。请注意，备份过程可能需要一些时间，感谢您的耐心等待。",
+      "progress": {
+        "title": "备份进度",
+        "preparing": "准备备份...",
+        "writing_data": "写入数据...",
+        "copying_files": "复制文件... {{progress}}%",
+        "compressing": "压缩文件...",
+        "completed": "备份完成"
+      }
+    },
+    "restore": {
+      "title": "数据恢复",
+      "confirm": "确定要恢复数据吗？",
+      "confirm.button": "选择备份文件",
+      "content": "恢复操作将使用备份数据覆盖当前所有应用数据。请注意，恢复过程可能需要一些时间，感谢您的耐心等待。",
+      "progress": {
+        "title": "恢复进度",
+        "preparing": "准备恢复...",
+        "extracting": "解压备份...",
+        "reading_data": "读取数据...",
+        "copying_files": "复制文件... {{progress}}%",
+        "completed": "恢复完成"
+      }
     }
   }
 }

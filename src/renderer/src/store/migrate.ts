@@ -1191,6 +1191,30 @@ const migrateConfig = {
       enabled: false
     })
     return state
+  },
+  '75': (state: RootState) => {
+    if (state.minapps) {
+      const you = DEFAULT_MIN_APPS.find((app) => app.id === 'you')
+      const cici = DEFAULT_MIN_APPS.find((app) => app.id === 'cici')
+      const zhihu = DEFAULT_MIN_APPS.find((app) => app.id === 'zhihu')
+      you && state.minapps.enabled.push(you)
+      cici && state.minapps.enabled.push(cici)
+      zhihu && state.minapps.enabled.push(zhihu)
+    }
+    return state
+  },
+  '76': (state: RootState) => {
+    state.llm.providers.push({
+      id: 'tencent-cloud-ti',
+      name: 'Tencent Cloud TI',
+      type: 'openai',
+      apiKey: '',
+      apiHost: 'https://api.lkeap.cloud.tencent.com',
+      models: SYSTEM_MODELS['tencent-cloud-ti'],
+      isSystem: true,
+      enabled: false
+    })
+    return state
   }
 }
 

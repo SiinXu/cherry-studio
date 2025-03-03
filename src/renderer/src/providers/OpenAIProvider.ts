@@ -26,6 +26,8 @@ import {
 import { CompletionsParams } from '.'
 import BaseProvider from './BaseProvider'
 
+type ReasoningEffort = 'high' | 'medium' | 'low'
+
 export default class OpenAIProvider extends BaseProvider {
   private sdk: OpenAI
 
