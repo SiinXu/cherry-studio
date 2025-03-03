@@ -364,6 +364,8 @@ const UngroupedSection = styled.div`
   padding: 8px;
   border-radius: 8px;
   min-height: 60px;
+  max-height: 300px; /* 添加最高高度限制 */
+  overflow-y: auto; /* 当内容超出高度时，添加垂直滚动条 */
 
   &.drag-over {
     background-color: var(--color-bg-3);
