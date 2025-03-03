@@ -6,10 +6,12 @@ import {
   EditOutlined,
   FolderAddOutlined,
   FolderOutlined,
+  LockOutlined,
   PlusOutlined,
   PushpinOutlined,
   QuestionCircleOutlined,
   RightOutlined,
+  UnlockOutlined,
   UploadOutlined
 } from '@ant-design/icons'
 import CopyIcon from '@renderer/components/Icons/CopyIcon'
@@ -19,8 +21,7 @@ import { isMac } from '@renderer/config/constant'
 import { useAssistant, useAssistants } from '@renderer/hooks/useAssistant'
 import { modelGenerating } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
-import { TopicManager, useTopicGroups } from '@renderer/hooks/useTopic'
-import { fetchMessagesSummary } from '@renderer/services/ApiService'
+import { useTopicGroups } from '@renderer/hooks/useTopic'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import store from '@renderer/store'
 import { setGenerating } from '@renderer/store/runtime'
@@ -49,7 +50,7 @@ interface Props {
 
 const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic }) => {
   const { assistants } = useAssistants()
-  const { assistant, removeTopic, moveTopic, updateTopic, addTopic } = useAssistant(_assistant.id)
+  const { assistant, removeTopic, updateTopic, addTopic, duplicateTopic } = useAssistant(_assistant.id)
   const { t } = useTranslation()
   const { showTopicTime, topicPosition } = useSettings()
   const { topicGroups, addGroup, updateGroup, removeGroup, updateTopicGroup } = useTopicGroups(_assistant.id)
@@ -228,6 +229,14 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     [updateTopic]
   )
 
+  const onLockTopic = useCallback(
+    (topic: Topic) => {
+      const updatedTopic = { ...topic, locked: !topic.locked }
+      updateTopic(updatedTopic)
+    },
+    [updateTopic]
+  )
+
   const onDeleteTopic = useCallback(
     async (topic: Topic) => {
       await modelGenerating()
@@ -238,14 +247,12 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     [assistant.topics, removeTopic, setActiveTopic]
   )
 
-  const onMoveTopic = useCallback(
+  const onDuplicateTopic = useCallback(
     async (topic: Topic, toAssistant: Assistant) => {
       await modelGenerating()
-      const index = findIndex(assistant.topics, (t) => t.id === topic.id)
-      setActiveTopic(assistant.topics[index + 1 === assistant.topics.length ? 0 : index + 1])
-      moveTopic(topic, toAssistant)
+      duplicateTopic(topic, toAssistant)
     },
-    [assistant.topics, moveTopic, setActiveTopic]
+    [duplicateTopic]
   )
 
   const onSwitchTopic = useCallback(
@@ -284,8 +291,11 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
               </TopicPromptText>
             )}
             {showTopicTime && <TopicTime className="time">{dayjs(topic.createdAt).format('MM/DD HH:mm')}</TopicTime>}
-            <MenuButton className="pin">{topic.pinned && <PushpinOutlined />}</MenuButton>
-            {isActive && !topic.pinned && (
+            <MenuButton className="pin">
+              {topic.locked && <LockOutlined style={{ color: 'var(--color-warning)' }} />}
+              {topic.pinned && <PushpinOutlined style={{ marginLeft: topic.locked ? '5px' : '0' }} />}
+            </MenuButton>
+            {isActive && !topic.pinned && !topic.locked && (
               <Tooltip
                 placement="bottom"
                 mouseEnterDelay={0.7}
@@ -360,33 +370,37 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
 
   const getTopicMenuItems = useCallback(
     (topic: Topic) => {
+      // 锁定状态下禁用的功能
+      const isLocked = topic.locked === true
+
       const menus: MenuProps['items'] = [
         {
-          label: t('chat.topics.auto_rename'),
-          key: 'auto-rename',
-          icon: <i className="iconfont icon-business-smart-assistant" style={{ fontSize: '14px' }} />,
-          async onClick() {
-            const messages = await TopicManager.getTopicMessages(topic.id)
-            if (messages.length >= 2) {
-              const summaryText = await fetchMessagesSummary({ messages, assistant })
-              if (summaryText) {
-                updateTopic({ ...topic, name: summaryText })
-              }
-            }
-          }
-        },
-        {
           label: t('chat.topics.edit.title'),
-          key: 'rename',
+          key: 'edit',
           icon: <EditOutlined />,
+          disabled: isLocked,
           async onClick() {
             const name = await PromptPopup.show({
               title: t('chat.topics.edit.title'),
               message: '',
-              defaultValue: topic?.name || ''
+              defaultValue: topic.name
             })
-            if (name && topic?.name !== name) {
-              updateTopic({ ...topic, name })
+            name && updateTopic({ ...topic, name: name.trim() })
+          }
+        },
+        {
+          label: t('chat.topics.auto_rename'),
+          key: 'auto-rename',
+          icon: <EditOutlined />,
+          disabled: isLocked,
+          onClick: () => {
+            // 仅当第一条消息是用户消息时才能自动命名
+            const firstMsg = topic.messages[0]
+            if (firstMsg && firstMsg.role === 'user') {
+              EventEmitter.emit(EVENT_NAMES.RENAME_TOPIC_ITEM, {
+                id: topic.id,
+                content: firstMsg.content
+              })
             }
           }
         },
@@ -394,6 +408,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
           label: t('chat.topics.prompt'),
           key: 'topic-prompt',
           icon: <i className="iconfont icon-ai-model1" style={{ fontSize: '14px' }} />,
+          disabled: isLocked,
           extra: (
             <Tooltip title={t('chat.topics.prompt.tips')}>
               <QuestionIcon />
@@ -421,9 +436,18 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
           }
         },
         {
+          label: topic.locked ? t('chat.topics.unlock') : t('chat.topics.lock'),
+          key: 'lock',
+          icon: topic.locked ? <UnlockOutlined /> : <LockOutlined />,
+          onClick() {
+            onLockTopic(topic)
+          }
+        },
+        {
           label: t('chat.topics.clear.title'),
           key: 'clear-messages',
           icon: <ClearOutlined />,
+          disabled: isLocked,
           async onClick() {
             window.modal.confirm({
               title: t('chat.input.clear.content'),
@@ -520,20 +544,20 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
 
       if (assistants.length > 1 && assistant.topics.length > 1) {
         menus.push({
-          label: t('chat.topics.move_to'),
-          key: 'move',
-          icon: <FolderOutlined />,
+          label: t('chat.topics.duplicate_to') || '复制到',
+          key: 'duplicate',
+          icon: <CopyIcon />,
           children: assistants
             .filter((a) => a.id !== assistant.id)
             .map((a) => ({
               label: a.name,
               key: a.id,
-              onClick: () => onMoveTopic(topic, a)
+              onClick: () => onDuplicateTopic(topic, a)
             }))
         })
       }
 
-      if (assistant.topics.length > 1 && !topic.pinned) {
+      if (assistant.topics.length > 1 && !topic.pinned && !topic.locked) {
         menus.push({ type: 'divider' })
         menus.push({
           label: t('common.delete'),
@@ -552,7 +576,8 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
       onClearMessages,
       onDeleteTopic,
       onPinTopic,
-      onMoveTopic,
+      onLockTopic,
+      onDuplicateTopic,
       t,
       updateTopic,
       topicGroups,

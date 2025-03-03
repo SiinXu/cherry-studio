@@ -128,17 +128,35 @@ const Messages: FC<Props> = ({ assistant, topic, setActiveTopic }) => {
 
   const onDeleteMessage = useCallback(
     async (message: Message) => {
+      // 检查话题是否被锁定
+      if (topic.locked) {
+        window.modal.warning({
+          title: t('chat.topics.locked_warning') || '话题已锁定',
+          content: t('chat.topics.locked_edit_warning') || '话题已锁定，无法编辑内容'
+        })
+        return
+      }
+      
       const _messages = messages.filter((m) => m.id !== message.id)
       setMessages(_messages)
       setDisplayMessages(_messages)
       await db.topics.update(topic.id, { messages: _messages })
       await deleteMessageFiles(message)
     },
-    [messages, topic.id]
+    [messages, topic.id, topic.locked, t]
   )
 
   const onDeleteGroupMessages = useCallback(
     async (askId: string) => {
+      // 检查话题是否被锁定
+      if (topic.locked) {
+        window.modal.warning({
+          title: t('chat.topics.locked_warning') || '话题已锁定',
+          content: t('chat.topics.locked_edit_warning') || '话题已锁定，无法编辑内容'
+        })
+        return
+      }
+      
       const _messages = messages.filter((m) => m.askId !== askId && m.id !== askId)
       setMessages(_messages)
       setDisplayMessages(_messages)
@@ -147,7 +165,7 @@ const Messages: FC<Props> = ({ assistant, topic, setActiveTopic }) => {
         await deleteMessageFiles(message)
       }
     },
-    [messages, topic.id]
+    [messages, topic.id, topic.locked, t]
   )
 
   const onGetMessages = useCallback(() => {
@@ -163,10 +181,29 @@ const Messages: FC<Props> = ({ assistant, topic, setActiveTopic }) => {
       }),
       EventEmitter.on(EVENT_NAMES.AI_AUTO_RENAME, autoRenameTopic),
       EventEmitter.on(EVENT_NAMES.CLEAR_MESSAGES, (data: Topic) => {
+        // 检查当前话题是否被锁定
+        if (topic.locked && (!data || data.id === topic.id)) {
+          window.modal.warning({
+            title: t('chat.topics.locked_warning') || '话题已锁定',
+            content: t('chat.topics.locked_edit_warning') || '话题已锁定，无法编辑内容'
+          })
+          return
+        }
+
         const defaultTopic = getDefaultTopic(assistant.id)
 
         // Clear messages of other topics
         if (data && data.id !== topic.id) {
+          // 检查目标话题是否被锁定
+          const targetTopic = getTopic(assistant, data.id)
+          if (targetTopic?.locked) {
+            window.modal.warning({
+              title: t('chat.topics.locked_warning') || '话题已锁定',
+              content: t('chat.topics.locked_edit_warning') || '话题已锁定，无法编辑内容'
+            })
+            return
+          }
+          
           TopicManager.clearTopicMessages(data.id)
           updateTopic({ ...data, name: defaultTopic.name, messages: [] })
           return

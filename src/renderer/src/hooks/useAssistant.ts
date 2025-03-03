@@ -22,6 +22,7 @@ import {
 import { setDefaultModel, setTopicNamingModel, setTranslateModel } from '@renderer/store/llm'
 import { Assistant, AssistantGroup, AssistantSettings, Model, Topic } from '@renderer/types'
 import { safeFilter } from '@renderer/utils/safeArrayUtils'
+import { v4 as uuid } from 'uuid'
 
 import { TopicManager } from './useTopic'
 
@@ -59,15 +60,17 @@ export function useAssistant(id: string) {
 
   // 安全地获取助手对象，如果不存在返回一个带有默认值的对象
   const safeAssistants = assistantsState?.assistants || []
-  const assistant = safeFilter(safeAssistants, (a) => a.id === id)[0] || {
-    id: '',
-    name: '默认助手',
-    prompt: '',
-    type: 'default',
-    topics: [],
-    model: defaultModel,
-    defaultModel: defaultModel
-  } as Assistant
+  const assistant =
+    safeFilter(safeAssistants, (a) => a.id === id)[0] ||
+    ({
+      id: '',
+      name: '默认助手',
+      prompt: '',
+      type: 'default',
+      topics: [],
+      model: defaultModel,
+      defaultModel: defaultModel
+    } as Assistant)
 
   return {
     assistant,
@@ -97,6 +100,46 @@ export function useAssistant(id: string) {
             }))
           }
         })
+    },
+    duplicateTopic: async (topic: Topic, toAssistant: Assistant) => {
+      if (!assistant || !assistant.id || !toAssistant || !toAssistant.id) return
+
+      // 创建新的话题ID
+      const newTopicId = uuid()
+
+      // 复制话题基本信息，但使用新ID
+      const newTopic: Topic = {
+        ...topic,
+        id: newTopicId,
+        assistantId: toAssistant.id,
+        groupId: undefined, // 复制到目标助手时，默认不分组
+        updatedAt: new Date().toISOString(),
+        messages: [] // 先设为空数组，稍后从数据库复制消息
+      }
+
+      // 添加到目标助手
+      dispatch(addTopic({ assistantId: toAssistant.id, topic: newTopic }))
+
+      // 从数据库复制消息
+      try {
+        const originalMessages = await TopicManager.getTopicMessages(topic.id)
+        if (originalMessages && originalMessages.length > 0) {
+          // 为每条消息创建新ID并更新助手ID
+          const newMessages = originalMessages.map((message) => ({
+            ...message,
+            id: uuid(),
+            topicId: newTopicId,
+            assistantId: toAssistant.id
+          }))
+
+          // 保存新消息到数据库
+          await TopicManager.saveTopicMessages(newTopicId, newMessages)
+        }
+      } catch (error) {
+        console.error('复制话题消息失败:', error)
+      }
+
+      return newTopic
     },
     updateTopic: (topic: Topic) => {
       if (!assistant || !assistant.id) return

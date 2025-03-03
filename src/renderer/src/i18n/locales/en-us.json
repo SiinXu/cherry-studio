@@ -147,28 +147,47 @@
       "settings.top_p.tip": "Default value is 1, the smaller the value, the less variety in the answers, the easier to understand, the larger the value, the larger the range of the AI's vocabulary, the more diverse",
       "suggestions.title": "Suggested Questions",
       "thinking": "Thinking",
-      "topics.auto_rename": "Auto Rename",
-      "topics.clear.title": "Clear Messages",
-      "topics.copy.image": "Copy as image",
-      "topics.copy.md": "Copy as markdown",
-      "topics.copy.title": "Copy",
-      "topics.delete.shortcut": "Hold {{key}} to delete directly",
-      "topics.edit.placeholder": "Enter new name",
-      "topics.edit.title": "Edit Name",
-      "topics.export.image": "Export as image",
-      "topics.export.md": "Export as markdown",
-      "topics.export.notion": "Export to Notion",
-      "topics.export.title": "Export",
-      "topics.export.word": "Export as Word",
-      "topics.export.yuque": "Export to Yuque",
-      "topics.list": "Topic List",
-      "topics.move_to": "Move to",
-      "topics.pinned": "Pinned Topics",
-      "topics.prompt": "Topic Prompts",
-      "topics.prompt.edit.title": "Edit Topic Prompts",
-      "topics.prompt.tips": "Topic Prompts: Additional supplementary prompts provided for the current topic",
-      "topics.title": "Topics",
-      "topics.unpinned": "Unpinned Topics",
+      "topics": {
+        "auto_rename": "Auto Rename",
+        "clear": {
+          "title": "Clear Messages"
+        },
+        "copy": {
+          "image": "Copy as image",
+          "md": "Copy as markdown",
+          "title": "Copy"
+        },
+        "delete": {
+          "shortcut": "Hold {{key}} to delete directly",
+          "title": "Delete Topic"
+        },
+        "duplicate_to": "Duplicate to",
+        "edit": {
+          "title": "Edit Topic"
+        },
+        "export": {
+          "image": "Export as image",
+          "md": "Export as markdown",
+          "notion": "Export to Notion",
+          "title": "Export",
+          "word": "Export as Word",
+          "yuque": "Export to Yuque"
+        },
+        "list": "Topic List",
+        "lock": "Lock Topic",
+        "locked_warning": "Topic Locked",
+        "locked_warning_content": "This topic is locked and cannot receive new messages",
+        "locked_edit_warning": "Topic is locked, content cannot be edited",
+        "locked_input_tip": "This topic is locked and in read-only mode",
+        "move_to": "Move to",
+        "pinned": "Pinned Topics",
+        "prompt": "Topic Prompts",
+        "prompt.edit.title": "Edit Topic Prompts",
+        "prompt.tips": "Topic Prompts: Additional supplementary prompts provided for the current topic",
+        "title": "Topics",
+        "unlock": "Unlock Topic",
+        "unpinned": "Unpinned Topics"
+      },
       "translate": "Translate"
     },
     "common": {
@@ -874,9 +893,15 @@
         "description": "Group Description",
         "description.placeholder": "Enter group description (optional)"
       },
+      "lock": "Lock Topic",
+      "locked_warning": "Topic Locked",
+      "locked_warning_content": "This topic is locked and cannot receive new messages",
+      "locked_edit_warning": "Topic is locked, content cannot be edited",
+      "locked_input_tip": "This topic is locked and in read-only mode",
       "move_to_group": "Move to Group",
       "no_group": "No Group",
       "new": "New Topic",
+      "unlock": "Unlock Topic",
       "ungrouped": "Ungrouped"
     },
     "translate": {

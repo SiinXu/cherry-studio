@@ -6,7 +6,8 @@ import {
   GlobalOutlined,
   PauseCircleOutlined,
   PicCenterOutlined,
-  QuestionCircleOutlined
+  QuestionCircleOutlined,
+  LockOutlined
 } from '@ant-design/icons'
 import TranslateButton from '@renderer/components/TranslateButton'
 import { isVisionModel, isWebSearchModel } from '@renderer/config/models'
@@ -114,6 +115,15 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
       return
     }
 
+    // 如果话题被锁定，则不允许发送消息
+    if (assistant.topics[0].locked) {
+      window.modal.warning({
+        title: t('chat.topics.locked_warning') || '话题已锁定',
+        content: t('chat.topics.locked_warning_content') || '该话题已被锁定，无法发送新消息'
+      })
+      return
+    }
+
     const message: Message = {
       id: uuid(),
       role: 'user',
@@ -165,7 +175,12 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
   }
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    const isEnterPressed = event.keyCode == 13
+    const isEnterPressed = event.key === 'Enter'
+    
+    // 如果话题被锁定，则阻止发送操作
+    if (assistant.topics[0].locked) {
+      return
+    }
 
     if (event.key === '@') {
       const textArea = textareaRef.current?.resizableTextArea?.textArea
@@ -538,6 +553,12 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
           id="inputbar"
           className={classNames('inputbar-container', inputFocus && 'focus')}
           ref={containerRef}>
+          {assistant.topics[0].locked && (
+            <LockWarningBar>
+              <LockOutlined style={{ marginRight: '8px' }} />
+              {t('chat.topics.locked_input_tip') || '该话题已锁定，处于只读状态'}
+            </LockWarningBar>
+          )}
           <AttachmentPreview files={files} setFiles={setFiles} />
           <MentionModelsInput selectedModels={mentionModels} onRemoveModel={handleRemoveModel} />
           <Textarea
@@ -563,7 +584,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
             }}
             onBlur={() => setInputFocus(false)}
             onInput={onInput}
-            disabled={searching}
+            disabled={assistant.topics[0].locked || searching}
             onPaste={(e) => onPaste(e.nativeEvent)}
             onClick={() => searching && dispatch(setSearching(false))}
           />
@@ -635,7 +656,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
                   </ToolbarButton>
                 </Tooltip>
               )}
-              {!generating && <SendMessageButton sendMessage={sendMessage} disabled={generating || inputEmpty} />}
+              {!generating && <SendMessageButton sendMessage={sendMessage} disabled={assistant.topics[0].locked || generating || inputEmpty} />}
             </ToolbarMenu>
           </Toolbar>
         </InputBarContainer>
@@ -734,6 +755,18 @@ const ToolbarButton = styled(Button)`
       background-color: var(--color-primary);
     }
   }
+`
+
+const LockWarningBar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning);
+  font-size: 13px;
+  border-radius: 8px 8px 0 0;
+  border-bottom: 1px solid var(--color-warning-border);
 `
 
 export default Inputbar

@@ -61,9 +61,7 @@ export function useTopic(assistant: Assistant, topicId?: string) {
 export function useTopicGroups(assistantId?: string) {
   const allTopicGroups = useAppSelector((state) => state.assistants.topicGroups || [])
   // 如果提供了assistantId，则过滤该助手的分组，否则返回所有分组（兼容旧代码）
-  const topicGroups = assistantId 
-    ? allTopicGroups.filter((group) => group.assistantId === assistantId) 
-    : allTopicGroups
+  const topicGroups = assistantId ? allTopicGroups.filter((group) => group.assistantId === assistantId) : allTopicGroups
   const dispatch = useAppDispatch()
 
   const addGroup = (name: string, description?: string, specificAssistantId?: string): TopicGroup | null => {
@@ -73,7 +71,7 @@ export function useTopicGroups(assistantId?: string) {
       console.error('无法创建分组：未提供助手ID')
       return null
     }
-    
+
     const newGroup: TopicGroup = {
       id: uuid(),
       name,
@@ -131,6 +129,21 @@ export class TopicManager {
   static async getTopicMessages(id: string) {
     const topic = await this.getTopic(id)
     return topic ? topic.messages : []
+  }
+
+  static async saveTopicMessages(id: string, messages: any[]) {
+    const topic = await this.getTopic(id)
+
+    if (topic) {
+      // 更新现有话题
+      topic.messages = messages
+      await db.topics.update(id, topic)
+    } else {
+      // 创建新话题记录
+      await db.topics.put({ id, messages })
+    }
+
+    return messages
   }
 
   static async removeTopic(id: string) {
