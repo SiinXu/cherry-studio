@@ -105,6 +105,15 @@ export type Topic = {
   messages: Message[]
   pinned?: boolean
   prompt?: string
+  groupId?: string
+}
+
+export type TopicGroup = {
+  id: string
+  name: string
+  description?: string
+  createdAt: string
+  updatedAt: string
 }
 
 export type User = {

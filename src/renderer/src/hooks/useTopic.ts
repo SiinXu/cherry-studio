@@ -1,9 +1,12 @@
 import db from '@renderer/databases'
 import { deleteMessageFiles } from '@renderer/services/MessagesService'
+import { useAppDispatch, useAppSelector } from '@renderer/store'
 import store from '@renderer/store'
-import { Assistant, Topic } from '@renderer/types'
+import { addTopicGroup, removeTopicGroup, updateTopicGroup, updateTopicGroupId } from '@renderer/store/assistants'
+import { Assistant, Topic, TopicGroup } from '@renderer/types'
 import { find } from 'lodash'
 import { useEffect, useState } from 'react'
+import { v4 as uuid } from 'uuid'
 
 import { useAssistant } from './useAssistant'
 
@@ -53,6 +56,47 @@ export function useActiveTopic(_assistant: Assistant, topic?: Topic) {
 
 export function useTopic(assistant: Assistant, topicId?: string) {
   return assistant?.topics.find((topic) => topic.id === topicId)
+}
+
+export function useTopicGroups() {
+  const topicGroups = useAppSelector((state) => state.assistants.topicGroups || [])
+  const dispatch = useAppDispatch()
+
+  const addGroup = (name: string, description?: string) => {
+    const newGroup: TopicGroup = {
+      id: uuid(),
+      name,
+      description,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+    dispatch(addTopicGroup(newGroup))
+    return newGroup
+  }
+
+  const updateGroup = (group: TopicGroup) => {
+    const updatedGroup = {
+      ...group,
+      updatedAt: new Date().toISOString()
+    }
+    dispatch(updateTopicGroup({ id: updatedGroup.id, ...updatedGroup }))
+  }
+
+  const removeGroup = (id: string) => {
+    dispatch(removeTopicGroup({ id }))
+  }
+
+  const updateTopicGroupForTopic = (assistantId: string, topicId: string, groupId?: string) => {
+    dispatch(updateTopicGroupId({ assistantId, topicId, groupId }))
+  }
+
+  return {
+    topicGroups,
+    addGroup,
+    updateGroup,
+    removeGroup,
+    updateTopicGroup: updateTopicGroupForTopic
+  }
 }
 
 export function getTopic(assistant: Assistant, topicId: string) {

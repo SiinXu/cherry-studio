@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { DEFAULT_CONTEXTCOUNT, DEFAULT_TEMPERATURE } from '@renderer/config/constant'
 import { TopicManager } from '@renderer/hooks/useTopic'
 import { getDefaultAssistant, getDefaultTopic } from '@renderer/services/AssistantService'
-import { Assistant, AssistantGroup, AssistantSettings, Model, Topic } from '@renderer/types'
+import { Assistant, AssistantGroup, AssistantSettings, Model, Topic, TopicGroup } from '@renderer/types'
 import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
 import { uniqBy } from 'lodash'
 
@@ -10,6 +10,7 @@ export interface AssistantsState {
   defaultAssistant: Assistant
   assistants: Assistant[]
   groups: AssistantGroup[]
+  topicGroups: TopicGroup[]
   isLoading: boolean
   loadingError: string | null
 }
@@ -43,6 +44,7 @@ const initialState: AssistantsState = {
   defaultAssistant: getInitialDefaultAssistant(),
   assistants: [getInitialDefaultAssistant()], // 确保始终有至少一个助手
   groups: [],
+  topicGroups: [],
   isLoading: false,
   loadingError: null
 }
@@ -253,6 +255,57 @@ const assistantsSlice = createSlice({
           ? { ...assistant, groupId: action.payload.groupId }
           : assistant
       )
+    },
+    addTopicGroup: (state, action: PayloadAction<TopicGroup>) => {
+      if (!state.topicGroups) {
+        state.topicGroups = []
+      }
+      state.topicGroups.push(action.payload)
+    },
+    updateTopicGroup: (state, action: PayloadAction<TopicGroup>) => {
+      if (!state.topicGroups) {
+        state.topicGroups = []
+        return
+      }
+      state.topicGroups = safeMap(state.topicGroups, (group) =>
+        group.id === action.payload.id ? action.payload : group
+      )
+    },
+    removeTopicGroup: (state, action: PayloadAction<{ id: string }>) => {
+      if (!state.assistants) {
+        state.assistants = []
+      }
+      if (!state.topicGroups) {
+        state.topicGroups = []
+        return
+      }
+
+      // 将所有属于此分组的话题设为未分组
+      state.assistants = safeMap(state.assistants, (assistant) => {
+        if (!assistant) return assistant
+        const updatedTopics = safeMap(assistant.topics, (topic) =>
+          topic && topic.groupId === action.payload.id ? { ...topic, groupId: undefined } : topic
+        )
+        return { ...assistant, topics: updatedTopics }
+      })
+
+      state.topicGroups = safeFilter(state.topicGroups, (group) => group.id !== action.payload.id)
+    },
+    updateTopicGroupId: (state, action: PayloadAction<{ assistantId: string; topicId: string; groupId?: string }>) => {
+      if (!state.assistants) {
+        state.assistants = []
+        return
+      }
+
+      state.assistants = safeMap(state.assistants, (assistant) => {
+        if (assistant && assistant.id === action.payload.assistantId) {
+          const updatedTopics = safeMap(assistant.topics, (topic) =>
+            topic && topic.id === action.payload.topicId ? { ...topic, groupId: action.payload.groupId } : topic
+          )
+          return { ...assistant, topics: updatedTopics }
+        }
+        return assistant
+      })
     }
   }
 })
@@ -274,6 +327,10 @@ export const {
   updateGroup,
   removeGroup,
   updateAssistantGroup,
+  addTopicGroup,
+  updateTopicGroup,
+  removeTopicGroup,
+  updateTopicGroupId,
   setAssistantsLoading,
   setAssistantsError
 } = assistantsSlice.actions

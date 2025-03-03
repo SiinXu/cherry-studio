@@ -60,9 +60,7 @@ const HeaderNavbar: FC<Props> = ({ activeAssistant }) => {
           <NavbarIcon onClick={toggleShowAssistants} style={{ marginLeft: isMac ? 16 : 0 }}>
             <i className="iconfont icon-hide-sidebar" />
           </NavbarIcon>
-          <NavbarIcon onClick={() => EventEmitter.emit(EVENT_NAMES.ADD_NEW_TOPIC)}>
-            <FormOutlined />
-          </NavbarIcon>
+          {/* 删除添加新话题按钮 */}
         </NavbarLeft>
       )}
       <NavbarRight
