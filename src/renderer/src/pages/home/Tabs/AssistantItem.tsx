@@ -2,6 +2,7 @@ import { DeleteOutlined, EditOutlined, FolderOutlined, MinusCircleOutlined, Save
 import ModelAvatar from '@renderer/components/Avatar/ModelAvatar'
 import CopyIcon from '@renderer/components/Icons/CopyIcon'
 import { useAssistant } from '@renderer/hooks/useAssistant'
+import { useAssistants } from '@renderer/hooks/useAssistant'
 import { modelGenerating } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
 import AssistantSettingsPopup from '@renderer/pages/settings/AssistantSettings'
@@ -17,14 +18,21 @@ import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
 interface AssistantItemProps {
+  /** 助手信息 */
   assistant: Assistant
-  isActive: boolean
+  /** 是否激活 */
+  isActive?: boolean
+  /** 切换助手的回调 */
   onSwitch: (assistant: Assistant) => void
-  onDelete: (assistant: Assistant) => void
-  onCreateDefaultAssistant: () => void
+  /** 添加代理的回调 */
   addAgent: (agent: any) => void
+  /** 添加助手的回调 */
   addAssistant: (assistant: Assistant) => void
+  /** 创建默认助手的回调，用于空状态显示 */
+  onCreateDefaultAssistant?: () => void
+  /** 移动到分组的回调 */
   onMoveToGroup?: (assistantId: string, groupId?: string) => void
+  /** 所有分组列表 */
   groups?: AssistantGroup[]
 }
 
@@ -32,7 +40,6 @@ const AssistantItem: FC<AssistantItemProps> = ({
   assistant,
   isActive,
   onSwitch,
-  onDelete,
   addAgent,
   addAssistant,
   onMoveToGroup,
@@ -42,6 +49,7 @@ const AssistantItem: FC<AssistantItemProps> = ({
   const { removeAllTopics } = useAssistant(assistant.id) // 使用当前助手的ID
   const { clickAssistantToShowTopic, topicPosition, showAssistantIcon } = useSettings()
   const defaultModel = getDefaultModel()
+  const { removeAssistant } = useAssistants()
 
   const getMenuItems = useCallback(
     (assistant: Assistant): ItemType[] => {
@@ -140,7 +148,7 @@ const AssistantItem: FC<AssistantItemProps> = ({
               content: t('assistants.delete.content'),
               centered: true,
               okButtonProps: { danger: true },
-              onOk: () => onDelete(assistant)
+              onOk: () => removeAssistant(assistant.id)
             })
           }
         }
@@ -148,7 +156,7 @@ const AssistantItem: FC<AssistantItemProps> = ({
 
       return baseItems
     },
-    [addAgent, addAssistant, onSwitch, removeAllTopics, t, onDelete, onMoveToGroup, groups]
+    [addAgent, addAssistant, onSwitch, removeAllTopics, removeAssistant, t, onMoveToGroup, groups]
   )
 
   const handleSwitch = useCallback(async () => {

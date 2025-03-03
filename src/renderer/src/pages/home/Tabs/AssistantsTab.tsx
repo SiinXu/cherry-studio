@@ -13,7 +13,7 @@ import { useAppSelector } from '@renderer/store'
 import { Assistant, AssistantGroup } from '@renderer/types'
 import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
 import { Alert, Form, Input, Modal, Spin } from 'antd'
-import { FC, useCallback, useEffect, useRef, useState } from 'react'
+import { FC, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { v4 as uuid } from 'uuid'
@@ -33,8 +33,7 @@ const Assistants: FC<AssistantsTabProps> = ({
   onCreateAssistant,
   onCreateDefaultAssistant
 }) => {
-  const { assistants, addGroup, updateGroup, removeGroup, updateAssistantGroup, addAssistant, removeAssistant } =
-    useAssistants()
+  const { assistants, addGroup, updateGroup, removeGroup, updateAssistantGroup, addAssistant } = useAssistants()
   const { groups, isLoading, loadingError } = useAppSelector((state) => state.assistants) // 直接从store获取状态
   const { addAgent } = useAgents()
   const [form] = Form.useForm()
@@ -52,35 +51,6 @@ const Assistants: FC<AssistantsTabProps> = ({
       // 可以在这里添加错误通知或重试逻辑
     }
   }, [loadingError])
-
-  const onDelete = useCallback(
-    (assistant: Assistant) => {
-      // 判断是否有未保存的会话
-      const unsavedChanges = false
-      if (unsavedChanges) {
-        window.modal.confirm({
-          title: t('assistants.delete.unsaved.title'),
-          content: t('assistants.delete.unsaved.content'),
-          cancelText: t('common.cancel'),
-          okText: t('common.confirm'),
-          okButtonProps: { danger: true },
-          centered: true,
-          onOk: () => removeAssistant(assistant.id)
-        })
-      } else {
-        window.modal.confirm({
-          title: t('assistants.delete.title'),
-          content: t('assistants.delete.content'),
-          cancelText: t('common.cancel'),
-          okText: t('common.confirm'),
-          okButtonProps: { danger: true },
-          centered: true,
-          onOk: () => removeAssistant(assistant.id)
-        })
-      }
-    },
-    [removeAssistant, t]
-  )
 
   const handleCreateGroup = () => {
     setCurrentGroup(null)
@@ -102,8 +72,6 @@ const Assistants: FC<AssistantsTabProps> = ({
     window.modal.confirm({
       title: t('assistants.group.delete.title'),
       content: t('assistants.group.delete.content'),
-      cancelText: t('common.cancel'),
-      okText: t('common.confirm'),
       okButtonProps: { danger: true },
       centered: true,
       onOk: () => {
@@ -189,7 +157,6 @@ const Assistants: FC<AssistantsTabProps> = ({
   // 渲染一个分组
   const renderGroup = (group: AssistantGroup) => {
     const groupAssistants = safeFilter(assistants, (a) => a.groupId === group.id)
-    // 删除空组过滤条件，允许显示空组
     const isExpanded = expandedGroups.has(group.id)
 
     return (
@@ -229,7 +196,6 @@ const Assistants: FC<AssistantsTabProps> = ({
                 assistant={assistant}
                 isActive={activeAssistant && assistant.id === activeAssistant.id}
                 onSwitch={setActiveAssistant}
-                onDelete={onDelete}
                 addAgent={addAgent}
                 addAssistant={addAssistant}
                 onCreateDefaultAssistant={onCreateDefaultAssistant}
@@ -270,7 +236,6 @@ const Assistants: FC<AssistantsTabProps> = ({
                       assistant={assistant}
                       isActive={activeAssistant && assistant.id === activeAssistant.id}
                       onSwitch={setActiveAssistant}
-                      onDelete={onDelete}
                       addAgent={addAgent}
                       addAssistant={addAssistant}
                       onCreateDefaultAssistant={onCreateDefaultAssistant}
