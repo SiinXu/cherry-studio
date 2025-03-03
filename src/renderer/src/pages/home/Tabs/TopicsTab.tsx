@@ -757,14 +757,13 @@ const GroupActions = styled.div`
 const GroupContent = styled.div`
   padding-left: 20px;
   overflow: hidden;
-  transition: max-height 0.3s ease;
 
   &.expanded {
-    max-height: 100%;
+    display: block;
   }
 
   &.collapsed {
-    max-height: 0;
+    display: none;
   }
 `
 
