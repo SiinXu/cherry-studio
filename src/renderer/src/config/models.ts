@@ -1969,10 +1969,3 @@ export function getOpenAIWebSearchParams(assistant: Assistant, model: Model): Re
 
   return {}
 }
-
-/**
- * 检查是否为OpenAI的o系列模型
- */
-export const isOpenAIoSeries = (model: Model): boolean => {
-  return ['o1', 'o1-2024-12-17'].includes(model.id) || model.id.startsWith('o3')
-}
