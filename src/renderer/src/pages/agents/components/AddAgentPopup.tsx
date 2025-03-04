@@ -54,7 +54,11 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
     setEmojiLoading(true)
     try {
       const generatedEmoji = await fetchEmojiSuggestion(promptText)
-      setEmoji(generatedEmoji)
+      // 确保只使用第一个emoji字符
+      if (generatedEmoji) {
+        const firstCodePoint = [...generatedEmoji][0] // 正确处理emoji字符
+        setEmoji(firstCodePoint)
+      }
     } catch (error) {
       console.error('Error generating emoji:', error)
     } finally {
@@ -63,7 +67,14 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
   }
 
   const onFinish = (values: FieldType) => {
-    const _emoji = emoji || getLeadingEmoji(values.name)
+    // 确保只使用单个emoji
+    let _emoji = emoji
+    if (!_emoji) {
+      const extractedEmoji = getLeadingEmoji(values.name)
+      if (extractedEmoji) {
+        _emoji = [...extractedEmoji][0] // 只取第一个emoji字符
+      }
+    }
 
     if (values.name.trim() === '' || values.prompt.trim() === '') {
       return
