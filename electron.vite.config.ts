@@ -48,7 +48,7 @@ export default defineConfig({
         babel: {
           plugins: [
             [
-              'styled-components',
+              'babel-plugin-styled-components',
               {
                 displayName: true, // 开发环境下启用组件名称
                 fileName: false, // 不在类名中包含文件名

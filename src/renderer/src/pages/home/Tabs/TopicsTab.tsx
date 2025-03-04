@@ -17,6 +17,7 @@ import {
 } from '@ant-design/icons'
 import CopyIcon from '@renderer/components/Icons/CopyIcon'
 import SparkleIcon from '@renderer/components/Icons/SparkleIcon'
+// 使用本地 SparkleIcon 组件
 import PromptPopup from '@renderer/components/Popups/PromptPopup'
 import Scrollbar from '@renderer/components/Scrollbar'
 import { isMac } from '@renderer/config/constant'
@@ -393,16 +394,14 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
         {
           label: t('chat.topics.auto_rename'),
           key: 'auto-rename',
-          icon: <SparkleIcon />,
+          icon: <i className="iconfont icon-business-smart-assistant" style={{ fontSize: '14px' }} />,
           disabled: isLocked,
           onClick: () => {
             // 仅当第一条消息是用户消息时才能自动命名
             const firstMsg = topic.messages[0]
             if (firstMsg && firstMsg.role === 'user') {
-              EventEmitter.emit(EVENT_NAMES.RENAME_TOPIC_ITEM, {
-                id: topic.id,
-                content: firstMsg.content
-              })
+              // 直接触发自动重命名事件
+              EventEmitter.emit(EVENT_NAMES.AI_AUTO_RENAME)
             }
           }
         },
