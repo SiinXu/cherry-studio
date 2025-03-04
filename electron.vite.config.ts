@@ -48,7 +48,7 @@ export default defineConfig({
         babel: {
           plugins: [
             [
-              'babel-plugin-styled-components',
+              'styled-components',
               {
                 displayName: true, // 开发环境下启用组件名称
                 fileName: false, // 不在类名中包含文件名
@@ -61,15 +61,6 @@ export default defineConfig({
       }),
       ...visualizerPlugin('renderer')
     ],
-    server: {
-      hmr: false, // 完全禁用HMR，避免__WS_TOKEN__错误
-      watch: {
-        usePolling: true // 使用轮询方式监听文件变化，避免WebSocket连接
-      },
-      fs: {
-        strict: false // 防止访问文件系统限制错误
-      }
-    },
     resolve: {
       alias: {
         '@renderer': resolve('src/renderer/src'),
