@@ -5,16 +5,18 @@ import {
   DownOutlined,
   EditOutlined,
   FolderAddOutlined,
-  FolderOutlined,
+  FolderOpenOutlined,
   LockOutlined,
   PlusOutlined,
   PushpinOutlined,
   QuestionCircleOutlined,
+  RetweetOutlined,
   RightOutlined,
   UnlockOutlined,
   UploadOutlined
 } from '@ant-design/icons'
 import CopyIcon from '@renderer/components/Icons/CopyIcon'
+import SparkleIcon from '@renderer/components/Icons/SparkleIcon'
 import PromptPopup from '@renderer/components/Popups/PromptPopup'
 import Scrollbar from '@renderer/components/Scrollbar'
 import { isMac } from '@renderer/config/constant'
@@ -391,7 +393,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
         {
           label: t('chat.topics.auto_rename'),
           key: 'auto-rename',
-          icon: <EditOutlined />,
+          icon: <SparkleIcon />,
           disabled: isLocked,
           onClick: () => {
             // 仅当第一条消息是用户消息时才能自动命名
@@ -518,7 +520,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
         {
           label: t('topics.move_to_group') || '移动到分组',
           key: 'move-to-group',
-          icon: <FolderOutlined />,
+          icon: <FolderOpenOutlined />,
           children: [
             {
               label: t('topics.no_group') || '无分组',
@@ -546,7 +548,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
         menus.push({
           label: t('chat.topics.duplicate_to') || '复制到',
           key: 'duplicate',
-          icon: <CopyIcon />,
+          icon: <RetweetOutlined />,
           children: assistants
             .filter((a) => a.id !== assistant.id)
             .map((a) => ({

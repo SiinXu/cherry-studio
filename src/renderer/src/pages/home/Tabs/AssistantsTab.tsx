@@ -225,6 +225,7 @@ const Assistants: FC<AssistantsTabProps> = ({
                 onDragLeave={handleAssistantDragLeave}
                 onDrop={(e) => handleAssistantDrop(e, null)}
                 className={dropTargetRef.current === null ? 'drag-over' : ''}>
+                <p className="section-title">{t('assistants.ungrouped') || '未分组'}</p>
                 {safeMap(ungroupedAssistants, (assistant) => (
                   <div
                     key={assistant.id}
@@ -246,8 +247,8 @@ const Assistants: FC<AssistantsTabProps> = ({
                 ))}
               </UngroupedSection>
 
-              {/* 模块间分割线 */}
-              <SectionDivider />
+              {/* 分割线 - 仅在未分组有内容且存在分组时显示 */}
+              {ungroupedAssistants.length > 0 && groups.length > 0 && <SectionDivider />}
 
               {/* 分组区域 */}
               <GroupsContainer>{safeMap(groups, renderGroup)}</GroupsContainer>
@@ -303,12 +304,11 @@ const Assistants: FC<AssistantsTabProps> = ({
 export default Assistants
 
 const Container = styled.div`
-  position: relative;
-  height: 100%;
-  overflow: hidden;
-  padding-bottom: 54px; /* 增加底部按钮区域的高度 */
   display: flex;
   flex-direction: column;
+  padding-top: 11px;
+  user-select: none;
+  height: 100%;
 
   .assistant-item-wrapper[draggable='true'] {
     cursor: grab;
@@ -329,11 +329,25 @@ const UngroupedSection = styled.div`
   padding: 8px;
   border-radius: 8px;
   min-height: 60px;
-  max-height: 300px; /* 添加最高高度限制 */
-  overflow-y: auto; /* 当内容超出高度时，添加垂直滚动条 */
+  max-height: 300px;
+  overflow-y: auto;
+
+  .section-title {
+    font-size: 13px;
+    color: var(--color-text-3);
+    margin: 5px 8px;
+    padding-left: 8px;
+  }
 
   &.drag-over {
     background-color: var(--color-bg-3);
+  }
+
+  .assistant-item-wrapper[draggable='true'] {
+    cursor: grab;
+    &:active {
+      cursor: grabbing;
+    }
   }
 `
 
@@ -398,24 +412,23 @@ const GroupIcon = styled.span`
 `
 
 const GroupActions = styled.div`
-  display: flex;
-  gap: 8px;
   opacity: 0;
   visibility: hidden;
-  transition: all 0.3s;
+  transition: opacity 0.2s;
+  display: flex;
+  gap: 8px;
+  z-index: 10; /* 确保操作按钮不被盖住 */
 
-  svg {
+  .anticon {
     cursor: pointer;
-    font-size: 14px;
-
+    color: var(--color-text-3);
     &:hover {
-      color: var(--color-primary);
+      color: var(--color-text-1);
     }
   }
 
-  /* 删除图标悬停时变为红色 - 提高优先级 */
   .delete-icon:hover {
-    color: var(--color-error) !important; /* 使用!important确保优先级 */
+    color: var(--color-error);
   }
 `
 
@@ -429,10 +442,14 @@ const GroupCount = styled.span`
 `
 
 const GroupContent = styled.div`
-  padding: 8px 12px 8px 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px; /* 减小Assistant间距 */
+  padding-left: 20px;
+  overflow: hidden;
+  padding-top: 8px;
+  padding-bottom: 8px;
+
+  &.expanded {
+    display: block;
+  }
 
   &.collapsed {
     display: none;
@@ -443,19 +460,13 @@ const ActionButtons = styled.div`
   display: flex;
   gap: 10px;
   padding: 10px;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  margin-top: 10px;
+  margin-bottom: 10px;
   background: var(--color-bg-1);
-  z-index: 10; /* 提高底部按钮区域的z-index */
-  border-top: 1px solid var(--color-border);
-  height: 54px; /* 确保按钮区域有足够的高度 */
-  box-sizing: border-box;
+  z-index: 10;
 
   button {
     flex: 1;
-    position: relative;
   }
 `
 

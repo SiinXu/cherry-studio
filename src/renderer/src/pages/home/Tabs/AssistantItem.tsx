@@ -193,14 +193,16 @@ const Container = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  padding: 7px 10px;
+  padding: 7px 12px;
+  margin-left: 10px;
+  margin-right: 4px;
   position: relative;
-  margin: 0 10px;
-  font-family: Ubuntu;
   border-radius: var(--list-item-border-radius);
+  font-family: Ubuntu;
+  font-size: 13px;
   border: 0.5px solid transparent;
-  width: calc(var(--assistants-width) - 20px);
   cursor: pointer;
+
   .iconfont {
     opacity: 0;
     color: var(--color-text-3);
