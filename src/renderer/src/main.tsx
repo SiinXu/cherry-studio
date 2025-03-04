@@ -1,4 +1,6 @@
 import './assets/styles/index.scss'
+// 引入WebSocket Token修复脚本，解决__WS_TOKEN__未定义错误
+import './utils/ws-token-fix.js'
 
 import ReactDOM from 'react-dom/client'
 
