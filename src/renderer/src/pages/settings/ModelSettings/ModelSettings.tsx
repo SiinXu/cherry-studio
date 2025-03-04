@@ -3,6 +3,7 @@ import { HStack } from '@renderer/components/Layout'
 import PromptPopup from '@renderer/components/Popups/PromptPopup'
 import { isEmbeddingModel } from '@renderer/config/models'
 import { TRANSLATE_PROMPT } from '@renderer/config/prompts'
+import { getModelUniqId } from '@renderer/services/ModelService'
 import { useTheme } from '@renderer/context/ThemeProvider'
 import { useDefaultModel } from '@renderer/hooks/useAssistant'
 import { useProviders } from '@renderer/hooks/useProvider'
@@ -39,8 +40,8 @@ const ModelSettings: FC = () => {
     options: sortBy(p.models || [], 'name')
       .filter((m) => !isEmbeddingModel(m))
       .map((m) => ({
-        label: m.name,
-        value: m.id
+        label: `${m.name} | ${p.isSystem ? t(`provider.${p.id}`) : p.name}`,
+        value: getModelUniqId(m)
       }))
   }))
 
