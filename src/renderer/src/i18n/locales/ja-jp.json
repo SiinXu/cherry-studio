@@ -130,7 +130,8 @@
       "message.useful": "役立つ",
       "resend": "再送信",
       "save": "保存",
-      "settings.code_collapsible": "コードブロックを折りたたむ",
+      "settings.code_collapsible": "コードブロック折り畳み",
+      "settings.code_wrappable": "コードブロック折り返し",
       "settings.context_count": "コンテキスト",
       "settings.context_count.tip": "コンテキストに保持する以前のメッセージの数",
       "settings.max": "最大",
@@ -925,6 +926,39 @@
       "no_group": "グループなし",
       "new": "新しいトピック",
       "ungrouped": "グループなし"
+    },
+    "code_block": {
+      "enable_wrap": "改行",
+      "disable_wrap": "改行解除"
+    },
+    "backup": {
+      "title": "データバックアップ",
+      "confirm": "データをバックアップしますか？",
+      "confirm.button": "バックアップ位置を選択",
+      "content": "バックアップ操作はすべてのアプリデータを含むため、時間がかかる場合があります。",
+      "progress": {
+        "title": "バックアップ進捗",
+        "preparing": "バックアップ準備中...",
+        "writing_data": "データ書き込み中...",
+        "copying_files": "ファイルコピー中... {{progress}}%",
+        "compressing": "圧縮中...",
+        "completed": "バックアップ完了"
+      }
+    },
+    "restore": {
+      "title": "データ復元",
+      "confirm": "データを復元しますか？",
+      "confirm.button": "バックアップファイルを選択",
+      "content": "復元操作は現在のアプリデータをバックアップデータで上書きします。復元処理には時間がかかる場合があります。",
+      "progress": {
+        "title": "復元進捗",
+        "preparing": "復元準備中...",
+        "extracting": "バックアップ解凍中...",
+        "reading_data": "データ読み込み中...",
+        "copying_files": "ファイルコピー中... {{progress}}%",
+        "completed": "復元完了"
+      }
     }
   }
 }
+
