@@ -1222,7 +1222,6 @@ const migrateConfig = {
       if (!state.assistants.groups) {
         state.assistants.groups = []
       }
-      
       if (!state.assistants.topicGroups) {
         state.assistants.topicGroups = []
       }
