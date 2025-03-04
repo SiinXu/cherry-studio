@@ -4,10 +4,10 @@ import {
   FullscreenExitOutlined,
   FullscreenOutlined,
   GlobalOutlined,
+  LockOutlined,
   PauseCircleOutlined,
   PicCenterOutlined,
-  QuestionCircleOutlined,
-  LockOutlined
+  QuestionCircleOutlined
 } from '@ant-design/icons'
 import TranslateButton from '@renderer/components/TranslateButton'
 import { isVisionModel, isWebSearchModel } from '@renderer/config/models'
@@ -189,7 +189,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const isEnterPressed = event.key === 'Enter'
-    
+
     // 如果话题被锁定，则阻止发送操作
     if (assistant.topics[0].locked) {
       return
@@ -677,7 +677,12 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
                   </ToolbarButton>
                 </Tooltip>
               )}
-              {!generating && <SendMessageButton sendMessage={sendMessage} disabled={assistant.topics[0].locked || generating || inputEmpty} />}
+              {!generating && (
+                <SendMessageButton
+                  sendMessage={sendMessage}
+                  disabled={assistant.topics[0].locked || generating || inputEmpty}
+                />
+              )}
             </ToolbarMenu>
           </Toolbar>
         </InputBarContainer>

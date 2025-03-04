@@ -136,7 +136,7 @@ const Messages: FC<Props> = ({ assistant, topic, setActiveTopic }) => {
         })
         return
       }
-      
+
       const _messages = messages.filter((m) => m.id !== message.id)
       setMessages(_messages)
       setDisplayMessages(_messages)
@@ -156,7 +156,7 @@ const Messages: FC<Props> = ({ assistant, topic, setActiveTopic }) => {
         })
         return
       }
-      
+
       const _messages = messages.filter((m) => m.askId !== askId && m.id !== askId)
       setMessages(_messages)
       setDisplayMessages(_messages)
@@ -203,7 +203,7 @@ const Messages: FC<Props> = ({ assistant, topic, setActiveTopic }) => {
             })
             return
           }
-          
+
           TopicManager.clearTopicMessages(data.id)
           updateTopic({ ...data, name: defaultTopic.name, messages: [] })
           return
