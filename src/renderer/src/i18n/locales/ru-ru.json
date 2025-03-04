@@ -121,6 +121,7 @@
       "input.web_search.button.ok": "Перейти в Настройки",
       "input.web_search.enable": "Включить веб-поиск",
       "input.web_search.enable_content": "Необходимо включить веб-поиск в Настройки",
+      "input.auto_resize": "Автоматическая высота", 
       "message.new.branch": "Новая ветка",
       "message.new.branch.created": "Новая ветка создана",
       "message.new.context": "Новый контекст",
@@ -797,7 +798,8 @@
         "remove_duplicate_keys": "Удалить дубликаты ключей",
         "remove_invalid_keys": "Удалить недействительные ключи",
         "search_placeholder": "Поиск по ID или имени модели",
-        "title": "Провайдеры моделей"
+        "title": "Провайдеры моделей",
+        "search": "Поиск поставщиков..."
       },
       "proxy": {
         "mode": {
