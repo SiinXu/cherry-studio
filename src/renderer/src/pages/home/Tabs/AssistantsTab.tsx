@@ -225,7 +225,7 @@ const Assistants: FC<AssistantsTabProps> = ({
                 onDragLeave={handleAssistantDragLeave}
                 onDrop={(e) => handleAssistantDrop(e, null)}
                 className={dropTargetRef.current === null ? 'drag-over' : ''}>
-                <p className="section-title">{t('assistants.ungrouped') || '未分组'}</p>
+                <p className="section-title">{t('assistants.ungrouped')}</p>
                 {safeMap(ungroupedAssistants, (assistant) => (
                   <div
                     key={assistant.id}

@@ -39,6 +39,7 @@
       "delete.content": "删除助手会删除所有该助手下的话题和文件，确定要繼續吗？",
       "delete.title": "删除助手",
       "edit.title": "編輯助手",
+      "ungrouped": "未分組",
       "group": {
         "add": "創建分組",
         "edit": "編輯分組",

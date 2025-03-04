@@ -39,6 +39,7 @@
       "delete.content": "Deleting assistant will delete all topics and files under this assistant, do you want to continue?",
       "delete.title": "Delete Assistant",
       "edit.title": "Edit Assistant",
+      "ungrouped": "Ungrouped",
       "group": {
         "add": "Create Group",
         "edit": "Edit Group",
