@@ -129,7 +129,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
     }
 
     // 如果话题被锁定，则不允许发送消息
-    if (assistant.topics[0].locked) {
+    if (assistant.topics && assistant.topics.length > 0 && assistant.topics[0].locked) {
       window.modal.warning({
         title: t('chat.topics.locked_warning') || '话题已锁定',
         content: t('chat.topics.locked_warning_content') || '该话题已被锁定，无法发送新消息'
@@ -191,7 +191,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
     const isEnterPressed = event.key === 'Enter'
 
     // 如果话题被锁定，则阻止发送操作
-    if (assistant.topics[0].locked) {
+    if (assistant.topics && assistant.topics.length > 0 && assistant.topics[0].locked) {
       return
     }
 
@@ -574,7 +574,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
           id="inputbar"
           className={classNames('inputbar-container', inputFocus && 'focus')}
           ref={containerRef}>
-          {assistant.topics[0].locked && (
+          {assistant.topics && assistant.topics.length > 0 && assistant.topics[0].locked && (
             <LockWarningBar>
               <LockOutlined style={{ marginRight: '8px' }} />
               {t('chat.topics.locked_input_tip') || '该话题已锁定，处于只读状态'}
@@ -605,7 +605,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
             }}
             onBlur={() => setInputFocus(false)}
             onInput={onInput}
-            disabled={assistant.topics[0].locked || searching}
+            disabled={(assistant.topics && assistant.topics.length > 0 && assistant.topics[0].locked) || searching}
             onPaste={(e) => onPaste(e.nativeEvent)}
             onClick={() => searching && dispatch(setSearching(false))}
           />
@@ -680,7 +680,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
               {!generating && (
                 <SendMessageButton
                   sendMessage={sendMessage}
-                  disabled={assistant.topics[0].locked || generating || inputEmpty}
+                  disabled={(assistant.topics && assistant.topics.length > 0 && assistant.topics[0].locked) || generating || inputEmpty}
                 />
               )}
             </ToolbarMenu>
