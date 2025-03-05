@@ -1,8 +1,8 @@
-import { migrateTopicGroups } from '@renderer/utils/migration'
 import { FC, useEffect } from 'react'
-import { useAppSelector } from '@renderer/store'
-import { useHotkeys } from 'react-hotkeys-hook'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useHotkeys } from 'react-hotkeys-hook'
+import { useAppSelector } from '@renderer/store'
+import { migrateTopicGroups } from '@renderer/utils/migration'
 
 const NavigationHandler: FC = () => {
   const location = useLocation()
