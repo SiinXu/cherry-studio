@@ -1227,6 +1227,18 @@ const migrateConfig = {
       }
     }
     return state
+  },
+  '78': (state: RootState) => {
+    // 初始化助手分组和话题分组设置
+    if (state.settings) {
+      if (state.settings.enableAssistantGroup === undefined) {
+        state.settings.enableAssistantGroup = false
+      }
+      if (state.settings.enableTopicsGroup === undefined) {
+        state.settings.enableTopicsGroup = false
+      }
+    }
+    return state
   }
 }
 

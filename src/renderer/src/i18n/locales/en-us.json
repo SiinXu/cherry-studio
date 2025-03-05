@@ -628,8 +628,6 @@
       "about.updateNotAvailable": "You are using the latest version",
       "about.website.button": "Website",
       "about.website.title": "Official Website",
-      "advanced.auto_switch_to_topics": "Auto switch to topic",
-      "advanced.title": "Advanced Settings",
       "assistant": "Default Assistant",
       "assistant.model_params": "Model Parameters",
       "assistant.title": "Default Assistant",
@@ -731,6 +729,7 @@
       "display.sidebar.translate.icon": "Show Translate icon",
       "display.sidebar.visible": "Show icons",
       "display.title": "Display Settings",
+      "display.group.title": "Group Settings",
       "display.topic.title": "Topic Settings",
       "display.assistant.title": "Assistant Settings",
       "font_size.title": "Message font size",
@@ -842,6 +841,12 @@
         "enable_quick_assistant": "Enable Quick Assistant",
         "title": "Quick Assistant",
         "use_shortcut_to_show": "Right-click the tray icon or use shortcuts to start"
+      },
+      "advanced": {
+        "title": "Advanced Settings",
+        "assistantGroup": "Assistant Group",
+        "topicsGroup": "Topics Group",
+        "auto_switch_to_topics": "Auto switch to topic"
       },
       "shortcuts": {
         "action": "Action",
