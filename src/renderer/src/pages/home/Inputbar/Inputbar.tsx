@@ -680,11 +680,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
               {!generating && (
                 <SendMessageButton
                   sendMessage={sendMessage}
-                  disabled={
-                    (assistant.topics && assistant.topics.length > 0 && assistant.topics[0].locked) ||
-                    generating ||
-                    inputEmpty
-                  }
+                  disabled={(assistant.topics && assistant.topics.length > 0 && assistant.topics[0].locked) || generating || inputEmpty}
                 />
               )}
             </ToolbarMenu>

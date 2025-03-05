@@ -19,8 +19,6 @@ export const DEFAULT_SIDEBAR_ICONS: SidebarIcon[] = [
 export interface SettingsState {
   showAssistants: boolean
   showTopics: boolean
-  enableAssistantGroup: boolean
-  enableTopicsGroup: boolean
   sendMessageShortcut: SendMessageShortcut
   language: LanguageVarious
   targetLanguage: TranslateLanguageVarious
@@ -88,8 +86,6 @@ export type MultiModelMessageStyle = 'horizontal' | 'vertical' | 'fold' | 'grid'
 const initialState: SettingsState = {
   showAssistants: true,
   showTopics: true,
-  enableAssistantGroup: false,
-  enableTopicsGroup: false,
   sendMessageShortcut: 'Enter',
   language: navigator.language as LanguageVarious,
   targetLanguage: 'english' as TranslateLanguageVarious,
@@ -332,20 +328,12 @@ const settingsSlice = createSlice({
     },
     setYuqueUrl: (state, action: PayloadAction<string>) => {
       state.yuqueUrl = action.payload
-    },
-    setEnableAssistantGroup: (state, action: PayloadAction<boolean>) => {
-      state.enableAssistantGroup = action.payload
-    },
-    setEnableTopicsGroup: (state, action: PayloadAction<boolean>) => {
-      state.enableTopicsGroup = action.payload
     }
   }
 })
 
 export const {
   setShowAssistants,
-  setEnableAssistantGroup,
-  setEnableTopicsGroup,
   toggleShowAssistants,
   setShowTopics,
   toggleShowTopics,

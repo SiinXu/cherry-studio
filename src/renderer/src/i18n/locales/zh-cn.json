@@ -71,7 +71,8 @@
       "settings.reasoning_effort.medium": "中",
       "settings.reasoning_effort.off": "关",
       "settings.reasoning_effort.tip": "仅支持 OpenAI o-series 和 Anthropic 推理模型",
-      "title": "助手"
+      "title": "助手",
+      "ungrouped": "未分组"
     },
     "auth": {
       "error": "自动获取密钥失败，请手动获取",
@@ -616,12 +617,8 @@
       "about.updateNotAvailable": "你的软件已是最新版本",
       "about.website.button": "查看",
       "about.website.title": "官方网站",
-      "advanced": {
-        "title": "高级设置",
-        "assistantGroup": "助手分组",
-        "topicsGroup": "话题分组",
-        "auto_switch_to_topics": "自动切换到话题"
-      },
+      "advanced.auto_switch_to_topics": "自动切换到话题",
+      "advanced.title": "高级设置",
       "assistant": "默认助手",
       "assistant.model_params": "模型参数",
       "assistant.title": "默认助手",
@@ -723,7 +720,6 @@
       "display.sidebar.translate.icon": "显示翻译图标",
       "display.sidebar.visible": "显示的图标",
       "display.title": "显示设置",
-      "display.group.title": "分组设置",
       "display.topic.title": "话题设置",
       "display.assistant.title": "助手设置",
       "font_size.title": "消息字体大小",

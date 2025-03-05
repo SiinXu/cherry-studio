@@ -16,6 +16,8 @@ import {
   UploadOutlined
 } from '@ant-design/icons'
 import CopyIcon from '@renderer/components/Icons/CopyIcon'
+import SparkleIcon from '@renderer/components/Icons/SparkleIcon'
+// 使用本地 SparkleIcon 组件
 import PromptPopup from '@renderer/components/Popups/PromptPopup'
 import Scrollbar from '@renderer/components/Scrollbar'
 import { isMac } from '@renderer/config/constant'
@@ -53,7 +55,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   const { assistants } = useAssistants()
   const { assistant, removeTopic, updateTopic, addTopic, duplicateTopic } = useAssistant(_assistant.id)
   const { t } = useTranslation()
-  const { showTopicTime, topicPosition, enableTopicsGroup } = useSettings()
+  const { showTopicTime, topicPosition } = useSettings()
   const { topicGroups, addGroup, updateGroup, removeGroup, updateTopicGroup } = useTopicGroups(_assistant.id)
   const [form] = Form.useForm()
 
@@ -69,9 +71,8 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   const [deletingTopicId, setDeletingTopicId] = useState<string | null>(null)
   const deleteTimerRef = useRef<NodeJS.Timeout>()
 
-  // 根据配置决定是否使用分组
-  // 当分组功能关闭时，所有话题都视为未分组
-  const ungroupedTopics = enableTopicsGroup ? safeFilter(assistant.topics, (topic) => !topic.groupId) : assistant.topics
+  // 初始化分组后，按分组对话题进行分类
+  const ungroupedTopics = safeFilter(assistant.topics, (topic) => !topic.groupId)
 
   // 分组话题
   const getGroupTopics = (groupId: string) => {
@@ -82,7 +83,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   const handleCreateTopic = () => {
     const newTopic: Topic = {
       id: uuid(),
-      name: t('topics.new'),
+      name: t('topics.new') || '新话题',
       assistantId: assistant.id,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -515,41 +516,36 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
             }
           ]
         },
-        // 只在启用话题分组功能时显示移动到分组选项
-        ...(enableTopicsGroup
-          ? [
-              {
-                label: t('topics.move_to_group'),
-                key: 'move-to-group',
-                icon: <FolderOpenOutlined />,
-                children: [
-                  {
-                    label: t('topics.no_group'),
-                    key: 'no-group',
-                    onClick: () => {
-                      if (assistant.id) {
-                        updateTopicGroup(assistant.id, topic.id, undefined)
-                      }
-                    }
-                  },
-                  ...safeMap(topicGroups, (group) => ({
-                    label: group.name,
-                    key: group.id,
-                    onClick: () => {
-                      if (assistant.id) {
-                        updateTopicGroup(assistant.id, topic.id, group.id)
-                      }
-                    }
-                  }))
-                ]
+        {
+          label: t('topics.move_to_group') || '移动到分组',
+          key: 'move-to-group',
+          icon: <FolderOpenOutlined />,
+          children: [
+            {
+              label: t('topics.no_group') || '无分组',
+              key: 'no-group',
+              onClick: () => {
+                if (assistant.id) {
+                  updateTopicGroup(assistant.id, topic.id, undefined)
+                }
               }
-            ]
-          : [])
+            },
+            ...safeMap(topicGroups, (group) => ({
+              label: group.name,
+              key: group.id,
+              onClick: () => {
+                if (assistant.id) {
+                  updateTopicGroup(assistant.id, topic.id, group.id)
+                }
+              }
+            }))
+          ]
+        }
       ]
 
       if (assistants.length > 1 && assistant.topics.length > 1) {
         menus.push({
-          label: t('chat.topics.duplicate_to'),
+          label: t('chat.topics.duplicate_to') || '复制到',
           key: 'duplicate',
           icon: <RetweetOutlined />,
           children: assistants
@@ -586,91 +582,71 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
       t,
       updateTopic,
       topicGroups,
-      updateTopicGroup,
-      enableTopicsGroup
+      updateTopicGroup
     ]
   )
 
   return (
     <Container right={topicPosition === 'right'} className="topics-tab">
-      {enableTopicsGroup ? (
-        // 启用分组时的显示方式
-        <>
-          {/* 未分组的话题 */}
-          <UngroupedSection
-            onDragOver={(e) => handleTopicDragOver(e, null)}
-            onDragLeave={handleTopicDragLeave}
-            onDrop={(e) => handleTopicDrop(e, null)}
-            className={dropTargetRef.current === null ? 'drag-over' : ''}
-            $enableGroup={enableTopicsGroup}>
-            <p className="section-title">{t('topics.ungrouped')}</p>
-            {ungroupedTopics.map(renderTopicItem)}
-          </UngroupedSection>
+      {/* 未分组的话题 */}
+      <UngroupedSection
+        onDragOver={(e) => handleTopicDragOver(e, null)}
+        onDragLeave={handleTopicDragLeave}
+        onDrop={(e) => handleTopicDrop(e, null)}
+        className={dropTargetRef.current === null ? 'drag-over' : ''}>
+        <p className="section-title">{t('topics.ungrouped') || '未分组'}</p>
+        {ungroupedTopics.map(renderTopicItem)}
+      </UngroupedSection>
 
-          {/* 分割线 */}
-          {ungroupedTopics.length > 0 && topicGroups.length > 0 && <SectionDivider />}
+      {/* 分割线 */}
+      {ungroupedTopics.length > 0 && topicGroups.length > 0 && <SectionDivider />}
 
-          {/* 分组区域 */}
-          <GroupsContainer>{safeMap(topicGroups, renderGroup)}</GroupsContainer>
-        </>
-      ) : (
-        // 未启用分组时的原始显示方式
-        <UngroupedSection $enableGroup={enableTopicsGroup}>{assistant.topics.map((topic) => renderTopicItem(topic))}</UngroupedSection>
-      )}
+      {/* 分组区域 */}
+      <GroupsContainer>{safeMap(topicGroups, renderGroup)}</GroupsContainer>
 
       {/* 添加按钮 */}
       <ActionButtons>
         {!dragging && (
           <>
-            {enableTopicsGroup ? (
-              <>
-                <CreateButton type="button" onClick={handleCreateTopic}>
-                  <PlusOutlined />
-                  {t('topics.add')}
-                </CreateButton>
-                <GroupCreateButton type="button" className="add-group-btn" onClick={handleCreateGroup}>
-                  <FolderAddOutlined />
-                  {t('topics.group.add')}
-                </GroupCreateButton>
-              </>
-            ) : (
-              <TopicAddItem onClick={handleCreateTopic} style={{ width: '100%' }}>
-                <TopicAddName>
-                  <PlusOutlined style={{ color: 'var(--color-text-2)', marginRight: 4 }} />
-                  {t('topics.add')}
-                </TopicAddName>
-              </TopicAddItem>
-            )}
+            <CreateButton type="button" onClick={handleCreateTopic}>
+              <PlusOutlined />
+              {t('topics.add') || '添加话题'}
+            </CreateButton>
+            <GroupCreateButton type="button" className="add-group-btn" onClick={handleCreateGroup}>
+              <FolderAddOutlined />
+              {t('topics.group.add') || '添加分组'}
+            </GroupCreateButton>
           </>
         )}
       </ActionButtons>
 
-      {/* 创建/编辑分组模态框 - 仅当分组功能开启时显示 */}
-      {enableTopicsGroup && (
-        <Modal
-          title={currentGroup ? t('topics.group.edit') : t('topics.group.add')}
-          open={groupModalVisible}
-          onOk={handleGroupFormSubmit}
-          onCancel={() => setGroupModalVisible(false)}
-          destroyOnClose>
-          <Form form={form} layout="vertical">
-            <Form.Item
-              name="name"
-              label={t('topics.group.name')}
-              rules={[
-                {
-                  required: true,
-                  message: t('topics.group.name.required')
-                }
-              ]}>
-              <Input placeholder={t('topics.group.name.placeholder')} />
-            </Form.Item>
-            <Form.Item name="description" label={t('topics.group.description')}>
-              <Input.TextArea placeholder={t('topics.group.description.placeholder')} rows={3} />
-            </Form.Item>
-          </Form>
-        </Modal>
-      )}
+      {/* 创建/编辑分组模态框 */}
+      <Modal
+        title={currentGroup ? t('topics.group.edit') || '编辑分组' : t('topics.group.add') || '添加分组'}
+        open={groupModalVisible}
+        onOk={handleGroupFormSubmit}
+        onCancel={() => setGroupModalVisible(false)}
+        destroyOnClose>
+        <Form form={form} layout="vertical">
+          <Form.Item
+            name="name"
+            label={t('topics.group.name') || '分组名称'}
+            rules={[
+              {
+                required: true,
+                message: t('topics.group.name.required') || '请输入分组名称'
+              }
+            ]}>
+            <Input placeholder={t('topics.group.name.placeholder') || '输入分组名称'} />
+          </Form.Item>
+          <Form.Item name="description" label={t('topics.group.description') || '分组描述'}>
+            <Input.TextArea
+              placeholder={t('topics.group.description.placeholder') || '输入分组描述（可选）'}
+              rows={3}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </Container>
   )
 }
@@ -697,12 +673,12 @@ const Container = styled(Scrollbar)`
   }
 `
 
-const UngroupedSection = styled.div<{ $enableGroup?: boolean }>`
+const UngroupedSection = styled.div`
   padding: 8px;
   border-radius: 8px;
   min-height: 60px;
+  max-height: 300px;
   overflow-y: auto;
-  max-height: ${props => props.$enableGroup ? '300px' : 'none'};
 
   .section-title {
     font-size: 13px;
@@ -945,39 +921,6 @@ const GroupCreateButton = styled(CreateButton)`
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     color: var(--color-primary);
   }
-`
-
-/* 非分组模式下的话题添加按钮样式 */
-const TopicAddItem = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  padding: 7px 12px;
-  position: relative;
-  margin: 0 10px;
-  padding-right: 35px;
-  font-family: Ubuntu;
-  border-radius: var(--list-item-border-radius);
-  border: 0.5px solid transparent;
-  cursor: pointer;
-
-  &:hover {
-    background-color: var(--color-background-soft);
-  }
-
-  &.active {
-    background-color: var(--color-background-soft);
-    border: 0.5px solid var(--color-border);
-  }
-`
-
-const TopicAddName = styled.div`
-  color: var(--color-text);
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  font-size: 13px;
 `
 
 export default Topics

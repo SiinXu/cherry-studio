@@ -47,7 +47,7 @@ const AssistantItem: FC<AssistantItemProps> = ({
 }) => {
   const { t } = useTranslation()
   const { removeAllTopics } = useAssistant(assistant.id) // 使用当前助手的ID
-  const { clickAssistantToShowTopic, topicPosition, showAssistantIcon, enableAssistantGroup } = useSettings()
+  const { clickAssistantToShowTopic, topicPosition, showAssistantIcon } = useSettings()
   const defaultModel = getDefaultModel()
   const { removeAssistant } = useAssistants()
 
@@ -101,8 +101,8 @@ const AssistantItem: FC<AssistantItemProps> = ({
         }
       ]
 
-      // 添加移至分组菜单 - 只在启用分组功能时显示
-      if (enableAssistantGroup && onMoveToGroup && groups.length > 0) {
+      // 添加移至分组菜单
+      if (onMoveToGroup && groups.length > 0) {
         const groupItems: ItemType[] = [
           {
             type: 'divider'
@@ -156,7 +156,7 @@ const AssistantItem: FC<AssistantItemProps> = ({
 
       return baseItems
     },
-    [addAgent, addAssistant, onSwitch, removeAllTopics, removeAssistant, t, onMoveToGroup, groups, enableAssistantGroup]
+    [addAgent, addAssistant, onSwitch, removeAllTopics, removeAssistant, t, onMoveToGroup, groups]
   )
 
   const handleSwitch = useCallback(async () => {

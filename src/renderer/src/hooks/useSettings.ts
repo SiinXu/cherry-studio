@@ -1,8 +1,6 @@
 import store, { useAppDispatch, useAppSelector } from '@renderer/store'
 import {
   SendMessageShortcut,
-  setEnableAssistantGroup as _setEnableAssistantGroup,
-  setEnableTopicsGroup as _setEnableTopicsGroup,
   setSendMessageShortcut as _setSendMessageShortcut,
   setShowAssistantIcon,
   setSidebarIcons,
@@ -51,12 +49,6 @@ export function useSettings() {
     },
     setShowAssistantIcon(showAssistantIcon: boolean) {
       dispatch(setShowAssistantIcon(showAssistantIcon))
-    },
-    setEnableAssistantGroup(enabled: boolean) {
-      dispatch(_setEnableAssistantGroup(enabled))
-    },
-    setEnableTopicsGroup(enabled: boolean) {
-      dispatch(_setEnableTopicsGroup(enabled))
     }
   }
 }
