@@ -1,11 +1,15 @@
 import { migrateTopicGroups } from '@renderer/utils/migration'
 import { FC, useEffect } from 'react'
+import { useAppSelector } from '@renderer/store'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 const NavigationHandler: FC = () => {
   const location = useLocation()
   const navigate = useNavigate()
+  const showSettingsShortcutEnabled = useAppSelector(
+    (state) => state.shortcuts.shortcuts.find((s) => s.key === 'show_settings')?.enabled
+  )
 
   // 进行数据迁移
   useEffect(() => {
@@ -28,7 +32,12 @@ const NavigationHandler: FC = () => {
       }
       navigate('/settings/provider')
     },
-    { splitKey: '!', enableOnContentEditable: true, enableOnFormTags: true }
+    {
+      splitKey: '!',
+      enableOnContentEditable: true,
+      enableOnFormTags: true,
+      enabled: showSettingsShortcutEnabled
+    }
   )
 
   return null
