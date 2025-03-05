@@ -857,7 +857,8 @@
         "toggle_show_topics": "切换话题显示",
         "zoom_in": "放大界面",
         "zoom_out": "缩小界面",
-        "zoom_reset": "重置缩放"
+        "zoom_reset": "重置缩放",
+        "lock_topic": "锁定话题"
       },
       "theme.auto": "自动",
       "theme.dark": "深色",

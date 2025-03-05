@@ -68,7 +68,7 @@ const initialState: ShortcutsState = {
     },
     {
       key: 'clear_topic',
-      shortcut: [isMac ? 'Command' : 'Ctrl', 'L'],
+      shortcut: [isMac ? 'Command' : 'Ctrl', 'Delete'],
       editable: true,
       enabled: true,
       system: false
@@ -76,6 +76,13 @@ const initialState: ShortcutsState = {
     {
       key: 'toggle_new_context',
       shortcut: [isMac ? 'Command' : 'Ctrl', 'K'],
+      editable: true,
+      enabled: true,
+      system: false
+    },
+    {
+      key: 'lock_topic',
+      shortcut: [isMac ? 'Command' : 'Ctrl', 'Shift', 'L'],
       editable: true,
       enabled: true,
       system: false

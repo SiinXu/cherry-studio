@@ -109,7 +109,7 @@ const SettingsPage: FC = () => {
             <Route path="data/*" element={<DataSettings />} />
             <Route path="quickAssistant" element={<QuickAssistantSettings />} />
             {/* 高级设置已移除，功能已移到显示设置中 */}
-            <Route path="shortcut" element={<ShortcutSettings />} />
+            <Route path="shortcut/*" element={<ShortcutSettings />} />
             <Route path="about" element={<AboutSettings />} />
           </Routes>
         </SettingContent>

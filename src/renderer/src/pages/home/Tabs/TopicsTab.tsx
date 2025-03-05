@@ -22,6 +22,7 @@ import { isMac } from '@renderer/config/constant'
 import { useAssistant, useAssistants } from '@renderer/hooks/useAssistant'
 import { modelGenerating } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
+import { useShortcuts } from '@renderer/hooks/useShortcuts'
 import { useTopicGroups } from '@renderer/hooks/useTopic'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import store from '@renderer/store'
@@ -38,7 +39,7 @@ import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
 import { Dropdown, Form, Input, MenuProps, Modal, Tooltip } from 'antd'
 import dayjs from 'dayjs'
 import { findIndex } from 'lodash'
-import { FC, useCallback, useRef, useState } from 'react'
+import { FC, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { v4 as uuid } from 'uuid'
@@ -238,6 +239,42 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     },
     [updateTopic]
   )
+
+  const { shortcuts } = useShortcuts()
+  const lockShortcut = shortcuts.find((s) => s.key === 'lock_topic')
+
+  useEffect(() => {
+    if (!lockShortcut?.enabled) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isLockShortcut = lockShortcut.shortcut.every((key) => {
+        switch (key) {
+          case 'Command':
+            return e.metaKey
+          case 'Ctrl':
+            return e.ctrlKey
+          case 'Shift':
+            return e.shiftKey
+          case 'Alt':
+            return e.altKey
+          case 'L':
+            return e.key.toLowerCase() === 'l'
+          default:
+            return false
+        }
+      })
+
+      if (isLockShortcut) {
+        e.preventDefault()
+        if (assistant.topics && assistant.topics.length > 0) {
+          onLockTopic(assistant.topics[0])
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [assistant.topics, onLockTopic, lockShortcut])
 
   const onDeleteTopic = useCallback(
     async (topic: Topic) => {
@@ -562,6 +599,13 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
         })
       }
 
+      menus.push({
+        label: topic.locked ? t('chat.topics.unlock') : t('chat.topics.lock'),
+        key: 'lock',
+        icon: topic.locked ? <UnlockOutlined /> : <LockOutlined />,
+        onClick: () => onLockTopic(topic)
+      })
+
       if (assistant.topics.length > 1 && !topic.pinned && !topic.locked) {
         menus.push({ type: 'divider' })
         menus.push({
@@ -615,7 +659,9 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
         </>
       ) : (
         // 未启用分组时的原始显示方式
-        <UngroupedSection $enableGroup={enableTopicsGroup}>{assistant.topics.map((topic) => renderTopicItem(topic))}</UngroupedSection>
+        <UngroupedSection $enableGroup={enableTopicsGroup}>
+          {assistant.topics.map((topic) => renderTopicItem(topic))}
+        </UngroupedSection>
       )}
 
       {/* 添加按钮 */}
@@ -702,7 +748,7 @@ const UngroupedSection = styled.div<{ $enableGroup?: boolean }>`
   border-radius: 8px;
   min-height: 60px;
   overflow-y: auto;
-  max-height: ${props => props.$enableGroup ? '300px' : 'none'};
+  max-height: ${(props) => (props.$enableGroup ? '300px' : 'none')};
 
   .section-title {
     font-size: 13px;
