@@ -83,7 +83,7 @@ const ModelSettings: FC = () => {
             {t('settings.models.default_assistant_model')}
           </div>
         </SettingTitle>
-        <HStack $alignItems="center">
+        <HStack $$alignItems="center">
           <Select
             value={defaultModelValue}
             defaultValue={defaultModelValue}
@@ -110,7 +110,7 @@ const ModelSettings: FC = () => {
             {t('settings.models.topic_naming_model')}
           </div>
         </SettingTitle>
-        <HStack $alignItems="center">
+        <HStack $$alignItems="center">
           <Select
             value={defaultTopicNamingModel}
             defaultValue={defaultTopicNamingModel}
@@ -137,7 +137,7 @@ const ModelSettings: FC = () => {
             {t('settings.models.translate_model')}
           </div>
         </SettingTitle>
-        <HStack $alignItems="center">
+        <HStack $$alignItems="center">
           <Select
             value={defaultTranslateModel}
             defaultValue={defaultTranslateModel}

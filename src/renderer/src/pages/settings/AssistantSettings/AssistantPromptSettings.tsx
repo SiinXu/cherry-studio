@@ -71,7 +71,7 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
       <Box mb={8} style={{ fontWeight: 'bold' }}>
         {t('common.name')}
       </Box>
-      <HStack gap={8} alignItems="center">
+      <HStack $ga$p={8} $alignItems="center">
         <Popover content={<EmojiPicker onEmojiClick={handleEmojiSelect} />} arrow>
           <EmojiButtonWrapper>
             <Button style={{ fontSize: 20, padding: '4px', minWidth: '32px', height: '32px' }}>{emoji}</Button>
@@ -126,7 +126,7 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
         spellCheck={false}
         style={{ minHeight: 'calc(80vh - 200px)', maxHeight: 'calc(80vh - 150px)' }}
       />
-      <HStack width="100%" justifyContent="flex-end" mt="10px">
+      <HStack width="100%" $justifyContent="flex-end" mt="10px">
         <Button type="primary" onClick={onOk}>
           {t('common.close')}
         </Button>

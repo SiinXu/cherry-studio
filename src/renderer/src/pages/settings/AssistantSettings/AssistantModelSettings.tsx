@@ -111,7 +111,7 @@ const AssistantModelSettings: FC<Props> = ({ assistant, updateAssistant, updateA
             style={{ width: '100%' }}
             value={param.value as number}
             onChange={(value) => onUpdateCustomParameter(index, 'value', value || 0)}
-            step={0.01}
+            ste$p={0.01}
           />
         )
       case 'boolean':
@@ -193,7 +193,7 @@ const AssistantModelSettings: FC<Props> = ({ assistant, updateAssistant, updateA
       <Row align="middle" style={{ marginBottom: 10 }}>
         <Label style={{ marginBottom: 10 }}>{t('assistants.settings.default_model')}</Label>
         <Col span={24}>
-          <HStack alignItems="center" gap={5}>
+          <HStack $alignItems="center" $ga$p={5}>
             <Button
               icon={defaultModel ? <ModelAvatar model={defaultModel} size={20} /> : <PlusOutlined />}
               onClick={onSelectModel}>
@@ -229,14 +229,14 @@ const AssistantModelSettings: FC<Props> = ({ assistant, updateAssistant, updateA
             onChangeComplete={onTemperatureChange}
             value={typeof temperature === 'number' ? temperature : 0}
             marks={{ 0: '0', 0.7: '0.7', 2: '2' }}
-            step={0.01}
+            ste$p={0.01}
           />
         </Col>
         <Col span={4}>
           <InputNumber
             min={0}
             max={2}
-            step={0.01}
+            ste$p={0.01}
             value={temperature}
             changeOnBlur
             onChange={(value) => {
@@ -264,14 +264,14 @@ const AssistantModelSettings: FC<Props> = ({ assistant, updateAssistant, updateA
             onChangeComplete={onTopPChange}
             value={typeof topP === 'number' ? topP : 1}
             marks={{ 0: '0', 1: '1' }}
-            step={0.01}
+            ste$p={0.01}
           />
         </Col>
         <Col span={4}>
           <InputNumber
             min={0}
             max={1}
-            step={0.01}
+            ste$p={0.01}
             value={topP}
             changeOnBlur
             onChange={(value) => {
@@ -301,14 +301,14 @@ const AssistantModelSettings: FC<Props> = ({ assistant, updateAssistant, updateA
             onChangeComplete={onContextCountChange}
             value={typeof contextCount === 'number' ? contextCount : 0}
             marks={{ 0: '0', 5: '5', 10: '10', 15: '15', 20: t('chat.settings.max') }}
-            step={1}
+            ste$p={1}
           />
         </Col>
         <Col span={4}>
           <InputNumber
             min={0}
             max={20}
-            step={1}
+            ste$p={1}
             value={contextCount}
             changeOnBlur
             onChange={(value) => {
@@ -323,7 +323,7 @@ const AssistantModelSettings: FC<Props> = ({ assistant, updateAssistant, updateA
       </Row>
       <Divider style={{ margin: '10px 0' }} />
       <SettingRow style={{ minHeight: 30 }}>
-        <HStack alignItems="center">
+        <HStack $alignItems="center">
           <Label>{t('chat.settings.max_tokens')}</Label>
           <Tooltip title={t('chat.settings.max_tokens.tip')}>
             <QuestionIcon />
@@ -355,7 +355,7 @@ const AssistantModelSettings: FC<Props> = ({ assistant, updateAssistant, updateA
               disabled={!enableMaxTokens}
               min={0}
               max={10000000}
-              step={100}
+              ste$p={100}
               value={maxTokens}
               changeOnBlur
               onChange={(value) => {
@@ -435,7 +435,7 @@ const AssistantModelSettings: FC<Props> = ({ assistant, updateAssistant, updateA
         </Row>
       ))}
       <Divider style={{ margin: '15px 0' }} />
-      <HStack justifyContent="flex-end">
+      <HStack $justifyContent="flex-end">
         <Button onClick={onReset} style={{ width: 80 }} danger type="primary">
           {t('chat.settings.reset')}
         </Button>

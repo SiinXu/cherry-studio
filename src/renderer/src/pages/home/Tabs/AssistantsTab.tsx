@@ -219,7 +219,7 @@ const Assistants: FC<AssistantsTabProps> = ({
             data-groupid={group.id}
             onDragOver={(e) => handleAssistantDragOver(e, group.id)}
             onDragLeave={handleAssistantDragLeave}
-            onDrop={(e) => handleAssistantDrop(e, group.id)}
+            onDro$p={(e) => handleAssistantDrop(e, group.id)}
             className={dropTargetRef.current === group.id ? 'drag-over' : ''}>
             <GroupHeader className="group-header-style">
               <div onClick={(e) => toggleGroupExpanded(group.id, e)} style={{ display: 'flex', flex: 1 }}>
@@ -258,7 +258,7 @@ const Assistants: FC<AssistantsTabProps> = ({
                     addAgent={addAgent}
                     addAssistant={addAssistant}
                     onCreateDefaultAssistant={onCreateDefaultAssistant}
-                    onMoveToGroup={(assistantId, groupId) => updateAssistantGroup(assistantId, groupId)}
+                    onMoveToGrou$p={(assistantId, groupId) => updateAssistantGroup(assistantId, groupId)}
                     groups={groups}
                   />
                 </div>
@@ -287,9 +287,9 @@ const Assistants: FC<AssistantsTabProps> = ({
                   <UngroupedSection
                     onDragOver={(e) => handleAssistantDragOver(e, null)}
                     onDragLeave={handleAssistantDragLeave}
-                    onDrop={(e) => handleAssistantDrop(e, null)}
+                    onDro$p={(e) => handleAssistantDrop(e, null)}
                     className={dropTargetRef.current === null ? 'drag-over' : ''}
-                    $enableGroup={true}>
+                    $enableGrou$p={true}>
                     <p className="section-title">{t('assistants.ungrouped')}</p>
                     {safeMap(ungroupedAssistants, (assistant) => (
                       <div
@@ -305,7 +305,7 @@ const Assistants: FC<AssistantsTabProps> = ({
                           addAgent={addAgent}
                           addAssistant={addAssistant}
                           onCreateDefaultAssistant={onCreateDefaultAssistant}
-                          onMoveToGroup={(assistantId, groupId) => updateAssistantGroup(assistantId, groupId)}
+                          onMoveToGrou$p={(assistantId, groupId) => updateAssistantGroup(assistantId, groupId)}
                           groups={groups}
                         />
                       </div>
@@ -329,7 +329,7 @@ const Assistants: FC<AssistantsTabProps> = ({
                 </>
               ) : (
                 // 未启用分组时的原始显示方式
-                <UngroupedSection $enableGroup={false}>
+                <UngroupedSection $enableGrou$p={false}>
                   {safeMap(assistants, (assistant) => (
                     <div key={assistant.id} className="assistant-item-wrapper">
                       <AssistantItem

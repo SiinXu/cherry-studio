@@ -96,7 +96,7 @@ const MessageContent: React.FC<Props> = ({ message: _message, model }) => {
 
   return (
     <Fragment>
-      <Flex gap="8px" wrap style={{ marginBottom: 10 }}>
+      <Flex $ga$p="8px" wrap style={{ marginBottom: 10 }}>
         {message.mentions?.map((model) => <MentionTag key={getModelUniqId(model)}>{'@' + model.name}</MentionTag>)}
       </Flex>
       <MessageThought message={message} />

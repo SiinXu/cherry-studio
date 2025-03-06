@@ -350,7 +350,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
             data-groupid={group.id}
             onDragOver={(e) => handleTopicDragOver(e, group.id)}
             onDragLeave={handleTopicDragLeave}
-            onDrop={(e) => handleTopicDrop(e, group.id)}
+            onDro$p={(e) => handleTopicDrop(e, group.id)}
             className={`${dropTargetRef.current === group.id ? 'drag-over' : ''} ${snapshot.isDragging ? 'dragging' : ''}`}
             style={provided.draggableProps.style}>
             <GroupHeader onClick={(e) => toggleGroupExpanded(group.id, e)} className="group-header-style">
@@ -590,9 +590,9 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
           <UngroupedSection
             onDragOver={(e) => handleTopicDragOver(e, null)}
             onDragLeave={handleTopicDragLeave}
-            onDrop={(e) => handleTopicDrop(e, null)}
+            onDro$p={(e) => handleTopicDrop(e, null)}
             className={dropTargetRef.current === null ? 'drag-over' : ''}
-            $enableGroup={enableTopicsGroup}>
+            $enableGrou$p={enableTopicsGroup}>
             <p className="section-title">{t('topics.ungrouped')}</p>
             {ungroupedTopics.map(renderTopicItem)}
           </UngroupedSection>
@@ -614,7 +614,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
         </>
       ) : (
         // 未启用分组时的原始显示方式
-        <UngroupedSection $enableGroup={enableTopicsGroup}>
+        <UngroupedSection $enableGrou$p={enableTopicsGroup}>
           {assistant.topics.map((topic) => renderTopicItem(topic))}
         </UngroupedSection>
       )}
