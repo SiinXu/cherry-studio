@@ -360,7 +360,7 @@ const DataSettings: FC = () => {
         <SettingDivider />
         <SettingRow>
           <SettingRowTitle>{t('settings.general.backup.title')}</SettingRowTitle>
-          <HStack $gap="5px" $justifyContent="space-between">
+          <HStack $gap="5px" justifyContent="space-between">
             <Button onClick={BackupPopup.show} icon={<SaveOutlined />}>
               {t('settings.general.backup.button')}
             </Button>
