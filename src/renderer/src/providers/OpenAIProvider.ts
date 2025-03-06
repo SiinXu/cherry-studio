@@ -233,16 +233,25 @@ export default class OpenAIProvider extends BaseProvider {
     return mcpTools.map((tool) => ({
       type: 'function',
       function: {
+<<<<<<< HEAD
         name: `mcp.${tool.serverName}.${tool.name}`,
         description: tool.description,
         parameters: {
           type: 'object',
           properties: tool.inputSchema
+=======
+        name: tool.id,
+        description: tool.description,
+        parameters: {
+          type: 'object',
+          properties: tool.inputSchema.properties
+>>>>>>> upstream/main
         }
       }
     }))
   }
 
+<<<<<<< HEAD
   private openAIToolsToMcpTool(tool: ChatCompletionMessageToolCall): MCPTool | undefined {
     const parts = tool.function.name.split('.')
     if (parts[0] !== 'mcp') {
@@ -257,6 +266,19 @@ export default class OpenAIProvider extends BaseProvider {
       name: name,
       inputSchema: JSON.parse(tool.function.arguments)
     } as MCPTool
+=======
+  private openAIToolsToMcpTool(
+    mcpTools: MCPTool[] | undefined,
+    llmTool: ChatCompletionMessageToolCall
+  ): MCPTool | undefined {
+    if (!mcpTools) return undefined
+    const tool = mcpTools.find((tool) => tool.id === llmTool.function.name)
+    if (!tool) {
+      return undefined
+    }
+    tool.inputSchema = JSON.parse(llmTool.function.arguments)
+    return tool
+>>>>>>> upstream/main
   }
 
   async completions({ messages, assistant, onChunk, onFilterMessages, mcpTools }: CompletionsParams): Promise<void> {
@@ -331,7 +353,11 @@ export default class OpenAIProvider extends BaseProvider {
     const { abortController, cleanup } = this.createAbortController(lastUserMessage?.id)
     const { signal } = abortController
 
+<<<<<<< HEAD
     const tools = mcpTools ? this.mcpToolsToOpenAITools(mcpTools) : undefined
+=======
+    const tools = mcpTools && mcpTools.length > 0 ? this.mcpToolsToOpenAITools(mcpTools) : undefined
+>>>>>>> upstream/main
 
     const reqMessages: ChatCompletionMessageParam[] = [systemMessage, ...userMessages].filter(
       Boolean
@@ -404,11 +430,17 @@ export default class OpenAIProvider extends BaseProvider {
           } as ChatCompletionAssistantMessageParam)
 
           for (const toolCall of toolCalls) {
+<<<<<<< HEAD
             const mcpTool = this.openAIToolsToMcpTool(toolCall)
             console.log('mcpTool', JSON.stringify(mcpTool, null, 2))
 
             if (!mcpTool) {
               console.log('Invalid tool', toolCall)
+=======
+            const mcpTool = this.openAIToolsToMcpTool(mcpTools, toolCall)
+
+            if (!mcpTool) {
+>>>>>>> upstream/main
               continue
             }
 
@@ -418,9 +450,12 @@ export default class OpenAIProvider extends BaseProvider {
               args: mcpTool.inputSchema
             })
 
+<<<<<<< HEAD
             console.log(`Tool ${mcpTool.serverName} - ${mcpTool.name} Call Response:`)
             console.log(toolCallResponse)
 
+=======
+>>>>>>> upstream/main
             reqMessages.push({
               role: 'tool',
               content: JSON.stringify(toolCallResponse, null, 2),

@@ -337,9 +337,10 @@ export interface MCPServerParameter {
 
 export interface MCPServer {
   name: string
-  command: string
   description?: string
-  args: string[]
+  baseUrl?: string
+  command?: string
+  args?: string[]
   env?: Record<string, string>
   isActive: boolean
 }
@@ -353,6 +354,10 @@ export interface MCPToolInputSchema {
 }
 
 export interface MCPTool {
+<<<<<<< HEAD
+=======
+  id: string
+>>>>>>> upstream/main
   serverName: string
   name: string
   description?: string
