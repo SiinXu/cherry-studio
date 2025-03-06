@@ -37,8 +37,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'yarn'
-          cache-dependency-path: yarn.lock
+          # u7981u7528Yarnu7f13u5b58uff0cu9632u6b62u4f7fu7528u9519u8bef7248u672c
+          # cache: 'yarn'
+          # cache-dependency-path: yarn.lock
 
       # u5148u7981u7528Node.jsu81eau5e26u7684u7f13u5b58u673au5236
       - name: Setup and enable corepack
