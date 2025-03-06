@@ -188,27 +188,13 @@ export default class MCPService extends EventEmitter {
   public async activate(server: MCPServer): Promise<void> {
     await this.ensureInitialized()
     try {
-<<<<<<< HEAD
-      const { name, command, args, env } = server
-=======
       const { name, baseUrl, command, args, env } = server
->>>>>>> upstream/main
 
       if (this.clients[name]) {
         log.info(`[MCP] Server ${name} is already running`)
         return
       }
 
-<<<<<<< HEAD
-      let cmd: string = command
-      if (command === 'npx') {
-        cmd = process.platform === 'win32' ? `${command}.cmd` : command
-      }
-
-      const mergedEnv = {
-        ...env,
-        PATH: process.env.PATH
-=======
       let transport: any = null
 
       if (baseUrl) {
@@ -232,7 +218,7 @@ export default class MCPService extends EventEmitter {
         })
       } else {
         throw new Error('Either baseUrl or command must be provided')
->>>>>>> upstream/main
+      }
       }
 
       const client = new this.Client(
@@ -245,16 +231,7 @@ export default class MCPService extends EventEmitter {
         }
       )
 
-<<<<<<< HEAD
-      const transport = new this.Transport({
-        command: cmd,
-        args,
-        stderr: process.platform === 'win32' ? 'pipe' : 'inherit',
-        env: mergedEnv
-      })
 
-=======
->>>>>>> upstream/main
       await client.connect(transport)
       this.clients[name] = client
       this.activeServers.set(name, { client, server })
@@ -294,11 +271,8 @@ export default class MCPService extends EventEmitter {
         }
         const { tools } = await this.clients[serverName].listTools()
         return tools.map((tool: any) => {
-<<<<<<< HEAD
-=======
           tool.serverName = serverName
           tool.id = uuidv4()
->>>>>>> upstream/main
           return tool
         })
       } else {
@@ -310,10 +284,7 @@ export default class MCPService extends EventEmitter {
             allTools = allTools.concat(
               tools.map((tool: MCPTool) => {
                 tool.serverName = clientName
-<<<<<<< HEAD
-=======
                 tool.id = uuidv4()
->>>>>>> upstream/main
                 return tool
               })
             )
