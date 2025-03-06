@@ -354,10 +354,7 @@ export interface MCPToolInputSchema {
 }
 
 export interface MCPTool {
-<<<<<<< HEAD
-=======
   id: string
->>>>>>> upstream/main
   serverName: string
   name: string
   description?: string
