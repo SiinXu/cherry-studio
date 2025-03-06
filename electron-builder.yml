@@ -37,10 +37,8 @@ removePackageScripts: true
 removePackageKeywords: true
 win:
   executableName: Cherry Studio
-  artifactName: ${productName}-${version}-portable.${ext}
-  target:
-    - target: nsis
-    - target: portable
+  artifactName: ${productName}-${version}-${arch}.${ext}
+  target: ["nsis", "portable"]
 
 portable:
   # 保留 Windows 便携版用户数据
