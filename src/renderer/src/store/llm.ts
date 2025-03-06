@@ -514,10 +514,14 @@ const settingsSlice = createSlice({
       window.electron.ipcRenderer.send('miniwindow-reload')
     },
     setTopicNamingModel: (state, action: PayloadAction<{ model: Model }>) => {
+      console.debug('[llm/setTopicNamingModel] before:', state.topicNamingModel)
       state.topicNamingModel = action.payload.model
+      console.debug('[llm/setTopicNamingModel] after:', state.topicNamingModel)
     },
     setTranslateModel: (state, action: PayloadAction<{ model: Model }>) => {
+      console.debug('[llm/setTranslateModel] before:', state.translateModel)
       state.translateModel = action.payload.model
+      console.debug('[llm/setTranslateModel] after:', state.translateModel)
     },
     setOllamaKeepAliveTime: (state, action: PayloadAction<number>) => {
       state.settings.ollama.keepAliveTime = action.payload
