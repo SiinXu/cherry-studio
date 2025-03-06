@@ -5,7 +5,6 @@ import AdmZip from 'adm-zip'
 import Logger from 'electron-log'
 import * as fs from 'fs'
 import * as path from 'path'
-import * as util from 'util'
 import * as xml2js from 'xml2js'
 
 /**
