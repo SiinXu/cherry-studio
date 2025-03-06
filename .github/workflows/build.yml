@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号'
+        required: true
+        default: '1.0.7'
 
 jobs:
   release:
@@ -31,6 +37,18 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
         
+      - name: Update version in package.json
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            # 从标签名称中提取版本号（去除 'v' 前缀）
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          fi
+          # 更新 package.json 中的版本号
+          node -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json')); pkg.version = '${VERSION}'; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');"
+          echo "当前版本: ${VERSION}"
+
       - name: Build for Windows
         if: matrix.platform == 'win'
         run: yarn build:win
@@ -68,10 +86,29 @@ jobs:
         with:
           path: artifacts
           
+      - name: Get version for release
+        id: get_version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            echo "tag_name=v${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            # 从标签名称中提取版本号
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+            echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: artifacts/**/*
           draft: true
+          tag_name: ${{ steps.get_version.outputs.tag_name }}
+          name: "Cherry Studio ${{ steps.get_version.outputs.version }}"
+          body: |
+            Cherry Studio ${{ steps.get_version.outputs.version }} 发布
+            
+            ## 更新内容
+            - 修复公式渲染问题
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
