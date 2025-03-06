@@ -167,18 +167,14 @@
       "topics.export.word": "导出为 Word",
       "topics.export.yuque": "导出到语雀",
       "topics.list": "话题列表",
-      "topics.lock": "锁定话题",
-      "topics.locked_warning": "话题已锁定",
-      "topics.locked_warning_content": "该话题已被锁定，无法发送新消息",
-      "topics.locked_edit_warning": "话题已锁定，无法编辑内容",
-      "topics.locked_input_tip": "该话题已锁定，处于只读状态",
+    
       "topics.move_to": "移动到",
       "topics.pinned": "固定话题",
       "topics.prompt": "话题提示词",
       "topics.prompt.edit.title": "编辑话题提示词",
       "topics.prompt.tips": "话题提示词: 针对当前话题提供额外的补充提示词",
       "topics.title": "话题",
-      "topics.unlock": "解除锁定",
+
       "topics.unpinned": "取消固定",
       "translate": "翻译",
       "topics.duplicate_to": "复制到"
@@ -859,8 +855,7 @@
         "toggle_show_topics": "切换话题显示",
         "zoom_in": "放大界面",
         "zoom_out": "缩小界面",
-        "zoom_reset": "重置缩放",
-        "lock_topic": "锁定话题"
+        "zoom_reset": "重置缩放"
       },
       "theme.auto": "自动",
       "theme.dark": "深色",
@@ -904,15 +899,11 @@
         "description": "分组描述",
         "description.placeholder": "输入分组描述（可选）"
       },
-      "lock": "锁定话题",
-      "locked_warning": "话题已锁定",
-      "locked_warning_content": "该话题已被锁定，无法发送新消息",
-      "locked_edit_warning": "话题已锁定，无法编辑内容",
-      "locked_input_tip": "该话题已锁定，处于只读状态",
+     
       "move_to_group": "移动到分组",
       "no_group": "无分组",
       "new": "新话题",
-      "unlock": "解除锁定",
+     
       "ungrouped": "未分组"
     },
     "translate": {

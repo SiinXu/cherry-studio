@@ -185,11 +185,16 @@ export function useDefaultModel() {
   const { defaultModel, topicNamingModel, translateModel } = useAppSelector((state) => state.llm)
   const dispatch = useAppDispatch()
 
+  console.debug('[useDefaultModel] current state:', { defaultModel, topicNamingModel, translateModel })
+
   return {
     defaultModel,
     topicNamingModel,
     translateModel,
-    setDefaultModel: (model: Model) => dispatch(setDefaultModel({ model })),
+    setDefaultModel: (model: Model) => {
+      console.debug('[setDefaultModel] setting model:', model)
+      dispatch(setDefaultModel({ model }))
+    },
     setTopicNamingModel: (model: Model) => dispatch(setTopicNamingModel({ model })),
     setTranslateModel: (model: Model) => dispatch(setTranslateModel({ model }))
   }

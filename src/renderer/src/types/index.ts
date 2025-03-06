@@ -104,7 +104,7 @@ export type Topic = {
   updatedAt: string
   messages: Message[]
   pinned?: boolean
-  locked?: boolean
+
   prompt?: string
   groupId?: string
 }

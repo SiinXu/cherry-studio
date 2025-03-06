@@ -4,7 +4,6 @@ import { CodeStyleVarious, LanguageVarious, ThemeMode, TranslateLanguageVarious 
 
 export type SendMessageShortcut = 'Enter' | 'Shift+Enter' | 'Ctrl+Enter' | 'Command+Enter'
 
-export type TopicLockShortcut = 'Command+Shift+L' | 'Ctrl+L' | 'Shift+L'
 
 export type SidebarIcon = 'assistants' | 'agents' | 'paintings' | 'translate' | 'minapp' | 'knowledge' | 'files'
 
@@ -24,7 +23,6 @@ export interface SettingsState {
   enableAssistantGroup: boolean
   enableTopicsGroup: boolean
   sendMessageShortcut: SendMessageShortcut
-  topicLockShortcut: TopicLockShortcut
   language: LanguageVarious
   targetLanguage: TranslateLanguageVarious
   proxyMode: 'system' | 'custom' | 'none'
@@ -94,7 +92,6 @@ const initialState: SettingsState = {
   enableAssistantGroup: false,
   enableTopicsGroup: false,
   sendMessageShortcut: 'Enter',
-  topicLockShortcut: 'Command+Shift+L',
   language: navigator.language as LanguageVarious,
   targetLanguage: 'english' as TranslateLanguageVarious,
   proxyMode: 'system',
@@ -171,9 +168,6 @@ const settingsSlice = createSlice({
     },
     setSendMessageShortcut: (state, action: PayloadAction<SendMessageShortcut>) => {
       state.sendMessageShortcut = action.payload
-    },
-    setTopicLockShortcut: (state, action: PayloadAction<TopicLockShortcut>) => {
-      state.topicLockShortcut = action.payload
     },
     setLanguage: (state, action: PayloadAction<LanguageVarious>) => {
       state.language = action.payload

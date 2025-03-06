@@ -6,13 +6,11 @@ import {
   EditOutlined,
   FolderAddOutlined,
   FolderOpenOutlined,
-  LockOutlined,
   PlusOutlined,
   PushpinOutlined,
   QuestionCircleOutlined,
   RetweetOutlined,
   RightOutlined,
-  UnlockOutlined,
   UploadOutlined
 } from '@ant-design/icons'
 import CopyIcon from '@renderer/components/Icons/CopyIcon'
@@ -22,7 +20,6 @@ import { isMac } from '@renderer/config/constant'
 import { useAssistant, useAssistants } from '@renderer/hooks/useAssistant'
 import { modelGenerating } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
-import { useShortcuts } from '@renderer/hooks/useShortcuts'
 import { useTopicGroups } from '@renderer/hooks/useTopic'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import store from '@renderer/store'
@@ -43,13 +40,11 @@ import { FC, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { v4 as uuid } from 'uuid'
-
 interface Props {
   assistant: Assistant
   activeTopic: Topic
   setActiveTopic: (topic: Topic) => void
 }
-
 const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic }) => {
   const { assistants } = useAssistants()
   const { assistant, removeTopic, updateTopic, addTopic, duplicateTopic } = useAssistant(_assistant.id)
@@ -57,28 +52,22 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   const { showTopicTime, topicPosition, enableTopicsGroup } = useSettings()
   const { topicGroups, addGroup, updateGroup, removeGroup, updateTopicGroup } = useTopicGroups(_assistant.id)
   const [form] = Form.useForm()
-
   const borderRadius = showTopicTime ? 12 : 'var(--list-item-border-radius)'
-
   // 分组管理状态
   const [groupModalVisible, setGroupModalVisible] = useState(false)
   const [currentGroup, setCurrentGroup] = useState<TopicGroup | null>(null)
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(safeMap(topicGroups, (g) => g.id)))
   const [dragging, setDragging] = useState(false)
   const dropTargetRef = useRef<string | null>(null)
-
   const [deletingTopicId, setDeletingTopicId] = useState<string | null>(null)
   const deleteTimerRef = useRef<NodeJS.Timeout>()
-
   // 根据配置决定是否使用分组
   // 当分组功能关闭时，所有话题都视为未分组
   const ungroupedTopics = enableTopicsGroup ? safeFilter(assistant.topics, (topic) => !topic.groupId) : assistant.topics
-
   // 分组话题
   const getGroupTopics = (groupId: string) => {
     return safeFilter(assistant.topics, (topic) => topic.groupId === groupId)
   }
-
   // 创建新话题
   const handleCreateTopic = () => {
     const newTopic: Topic = {
@@ -92,14 +81,12 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     addTopic(newTopic)
     setActiveTopic(newTopic)
   }
-
   // 分组管理函数
   const handleCreateGroup = () => {
     setCurrentGroup(null)
     form.resetFields()
     setGroupModalVisible(true)
   }
-
   const handleEditGroup = (group: TopicGroup, e: React.MouseEvent) => {
     e.stopPropagation() // 阻止事件冒泡到toggle
     setCurrentGroup(group)
@@ -109,7 +96,6 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     })
     setGroupModalVisible(true)
   }
-
   const handleDeleteGroup = (groupId: string) => {
     window.modal.confirm({
       title: t('topics.group.delete.title') || '删除分组',
@@ -121,7 +107,6 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
       }
     })
   }
-
   const handleGroupFormSubmit = async () => {
     try {
       const values = await form.validateFields()
@@ -145,7 +130,6 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
       console.error('分组表单验证错误:', error)
     }
   }
-
   // 切换分组的展开/折叠状态
   const toggleGroupExpanded = (groupId: string, e: React.MouseEvent) => {
     e.stopPropagation() // 阻止事件冒泡
@@ -157,30 +141,25 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
       setExpandedGroups(new Set([...expandedGroups, groupId]))
     }
   }
-
   // 处理将话题拖入分组
   const handleTopicDragStart = (e: React.DragEvent, topicId: string) => {
     setDragging(true)
     e.dataTransfer.setData('topicId', topicId)
     e.dataTransfer.effectAllowed = 'move'
   }
-
   const handleTopicDragEnd = () => {
     setDragging(false)
     dropTargetRef.current = null
   }
-
   const handleTopicDragOver = (e: React.DragEvent, groupId: string | null) => {
     e.preventDefault()
     e.stopPropagation()
     e.dataTransfer.dropEffect = 'move'
     dropTargetRef.current = groupId !== null ? groupId : null
   }
-
   const handleTopicDragLeave = () => {
     dropTargetRef.current = null
   }
-
   const handleTopicDrop = (e: React.DragEvent, groupId: string | null) => {
     e.preventDefault()
     const topicId = e.dataTransfer.getData('topicId')
@@ -190,25 +169,19 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     setDragging(false)
     dropTargetRef.current = null
   }
-
   const handleDeleteClick = useCallback((topicId: string, e: React.MouseEvent) => {
     e.stopPropagation()
-
     if (deleteTimerRef.current) {
       clearTimeout(deleteTimerRef.current)
     }
-
     setDeletingTopicId(topicId)
-
     deleteTimerRef.current = setTimeout(() => setDeletingTopicId(null), 2000)
   }, [])
-
   const onClearMessages = useCallback((topic: Topic) => {
     window.keyv.set(EVENT_NAMES.CHAT_COMPLETION_PAUSED, true)
     store.dispatch(setGenerating(false))
     EventEmitter.emit(EVENT_NAMES.CLEAR_MESSAGES, topic)
   }, [])
-
   const handleConfirmDelete = useCallback(
     async (topic: Topic, e: React.MouseEvent) => {
       e.stopPropagation()
@@ -223,7 +196,6 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     },
     [assistant.topics, onClearMessages, removeTopic, setActiveTopic]
   )
-
   const onPinTopic = useCallback(
     (topic: Topic) => {
       const updatedTopic = { ...topic, pinned: !topic.pinned }
@@ -232,49 +204,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     [updateTopic]
   )
 
-  const onLockTopic = useCallback(
-    (topic: Topic) => {
-      const updatedTopic = { ...topic, locked: !topic.locked }
-      updateTopic(updatedTopic)
-    },
-    [updateTopic]
-  )
-
-  const { shortcuts } = useShortcuts()
-  const lockShortcut = shortcuts.find((s) => s.key === 'lock_topic')
-
-  useEffect(() => {
-    if (!lockShortcut?.enabled) return
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const isLockShortcut = lockShortcut.shortcut.every((key) => {
-        switch (key) {
-          case 'Command':
-            return e.metaKey
-          case 'Ctrl':
-            return e.ctrlKey
-          case 'Shift':
-            return e.shiftKey
-          case 'Alt':
-            return e.altKey
-          case 'L':
-            return e.key.toLowerCase() === 'l'
-          default:
-            return false
-        }
-      })
-
-      if (isLockShortcut) {
-        e.preventDefault()
-        if (assistant.topics && assistant.topics.length > 0) {
-          onLockTopic(assistant.topics[0])
-        }
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [assistant.topics, onLockTopic, lockShortcut])
+  useEffect(() => {}, [])
 
   const onDeleteTopic = useCallback(
     async (topic: Topic) => {
@@ -285,7 +215,6 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     },
     [assistant.topics, removeTopic, setActiveTopic]
   )
-
   const onDuplicateTopic = useCallback(
     async (topic: Topic, toAssistant: Assistant) => {
       await modelGenerating()
@@ -293,7 +222,6 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     },
     [duplicateTopic]
   )
-
   const onSwitchTopic = useCallback(
     async (topic: Topic) => {
       await modelGenerating()
@@ -301,14 +229,12 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     },
     [setActiveTopic]
   )
-
   // 主要渲染函数
   const renderTopicItem = (topic: Topic) => {
     const isActive = topic.id === activeTopic?.id
     const topicName = topic.name.replace('`', '')
     const topicPrompt = topic.prompt
     const fullTopicPrompt = t('common.prompt') + ': ' + topicPrompt
-
     return (
       <div
         key={topic.id}
@@ -330,11 +256,8 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
               </TopicPromptText>
             )}
             {showTopicTime && <TopicTime className="time">{dayjs(topic.createdAt).format('MM/DD HH:mm')}</TopicTime>}
-            <MenuButton className="pin">
-              {topic.locked && <LockOutlined style={{ color: 'var(--color-warning)' }} />}
-              {topic.pinned && <PushpinOutlined style={{ marginLeft: topic.locked ? '5px' : '0' }} />}
-            </MenuButton>
-            {isActive && !topic.pinned && !topic.locked && (
+            <MenuButton className="pin">{topic.pinned && <PushpinOutlined />} </MenuButton>
+            {isActive && !topic.pinned && (
               <Tooltip
                 placement="bottom"
                 mouseEnterDelay={0.7}
@@ -369,12 +292,10 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
       </div>
     )
   }
-
   // 渲染分组
   const renderGroup = (group: TopicGroup) => {
     const groupTopics = getGroupTopics(group.id)
     const isExpanded = expandedGroups.has(group.id)
-
     return (
       <GroupContainer
         key={group.id}
@@ -406,18 +327,13 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
       </GroupContainer>
     )
   }
-
   const getTopicMenuItems = useCallback(
     (topic: Topic) => {
-      // 锁定状态下禁用的功能
-      const isLocked = topic.locked === true
-
       const menus: MenuProps['items'] = [
         {
           label: t('chat.topics.edit.title'),
           key: 'edit',
           icon: <EditOutlined />,
-          disabled: isLocked,
           async onClick() {
             const name = await PromptPopup.show({
               title: t('chat.topics.edit.title'),
@@ -431,7 +347,6 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
           label: t('chat.topics.auto_rename'),
           key: 'auto-rename',
           icon: <i className="iconfont icon-business-smart-assistant" style={{ fontSize: '14px' }} />,
-          disabled: isLocked,
           onClick: () => {
             // 仅当第一条消息是用户消息时才能自动命名
             const firstMsg = topic.messages[0]
@@ -445,7 +360,6 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
           label: t('chat.topics.prompt'),
           key: 'topic-prompt',
           icon: <i className="iconfont icon-ai-model1" style={{ fontSize: '14px' }} />,
-          disabled: isLocked,
           extra: (
             <Tooltip title={t('chat.topics.prompt.tips')}>
               <QuestionIcon />
@@ -473,18 +387,9 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
           }
         },
         {
-          label: topic.locked ? t('chat.topics.unlock') : t('chat.topics.lock'),
-          key: 'lock',
-          icon: topic.locked ? <UnlockOutlined /> : <LockOutlined />,
-          onClick() {
-            onLockTopic(topic)
-          }
-        },
-        {
           label: t('chat.topics.clear.title'),
           key: 'clear-messages',
           icon: <ClearOutlined />,
-          disabled: isLocked,
           async onClick() {
             window.modal.confirm({
               title: t('chat.input.clear.content'),
@@ -525,7 +430,6 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
               key: 'markdown',
               onClick: () => exportTopicAsMarkdown(topic)
             },
-
             {
               label: t('chat.topics.export.word'),
               key: 'word',
@@ -583,7 +487,6 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
             ]
           : [])
       ]
-
       if (assistants.length > 1 && assistant.topics.length > 1) {
         menus.push({
           label: t('chat.topics.duplicate_to'),
@@ -598,15 +501,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
             }))
         })
       }
-
-      menus.push({
-        label: topic.locked ? t('chat.topics.unlock') : t('chat.topics.lock'),
-        key: 'lock',
-        icon: topic.locked ? <UnlockOutlined /> : <LockOutlined />,
-        onClick: () => onLockTopic(topic)
-      })
-
-      if (assistant.topics.length > 1 && !topic.pinned && !topic.locked) {
+      if (assistant.topics.length > 1 && !topic.pinned) {
         menus.push({ type: 'divider' })
         menus.push({
           label: t('common.delete'),
@@ -616,7 +511,6 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
           onClick: () => onDeleteTopic(topic)
         })
       }
-
       return menus
     },
     [
@@ -625,7 +519,6 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
       onClearMessages,
       onDeleteTopic,
       onPinTopic,
-      onLockTopic,
       onDuplicateTopic,
       t,
       updateTopic,
@@ -634,7 +527,6 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
       enableTopicsGroup
     ]
   )
-
   return (
     <Container right={topicPosition === 'right'} className="topics-tab">
       {enableTopicsGroup ? (
@@ -650,10 +542,8 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
             <p className="section-title">{t('topics.ungrouped')}</p>
             {ungroupedTopics.map(renderTopicItem)}
           </UngroupedSection>
-
           {/* 分割线 */}
           {ungroupedTopics.length > 0 && topicGroups.length > 0 && <SectionDivider />}
-
           {/* 分组区域 */}
           <GroupsContainer>{safeMap(topicGroups, renderGroup)}</GroupsContainer>
         </>
@@ -663,7 +553,6 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
           {assistant.topics.map((topic) => renderTopicItem(topic))}
         </UngroupedSection>
       )}
-
       {/* 添加按钮 */}
       <ActionButtons>
         {!dragging && (
@@ -690,7 +579,6 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
           </>
         )}
       </ActionButtons>
-
       {/* 创建/编辑分组模态框 - 仅当分组功能开启时显示 */}
       {enableTopicsGroup && (
         <Modal
@@ -720,47 +608,39 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     </Container>
   )
 }
-
 const Container = styled(Scrollbar)`
   display: flex;
   flex-direction: column;
   padding-top: 11px;
   user-select: none;
   height: 100%;
-
   .topic-item-wrapper[draggable='true'] {
     cursor: grab;
-
     &:active {
       cursor: grabbing;
     }
   }
-
   /* 解决拖拽时的白边问题 */
   [draggable] {
     -webkit-user-drag: element;
     user-select: none;
   }
 `
-
 const UngroupedSection = styled.div<{ $enableGroup?: boolean }>`
   padding: 8px;
   border-radius: 8px;
   min-height: 60px;
   overflow-y: auto;
   max-height: ${(props) => (props.$enableGroup ? '300px' : 'none')};
-
   .section-title {
     font-size: 13px;
     color: var(--color-text-3);
     margin: 5px 8px;
     padding-left: 8px;
   }
-
   &.drag-over {
     background-color: var(--color-bg-3);
   }
-
   .topic-item-wrapper[draggable='true'] {
     cursor: grab;
     &:active {
@@ -768,28 +648,23 @@ const UngroupedSection = styled.div<{ $enableGroup?: boolean }>`
     }
   }
 `
-
 const SectionDivider = styled.div`
   height: 1px;
   background-color: var(--color-border);
   margin: 8px 0;
 `
-
 const GroupsContainer = styled.div`
   flex: 1;
   overflow-y: auto;
 `
-
 const GroupContainer = styled.div`
   margin-bottom: 4px;
   position: relative;
-
   &.drag-over {
     background-color: var(--color-bg-3);
     border-radius: 6px;
   }
 `
-
 const GroupHeader = styled.div`
   padding: 10px 12px;
   display: flex;
@@ -799,17 +674,14 @@ const GroupHeader = styled.div`
   user-select: none;
   position: relative;
   border-radius: 6px;
-
   &:hover {
     background-color: var(--color-bg-2);
-
     .group-actions {
       opacity: 1;
       visibility: visible;
     }
   }
 `
-
 const GroupTitle = styled.div`
   display: flex;
   align-items: center;
@@ -817,26 +689,22 @@ const GroupTitle = styled.div`
   font-weight: 500;
   font-size: 13px;
 `
-
 const GroupIcon = styled.span`
   margin-right: 8px;
   font-size: 12px;
 `
-
 const GroupCount = styled.span`
   margin-left: 8px;
   color: var(--color-text-3);
   font-size: 12px;
   font-weight: normal;
 `
-
 const GroupActions = styled.div`
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.2s;
   display: flex;
   gap: 8px;
-
   .anticon {
     cursor: pointer;
     color: var(--color-text-3);
@@ -844,25 +712,20 @@ const GroupActions = styled.div`
       color: var(--color-text-1);
     }
   }
-
   .delete-icon:hover {
     color: var(--color-error);
   }
 `
-
 const GroupContent = styled.div`
   padding-left: 20px;
   overflow: hidden;
-
   &.expanded {
     display: block;
   }
-
   &.collapsed {
     display: none;
   }
 `
-
 const TopicListItem = styled.div`
   padding: 7px 12px;
   margin-left: 10px;
@@ -900,7 +763,6 @@ const TopicListItem = styled.div`
     }
   }
 `
-
 const TopicName = styled.div`
   font-size: 13px;
   color: var(--color-text-1);
@@ -909,7 +771,6 @@ const TopicName = styled.div`
   -webkit-box-orient: vertical;
   overflow: hidden;
 `
-
 const TopicPromptText = styled.div`
   color: var(--color-text-2);
   font-size: 12px;
@@ -921,12 +782,10 @@ const TopicPromptText = styled.div`
     margin-top: 10px;
   }
 `
-
 const TopicTime = styled.div`
   color: var(--color-text-3);
   font-size: 11px;
 `
-
 const MenuButton = styled.div`
   display: flex;
   flex-direction: row;
@@ -941,25 +800,21 @@ const MenuButton = styled.div`
     font-size: 12px;
   }
 `
-
 const QuestionIcon = styled(QuestionCircleOutlined)`
   font-size: 14px;
   cursor: pointer;
   color: var(--color-text-3);
 `
-
 const ActionButtons = styled.div`
   display: flex;
   gap: 10px;
   padding: 10px;
   margin-top: 10px;
   margin-bottom: 10px;
-
   button {
     flex: 1;
   }
 `
-
 const CreateButton = styled.button`
   height: 34px;
   border-radius: 6px;
@@ -972,7 +827,6 @@ const CreateButton = styled.button`
   justify-content: center;
   gap: 6px;
   transition: all 0.3s;
-
   &:hover {
     background-color: #05d47b;
     transform: translateY(-1px);
@@ -980,11 +834,9 @@ const CreateButton = styled.button`
     color: #fff;
   }
 `
-
 const GroupCreateButton = styled(CreateButton)`
   background-color: var(--color-neutral-5);
   color: var(--color-text-1);
-
   &:hover {
     background-color: var(--color-neutral-6);
     transform: translateY(-1px);
@@ -992,7 +844,6 @@ const GroupCreateButton = styled(CreateButton)`
     color: var(--color-primary);
   }
 `
-
 /* 非分组模式下的话题添加按钮样式 */
 const TopicAddItem = styled.div`
   display: flex;
@@ -1006,17 +857,14 @@ const TopicAddItem = styled.div`
   border-radius: var(--list-item-border-radius);
   border: 0.5px solid transparent;
   cursor: pointer;
-
   &:hover {
     background-color: var(--color-background-soft);
   }
-
   &.active {
     background-color: var(--color-background-soft);
     border: 0.5px solid var(--color-border);
   }
 `
-
 const TopicAddName = styled.div`
   color: var(--color-text);
   display: -webkit-box;
@@ -1025,5 +873,4 @@ const TopicAddName = styled.div`
   overflow: hidden;
   font-size: 13px;
 `
-
 export default Topics

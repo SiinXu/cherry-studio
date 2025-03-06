@@ -4,7 +4,6 @@ import {
   FullscreenExitOutlined,
   FullscreenOutlined,
   GlobalOutlined,
-  LockOutlined,
   PauseCircleOutlined,
   PicCenterOutlined,
   QuestionCircleOutlined
@@ -97,14 +96,15 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
 
   const [tokenCount, setTokenCount] = useState(0)
 
-  const debouncedEstimate = useCallback(
-    debounce((newText) => {
+  const debouncedEstimate = useCallback((newText: string) => {
+    const debouncedFn = debounce(() => {
       if (showInputEstimatedTokens) {
         const count = estimateTxtTokens(newText) || 0
         setTokenCount(count)
       }
-    }, 500),
-    [showInputEstimatedTokens]
+    }, 500)
+    debouncedFn()
+  }, [showInputEstimatedTokens]
   )
 
   useEffect(() => {
@@ -125,15 +125,6 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
     await modelGenerating()
 
     if (inputEmpty) {
-      return
-    }
-
-    // 如果话题被锁定，则不允许发送消息
-    if (assistant.topics && assistant.topics.length > 0 && assistant.topics[0].locked) {
-      window.modal.warning({
-        title: t('chat.topics.locked_warning') || '话题已锁定',
-        content: t('chat.topics.locked_warning_content') || '该话题已被锁定，无法发送新消息'
-      })
       return
     }
 
@@ -189,11 +180,6 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const isEnterPressed = event.key === 'Enter'
-
-    // 如果话题被锁定，则阻止发送操作
-    if (assistant.topics && assistant.topics.length > 0 && assistant.topics[0].locked) {
-      return
-    }
 
     if (event.key === '@') {
       const textArea = textareaRef.current?.resizableTextArea?.textArea
@@ -367,7 +353,8 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
         // Prioritize the text when pasting.
         // handled by the default event
       } else {
-        for (const file of event.clipboardData?.files || []) {
+        const files = Array.from(event.clipboardData?.files || [])
+        for (const file of files) {
           event.preventDefault()
 
           if (file.path === '') {
@@ -412,7 +399,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
         }
       }
     },
-    [pasteLongTextAsFile, pasteLongTextThreshold, supportExts, t, text]
+    [pasteLongTextAsFile, pasteLongTextThreshold, supportExts, t, text, model]
   )
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -574,12 +561,6 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
           id="inputbar"
           className={classNames('inputbar-container', inputFocus && 'focus')}
           ref={containerRef}>
-          {assistant.topics && assistant.topics.length > 0 && assistant.topics[0].locked && (
-            <LockWarningBar>
-              <LockOutlined style={{ marginRight: '8px' }} />
-              {t('chat.topics.locked_input_tip') || '该话题已锁定，处于只读状态'}
-            </LockWarningBar>
-          )}
           <AttachmentPreview files={files} setFiles={setFiles} />
           <MentionModelsInput selectedModels={mentionModels} onRemoveModel={handleRemoveModel} />
           <Textarea
@@ -605,7 +586,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
             }}
             onBlur={() => setInputFocus(false)}
             onInput={onInput}
-            disabled={(assistant.topics && assistant.topics.length > 0 && assistant.topics[0].locked) || searching}
+            disabled={searching}
             onPaste={(e) => onPaste(e.nativeEvent)}
             onClick={() => searching && dispatch(setSearching(false))}
           />
@@ -677,12 +658,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
                   </ToolbarButton>
                 </Tooltip>
               )}
-              {!generating && (
-                <SendMessageButton
-                  sendMessage={sendMessage}
-                  disabled={(assistant.topics && assistant.topics.length > 0 && assistant.topics[0].locked) || generating || inputEmpty}
-                />
-              )}
+              {!generating && <SendMessageButton sendMessage={sendMessage} disabled={generating || inputEmpty} />}
             </ToolbarMenu>
           </Toolbar>
         </InputBarContainer>
@@ -781,18 +757,6 @@ const ToolbarButton = styled(Button)`
       background-color: var(--color-primary);
     }
   }
-`
-
-const LockWarningBar = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px;
-  background-color: var(--color-warning-bg);
-  color: var(--color-warning);
-  font-size: 13px;
-  border-radius: 8px 8px 0 0;
-  border-bottom: 1px solid var(--color-warning-border);
 `
 
 export default Inputbar

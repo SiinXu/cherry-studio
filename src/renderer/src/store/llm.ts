@@ -508,7 +508,9 @@ const settingsSlice = createSlice({
       )
     },
     setDefaultModel: (state, action: PayloadAction<{ model: Model }>) => {
+      console.debug('[llm/setDefaultModel] before:', state.defaultModel)
       state.defaultModel = action.payload.model
+      console.debug('[llm/setDefaultModel] after:', state.defaultModel)
       window.electron.ipcRenderer.send('miniwindow-reload')
     },
     setTopicNamingModel: (state, action: PayloadAction<{ model: Model }>) => {

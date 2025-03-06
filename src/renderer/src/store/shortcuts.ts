@@ -80,13 +80,7 @@ const initialState: ShortcutsState = {
       enabled: true,
       system: false
     },
-    {
-      key: 'lock_topic',
-      shortcut: [isMac ? 'Command' : 'Ctrl', 'Shift', 'L'],
-      editable: true,
-      enabled: true,
-      system: false
-    }
+
   ]
 }
 
