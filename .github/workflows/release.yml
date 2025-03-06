@@ -117,6 +117,10 @@ jobs:
             echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
           fi
 
+      # 检查下载的构建产物
+      - name: List downloaded artifacts
+        run: find artifacts -type f | sort
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
@@ -125,9 +129,20 @@ jobs:
           tag_name: ${{ steps.get_version.outputs.tag_name }}
           name: "Cherry Studio ${{ steps.get_version.outputs.version }}"
           body: |
-            Cherry Studio ${{ steps.get_version.outputs.version }} 发布
+            # Cherry Studio ${{ steps.get_version.outputs.version }} 发布
+            
+            ## 下载地址
+            
+            ### Windows
+            - [Cherry Studio-${{ steps.get_version.outputs.version }}-setup.exe](https://github.com/SiinXu/cherry-studio/releases/download/${{ steps.get_version.outputs.tag_name }}/Cherry.Studio-${{ steps.get_version.outputs.version }}-setup.exe) - 安装版
+            - [Cherry Studio-${{ steps.get_version.outputs.version }}-portable.exe](https://github.com/SiinXu/cherry-studio/releases/download/${{ steps.get_version.outputs.tag_name }}/Cherry.Studio-${{ steps.get_version.outputs.version }}-portable.exe) - 便携版
+            
+            ### macOS
+            - [Cherry Studio-${{ steps.get_version.outputs.version }}-arm64.dmg](https://github.com/SiinXu/cherry-studio/releases/download/${{ steps.get_version.outputs.tag_name }}/Cherry.Studio-${{ steps.get_version.outputs.version }}-arm64.dmg) - 适用于Apple Silicon芯片
+            - [Cherry Studio-${{ steps.get_version.outputs.version }}-x64.dmg](https://github.com/SiinXu/cherry-studio/releases/download/${{ steps.get_version.outputs.tag_name }}/Cherry.Studio-${{ steps.get_version.outputs.version }}-x64.dmg) - 适用于Intel芯片
             
             ## 更新内容
             - 修复公式渲染问题
+            - 优化构建流程
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

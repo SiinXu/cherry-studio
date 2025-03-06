@@ -93,4 +93,8 @@ afterPack: scripts/after-pack.js
 afterSign: scripts/notarize.js
 releaseInfo:
   releaseNotes: |
-    修复公式渲染问题
+    # Cherry Studio 更新
+    
+    ## 更新内容
+    - 修复公式渲染问题
+    - 优化构建流程

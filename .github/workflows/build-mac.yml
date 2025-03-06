@@ -34,6 +34,7 @@ jobs:
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
+        shell: bash
         run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
 
       - name: Cache yarn dependencies
@@ -62,10 +63,23 @@ jobs:
           node -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json')); pkg.version = '${VERSION}'; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');"
           echo "当前版本: ${VERSION}"
 
+      # 清理设置并构建
       - name: Build macOS App
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: yarn build:mac
+        run: |
+          # 清理设置
+          node scripts/clean-settings.js
+          # 构建macOS应用（同时生成arm64和x64版本）
+          yarn build:mac
+        
+      # 检查构建产物
+      - name: List build artifacts
+        run: |
+          echo "检查dist目录内容："
+          ls -la dist/
+          echo "检查DMG文件："
+          find dist -name "*.dmg" | sort
         
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -75,6 +89,7 @@ jobs:
             dist/*.dmg
             dist/*.zip
             dist/latest*.yml
+            dist/*.blockmap
           if-no-files-found: warn
 
       - name: Create Release
@@ -85,6 +100,18 @@ jobs:
             dist/*.dmg
             dist/*.zip
             dist/latest*.yml
+            dist/*.blockmap
           draft: true
+          name: "Cherry Studio ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.version) || github.ref_name }}"
+          body: |
+            # Cherry Studio ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.version) || github.ref_name }} 发布
+            
+            ## macOS下载
+            - [Cherry Studio-arm64.dmg] - 适用于Apple Silicon芯片
+            - [Cherry Studio-x64.dmg] - 适用于Intel芯片
+            
+            ## 更新内容
+            - 修复公式渲染问题
+            - 优化构建流程
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

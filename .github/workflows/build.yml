@@ -44,6 +44,7 @@ jobs:
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
+        shell: bash
         run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
 
       - name: Cache yarn dependencies
@@ -72,18 +73,25 @@ jobs:
           node -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json')); pkg.version = '${VERSION}'; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');"
           echo "当前版本: ${VERSION}"
 
+      # Windows构建
       - name: Build for Windows
         if: matrix.platform == 'win'
         run: yarn build:win
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
+      # macOS构建
       - name: Build for macOS
         if: matrix.platform == 'mac'
         run: yarn build:mac
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # 检查构建产物
+      - name: List build artifacts
+        run: ls -la dist/
+
+      # 上传构建产物
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -93,6 +101,7 @@ jobs:
             dist/*.dmg
             dist/*.zip
             dist/latest*.yml
+            dist/*.blockmap
           if-no-files-found: warn
 
   create-release:
@@ -103,6 +112,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+          
+      # 检查下载的构建产物
+      - name: List downloaded artifacts
+        run: find artifacts -type f | sort
           
       - name: Get version for release
         id: get_version
@@ -125,9 +138,19 @@ jobs:
           tag_name: ${{ steps.get_version.outputs.tag_name }}
           name: "Cherry Studio ${{ steps.get_version.outputs.version }}"
           body: |
-            Cherry Studio ${{ steps.get_version.outputs.version }} 发布
+            # Cherry Studio ${{ steps.get_version.outputs.version }} 发布
+            
+            ## 下载地址
+            
+            ### Windows
+            - [Cherry Studio-${{ steps.get_version.outputs.version }}-setup.exe](https://github.com/SiinXu/cherry-studio/releases/download/${{ steps.get_version.outputs.tag_name }}/Cherry.Studio-${{ steps.get_version.outputs.version }}-setup.exe)
+            
+            ### macOS
+            - [Cherry Studio-${{ steps.get_version.outputs.version }}-arm64.dmg](https://github.com/SiinXu/cherry-studio/releases/download/${{ steps.get_version.outputs.tag_name }}/Cherry.Studio-${{ steps.get_version.outputs.version }}-arm64.dmg) (Apple Silicon)
+            - [Cherry Studio-${{ steps.get_version.outputs.version }}-x64.dmg](https://github.com/SiinXu/cherry-studio/releases/download/${{ steps.get_version.outputs.tag_name }}/Cherry.Studio-${{ steps.get_version.outputs.version }}-x64.dmg) (Intel)
             
             ## 更新内容
             - 修复公式渲染问题
+            - 优化构建流程
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

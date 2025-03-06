@@ -63,10 +63,22 @@ jobs:
           node -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json')); pkg.version = '${VERSION}'; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');"
           echo "当前版本: ${VERSION}"
 
+      # 构建Windows应用
       - name: Build Windows App
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: yarn build:win
+        run: |
+          # 构建Windows应用
+          yarn build:win
+        
+      # 检查构建产物
+      - name: List build artifacts
+        shell: bash
+        run: |
+          echo "检查dist目录内容："
+          ls -la dist/
+          echo "检查EXE文件："
+          find dist -name "*.exe" | sort
         
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -87,5 +99,16 @@ jobs:
             dist/latest*.yml
             dist/*.blockmap
           draft: true
+          name: "Cherry Studio ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.version) || github.ref_name }}"
+          body: |
+            # Cherry Studio ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.version) || github.ref_name }} 发布
+            
+            ## Windows下载
+            - [Cherry Studio-setup.exe] - Windows安装版
+            - [Cherry Studio-portable.exe] - Windows便携版
+            
+            ## 更新内容
+            - 修复公式渲染问题
+            - 优化构建流程
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
