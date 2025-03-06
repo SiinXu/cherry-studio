@@ -22,7 +22,7 @@ export interface LlmState {
 }
 
 const initialState: LlmState = {
-  defaultModel: SYSTEM_MODELS.silicon[1],
+  defaultModel: SYSTEM_MODELS.silicon[0],
   topicNamingModel: SYSTEM_MODELS.silicon[2],
   translateModel: SYSTEM_MODELS.silicon[3],
   providers: [
