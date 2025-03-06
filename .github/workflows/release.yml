@@ -3,16 +3,17 @@ name: Release
 on:
   workflow_dispatch:
     inputs:
-      tag:
-        description: 'Release tag (e.g. v1.0.0)'
+      version:
+        description: '版本号'
         required: true
-        default: 'v0.9.18'
+        default: '1.0.7'
   push:
     tags:
-      - v*.*.*
+      - 'v*'
 
 permissions:
   contents: write
+  packages: read
 
 jobs:
   release:
@@ -20,30 +21,25 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        os: [macos-latest, windows-latest]
+        include:
+          - os: macos-latest
+            platform: mac
+          - os: windows-latest
+            platform: win
       fail-fast: false
 
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4
 
-      - name: Get release tag
-        id: get-tag
-        shell: bash
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
-          else
-            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-          fi
-
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
 
       - name: Install corepack
-        run: corepack enable && corepack prepare yarn@4.3.1 --activate
+        run: corepack enable && corepack prepare yarn@4.6.0 --activate
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -59,49 +55,79 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: yarn install
-
-      - name: Build Linux
-        if: matrix.os == 'ubuntu-latest'
+        
+      - name: Update version in package.json
+        shell: bash
         run: |
-          yarn build:npm linux
-          yarn build:linux
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            # 从标签名称中提取版本号（去除 'v' 前缀）
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          fi
+          # 更新 package.json 中的版本号
+          node -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json')); pkg.version = '${VERSION}'; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');"
+          echo "当前版本: ${VERSION}"
 
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RENDERER_VITE_AIHUBMIX_SECRET: ${{ vars.RENDERER_VITE_AIHUBMIX_SECRET }}
-
-      - name: Build Mac
-        if: matrix.os == 'macos-latest'
-        run: |
-          yarn build:npm mac
-          yarn build:mac
-        env:
-          CSC_LINK: ${{ secrets.CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-          APPLE_ID: ${{ vars.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ vars.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
-          RENDERER_VITE_AIHUBMIX_SECRET: ${{ vars.RENDERER_VITE_AIHUBMIX_SECRET }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build Windows
-        if: matrix.os == 'windows-latest'
+      - name: Build for Windows
+        if: matrix.platform == 'win'
         run: yarn build:win
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RENDERER_VITE_AIHUBMIX_SECRET: ${{ vars.RENDERER_VITE_AIHUBMIX_SECRET }}
+          
+      - name: Build for macOS
+        if: matrix.platform == 'mac'
+        run: yarn build:mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Replace spaces in filenames
-        run: node scripts/replace-spaces.js
-
-      - name: Release
-        uses: ncipollo/release-action@v1
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
+          name: ${{ matrix.platform }}-artifacts
+          path: |
+            dist/*.exe
+            dist/*.dmg
+            dist/*.zip
+            dist/latest*.yml
+            dist/*.blockmap
+          if-no-files-found: warn
+
+  create-release:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          
+      - name: Get version for release
+        id: get_version
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            echo "tag_name=v${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            # 从标签名称中提取版本号
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+            echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: artifacts/**/*
           draft: true
-          allowUpdates: true
-          makeLatest: false
-          tag: ${{ steps.get-tag.outputs.tag }}
-          artifacts: 'dist/*.exe,dist/*.zip,dist/*.dmg,dist/*.AppImage,dist/*.snap,dist/*.deb,dist/*.rpm,dist/*.tar.gz,dist/latest*.yml,dist/*.blockmap'
-          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ steps.get_version.outputs.tag_name }}
+          name: "Cherry Studio ${{ steps.get_version.outputs.version }}"
+          body: |
+            Cherry Studio ${{ steps.get_version.outputs.version }} 发布
+            
+            ## 更新内容
+            - 修复公式渲染问题
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

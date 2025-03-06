@@ -4,6 +4,17 @@ on:
   push:
     tags:
       - 'v*' # 当推送版本标签时触发
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号'
+        required: true
+        default: '1.0.7'
+
+# 添加权限设置
+permissions:
+  contents: write
+  packages: read
 
 jobs:
   build:
@@ -17,18 +28,45 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'yarn'
+
+      - name: Install corepack
+        run: corepack enable && corepack prepare yarn@4.6.0 --activate
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        shell: bash
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
+      - name: Cache yarn dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ steps.yarn-cache-dir-path.outputs.dir }}
+            node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
 
       - name: Install dependencies
+        run: yarn install
+
+      - name: Update version in package.json
+        shell: bash
         run: |
-          corepack enable
-          yarn install
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            # 从标签名称中提取版本号（去除 'v' 前缀）
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          fi
+          # 更新 package.json 中的版本号
+          node -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json')); pkg.version = '${VERSION}'; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');"
+          echo "当前版本: ${VERSION}"
 
       - name: Build Windows App
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          yarn build:win
+        run: yarn build:win
         
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -36,7 +74,9 @@ jobs:
           name: windows-build
           path: |
             dist/*.exe
-            dist/latest.yml
+            dist/latest*.yml
+            dist/*.blockmap
+          if-no-files-found: warn
 
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/')
@@ -44,6 +84,8 @@ jobs:
         with:
           files: |
             dist/*.exe
-            dist/latest.yml
+            dist/latest*.yml
+            dist/*.blockmap
+          draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

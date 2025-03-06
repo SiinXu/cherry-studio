@@ -11,6 +11,11 @@ on:
         required: true
         default: '1.0.7'
 
+# 添加权限设置
+permissions:
+  contents: write
+  packages: read
+
 jobs:
   release:
     runs-on: ${{ matrix.os }}
@@ -23,6 +28,7 @@ jobs:
             platform: mac
           - os: windows-latest
             platform: win
+      fail-fast: false
     
     steps:
       - name: Check out Git repository
@@ -32,12 +38,29 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'yarn'
+
+      - name: Install corepack
+        run: corepack enable && corepack prepare yarn@4.6.0 --activate
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
+      - name: Cache yarn dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ steps.yarn-cache-dir-path.outputs.dir }}
+            node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
         
       - name: Update version in package.json
+        shell: bash
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             VERSION="${{ github.event.inputs.version }}"
@@ -55,15 +78,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Build for macOS (ARM64)
+      - name: Build for macOS
         if: matrix.platform == 'mac'
-        run: yarn build:mac:arm64
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Build for macOS (x64)
-        if: matrix.platform == 'mac'
-        run: yarn build:mac:x64
+        run: yarn build:mac
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -75,7 +92,8 @@ jobs:
             dist/*.exe
             dist/*.dmg
             dist/*.zip
-          if-no-files-found: ignore
+            dist/latest*.yml
+          if-no-files-found: warn
 
   create-release:
     needs: release
@@ -88,6 +106,7 @@ jobs:
           
       - name: Get version for release
         id: get_version
+        shell: bash
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
