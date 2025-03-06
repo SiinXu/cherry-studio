@@ -317,21 +317,6 @@ const MCPSettings: FC = () => {
             </Form.Item>
 
             <Form.Item
-<<<<<<< HEAD
-              name="command"
-              label={t('settings.mcp.command')}
-              rules={[{ required: true, message: t('settings.mcp.commandRequired') }]}>
-              <Input placeholder="python script.py" />
-            </Form.Item>
-
-            <Form.Item name="args" label={t('settings.mcp.args')} tooltip={t('settings.mcp.argsTooltip')}>
-              <TextArea rows={3} placeholder="{--param1}\n{--param2 value}" style={{ fontFamily: 'monospace' }} />
-            </Form.Item>
-
-            <Form.Item name="env" label={t('settings.mcp.env')} tooltip={t('settings.mcp.envTooltip')}>
-              <TextArea rows={3} placeholder="KEY1=value1\nKEY2=value2" style={{ fontFamily: 'monospace' }} />
-            </Form.Item>
-=======
               name="serverType"
               label={t('settings.mcp.type')}
               rules={[{ required: true }]}
