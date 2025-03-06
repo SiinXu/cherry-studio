@@ -31,6 +31,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@agentic/exa@npm:^7.3.3":
+  version: 7.3.3
+  resolution: "@agentic/exa@npm:7.3.3"
+  dependencies:
+    "@agentic/core": "npm:7.3.3"
+    ky: "npm:^1.7.5"
+  peerDependencies:
+    zod: ^3.24.2
+  checksum: 10c0/0293d9f7cda2b17669c853f0834a189988ab8bd8d219f0916d894786143ac732a5c2a669ba112b5edf45b8574473c25a0bf5537c23d666df3132624fca16741e
+  languageName: node
+  linkType: hard
+
 "@agentic/searxng@npm:^7.3.3":
   version: 7.3.3
   resolution: "@agentic/searxng@npm:7.3.3"
@@ -4299,6 +4311,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "cherry-studio@workspace:."
   dependencies:
+    "@agentic/exa": "npm:^7.3.3"
     "@agentic/searxng": "npm:^7.3.3"
     "@agentic/tavily": "npm:^7.3.3"
     "@anthropic-ai/sdk": "npm:^0.38.0"
@@ -4407,6 +4420,7 @@ __metadata:
     vite: "npm:^5.0.12"
     webdav: "npm:4.11.4"
     xml2js: "npm:^0.6.2"
+    zod: "npm:^3.24.2"
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
@@ -15507,7 +15521,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^3.22.4, zod@npm:^3.23.8":
+"zod@npm:^3.22.4, zod@npm:^3.23.8, zod@npm:^3.24.2":
   version: 3.24.2
   resolution: "zod@npm:3.24.2"
   checksum: 10c0/c638c7220150847f13ad90635b3e7d0321b36cce36f3fc6050ed960689594c949c326dfe2c6fa87c14b126ee5d370ccdebd6efb304f41ef5557a4aaca2824565
