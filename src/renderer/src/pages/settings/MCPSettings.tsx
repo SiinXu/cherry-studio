@@ -189,22 +189,6 @@ const MCPSettings: FC = () => {
       title: t('settings.mcp.name'),
       dataIndex: 'name',
       key: 'name',
-<<<<<<< HEAD
-      width: '20%',
-      render: (text: string, record: MCPServer) => <Text strong={record.isActive}>{text}</Text>
-    },
-    {
-      title: t('settings.mcp.description'),
-      dataIndex: 'description',
-      key: 'description',
-      width: '40%',
-      render: (text: string) =>
-        text || (
-          <Text type="secondary" italic>
-            {t('common.description')}
-          </Text>
-        )
-=======
       width: '10%',
       render: (text: string, record: MCPServer) => <Text strong={record.isActive}>{text}</Text>
     },
@@ -242,17 +226,12 @@ const MCPSettings: FC = () => {
           </Paragraph>
         )
       }
->>>>>>> upstream/main
     },
     {
       title: t('settings.mcp.active'),
       dataIndex: 'isActive',
       key: 'isActive',
-<<<<<<< HEAD
-      width: '15%',
-=======
       width: '5%',
->>>>>>> upstream/main
       render: (isActive: boolean, record: MCPServer) => (
         <Switch checked={isActive} onChange={(checked) => handleToggleActive(record.name, checked)} />
       )
@@ -260,11 +239,7 @@ const MCPSettings: FC = () => {
     {
       title: t('settings.mcp.actions'),
       key: 'actions',
-<<<<<<< HEAD
-      width: '25%',
-=======
       width: '10%',
->>>>>>> upstream/main
       render: (_: any, record: MCPServer) => (
         <Space>
           <Tooltip title={t('common.edit')}>
@@ -398,7 +373,6 @@ const MCPSettings: FC = () => {
                 </Form.Item>
               </>
             )}
->>>>>>> upstream/main
 
             <Form.Item name="isActive" label={t('settings.mcp.active')} valuePropName="checked" initialValue={true}>
               <Switch />
