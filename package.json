@@ -32,7 +32,7 @@
     "build:win": "dotenv npm run build && electron-builder --win",
     "build:win:x64": "dotenv npm run build && electron-builder --win --x64",
     "clean-settings": "node scripts/clean-settings.js",
-    "build:mac": "dotenv npm run clean-settings && electron-vite build && electron-builder --mac",
+    "build:mac": "dotenv npm run clean-settings && electron-vite build && electron-builder --mac --x64 --arm64 -c.mac.target=dmg",
     "build:mac:arm64": "dotenv electron-vite build && electron-builder --mac --arm64",
     "build:mac:x64": "dotenv electron-vite build && electron-builder --mac --x64",
     "build:linux": "dotenv electron-vite build && electron-builder --linux",
