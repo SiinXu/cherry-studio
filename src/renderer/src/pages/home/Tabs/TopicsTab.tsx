@@ -6,6 +6,7 @@ import {
   EditOutlined,
   FolderAddOutlined,
   FolderOpenOutlined,
+  HolderOutlined,
   PlusOutlined,
   PushpinOutlined,
   QuestionCircleOutlined,
@@ -13,6 +14,8 @@ import {
   RightOutlined,
   UploadOutlined
 } from '@ant-design/icons'
+import type { DropResult } from '@hello-pangea/dnd'
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
 import CopyIcon from '@renderer/components/Icons/CopyIcon'
 import PromptPopup from '@renderer/components/Popups/PromptPopup'
 import Scrollbar from '@renderer/components/Scrollbar'
@@ -25,6 +28,7 @@ import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import store from '@renderer/store'
 import { setGenerating } from '@renderer/store/runtime'
 import { Assistant, Topic, TopicGroup } from '@renderer/types'
+import { droppableReorder } from '@renderer/utils'
 import { copyTopicAsMarkdown } from '@renderer/utils/copy'
 import {
   exportMarkdownToNotion,
@@ -50,13 +54,27 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   const { assistant, removeTopic, updateTopic, addTopic, duplicateTopic } = useAssistant(_assistant.id)
   const { t } = useTranslation()
   const { showTopicTime, topicPosition, enableTopicsGroup } = useSettings()
-  const { topicGroups, addGroup, updateGroup, removeGroup, updateTopicGroup } = useTopicGroups(_assistant.id)
+  const { topicGroups, addGroup, updateGroup, removeGroup, updateTopicGroup, updateGroupsOrder } = useTopicGroups(
+    _assistant.id
+  )
   const [form] = Form.useForm()
   const borderRadius = showTopicTime ? 12 : 'var(--list-item-border-radius)'
   // 分组管理状态
   const [groupModalVisible, setGroupModalVisible] = useState(false)
   const [currentGroup, setCurrentGroup] = useState<TopicGroup | null>(null)
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(safeMap(topicGroups, (g) => g.id)))
+  // 从localStorage获取已保存的话题分组展开状态，如果没有则默认全部展开
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
+    try {
+      const savedState = localStorage.getItem('topicGroups_expandedState')
+      if (savedState) {
+        const parsedState = JSON.parse(savedState)
+        return new Set(parsedState)
+      }
+    } catch (e) {
+      console.error('Error loading topic group expanded state:', e)
+    }
+    return new Set(safeMap(topicGroups, (g) => g.id)) // 默认展开所有分组
+  })
   const [dragging, setDragging] = useState(false)
   const dropTargetRef = useRef<string | null>(null)
   const [deletingTopicId, setDeletingTopicId] = useState<string | null>(null)
@@ -133,12 +151,21 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   // 切换分组的展开/折叠状态
   const toggleGroupExpanded = (groupId: string, e: React.MouseEvent) => {
     e.stopPropagation() // 阻止事件冒泡
+    let newExpandedGroups: Set<string>
     if (expandedGroups.has(groupId)) {
       const newSet = new Set(expandedGroups)
       newSet.delete(groupId)
-      setExpandedGroups(newSet)
+      newExpandedGroups = newSet
     } else {
-      setExpandedGroups(new Set([...expandedGroups, groupId]))
+      newExpandedGroups = new Set([...expandedGroups, groupId])
+    }
+    // 设置新状态
+    setExpandedGroups(newExpandedGroups)
+    // 保存到localStorage
+    try {
+      localStorage.setItem('topicGroups_expandedState', JSON.stringify(Array.from(newExpandedGroups)))
+    } catch (e) {
+      console.error('Error saving topic group expanded state:', e)
     }
   }
   // 处理将话题拖入分组
@@ -292,39 +319,66 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
       </div>
     )
   }
+  // 处理分组拖拽结束事件
+  const handleGroupDragEnd = (result: DropResult) => {
+    // 如果没有目标位置或源位置和目标位置相同，则不做任何操作
+    if (!result.destination || result.destination.index === result.source.index) {
+      return
+    }
+
+    // 重新排序分组
+    const reorderedGroups = droppableReorder<TopicGroup>(
+      [...topicGroups],
+      result.source.index,
+      result.destination.index
+    )
+
+    // 更新Redux存储中的分组顺序
+    updateGroupsOrder(reorderedGroups)
+  }
+
   // 渲染分组
-  const renderGroup = (group: TopicGroup) => {
+  const renderGroup = (group: TopicGroup, index: number) => {
     const groupTopics = getGroupTopics(group.id)
     const isExpanded = expandedGroups.has(group.id)
     return (
-      <GroupContainer
-        key={group.id}
-        data-groupid={group.id}
-        onDragOver={(e) => handleTopicDragOver(e, group.id)}
-        onDragLeave={handleTopicDragLeave}
-        onDrop={(e) => handleTopicDrop(e, group.id)}
-        className={dropTargetRef.current === group.id ? 'drag-over' : ''}>
-        <GroupHeader onClick={(e) => toggleGroupExpanded(group.id, e)} className="group-header-style">
-          <GroupTitle>
-            <GroupIcon>{isExpanded ? <DownOutlined /> : <RightOutlined />}</GroupIcon>
-            <div>{group.name}</div>
-            <GroupCount>{groupTopics.length}</GroupCount>
-          </GroupTitle>
-          <GroupActions className="group-actions">
-            <EditOutlined onClick={(e) => handleEditGroup(group, e)} />
-            <DeleteOutlined
-              className="delete-icon"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleDeleteGroup(group.id)
-              }}
-            />
-          </GroupActions>
-        </GroupHeader>
-        <GroupContent className={isExpanded ? 'expanded' : 'collapsed'}>
-          {safeMap(groupTopics, renderTopicItem)}
-        </GroupContent>
-      </GroupContainer>
+      <Draggable key={group.id} draggableId={group.id} index={index}>
+        {(provided, snapshot) => (
+          <GroupContainer
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            data-groupid={group.id}
+            onDragOver={(e) => handleTopicDragOver(e, group.id)}
+            onDragLeave={handleTopicDragLeave}
+            onDrop={(e) => handleTopicDrop(e, group.id)}
+            className={`${dropTargetRef.current === group.id ? 'drag-over' : ''} ${snapshot.isDragging ? 'dragging' : ''}`}
+            style={provided.draggableProps.style}>
+            <GroupHeader onClick={(e) => toggleGroupExpanded(group.id, e)} className="group-header-style">
+              <GroupTitle>
+                <GroupIcon>{isExpanded ? <DownOutlined /> : <RightOutlined />}</GroupIcon>
+                <div>{group.name}</div>
+                <GroupCount>{groupTopics.length}</GroupCount>
+              </GroupTitle>
+              <GroupActions className="group-actions">
+                <span {...provided.dragHandleProps} className="drag-handle" onClick={(e) => e.stopPropagation()}>
+                  <HolderOutlined />
+                </span>
+                <EditOutlined onClick={(e) => handleEditGroup(group, e)} />
+                <DeleteOutlined
+                  className="delete-icon"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDeleteGroup(group.id)
+                  }}
+                />
+              </GroupActions>
+            </GroupHeader>
+            <GroupContent className={isExpanded ? 'expanded' : 'collapsed'}>
+              {safeMap(groupTopics, renderTopicItem)}
+            </GroupContent>
+          </GroupContainer>
+        )}
+      </Draggable>
     )
   }
   const getTopicMenuItems = useCallback(
@@ -545,7 +599,18 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
           {/* 分割线 */}
           {ungroupedTopics.length > 0 && topicGroups.length > 0 && <SectionDivider />}
           {/* 分组区域 */}
-          <GroupsContainer>{safeMap(topicGroups, renderGroup)}</GroupsContainer>
+          <GroupsContainer>
+            <DragDropContext onDragEnd={handleGroupDragEnd}>
+              <Droppable droppableId="topic-groups-droppable">
+                {(provided) => (
+                  <div ref={provided.innerRef} {...provided.droppableProps} className="topic-groups-container">
+                    {safeMap(topicGroups, renderGroup)}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+          </GroupsContainer>
         </>
       ) : (
         // 未启用分组时的原始显示方式
@@ -656,13 +721,27 @@ const SectionDivider = styled.div`
 const GroupsContainer = styled.div`
   flex: 1;
   overflow-y: auto;
+
+  .topic-groups-container {
+    display: flex;
+    flex-direction: column;
+  }
 `
 const GroupContainer = styled.div`
   margin-bottom: 4px;
   position: relative;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+
   &.drag-over {
     background-color: var(--color-bg-3);
     border-radius: 6px;
+    outline: 2px solid var(--color-primary);
+  }
+
+  &.dragging {
+    opacity: 0.8;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
   }
 `
 const GroupHeader = styled.div`
@@ -705,6 +784,17 @@ const GroupActions = styled.div`
   transition: opacity 0.2s;
   display: flex;
   gap: 8px;
+
+  .drag-handle {
+    cursor: grab;
+    display: flex;
+    align-items: center;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
   .anticon {
     cursor: pointer;
     color: var(--color-text-3);

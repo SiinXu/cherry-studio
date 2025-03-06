@@ -2,7 +2,13 @@ import db from '@renderer/databases'
 import { deleteMessageFiles } from '@renderer/services/MessagesService'
 import { useAppDispatch, useAppSelector } from '@renderer/store'
 import store from '@renderer/store'
-import { addTopicGroup, removeTopicGroup, updateTopicGroup, updateTopicGroupId } from '@renderer/store/assistants'
+import {
+  addTopicGroup,
+  removeTopicGroup,
+  updateTopicGroup,
+  updateTopicGroupId,
+  updateTopicGroups
+} from '@renderer/store/assistants'
 import { Assistant, Topic, TopicGroup } from '@renderer/types'
 import { find } from 'lodash'
 import { useEffect, useState } from 'react'
@@ -100,12 +106,23 @@ export function useTopicGroups(assistantId?: string) {
     dispatch(updateTopicGroupId({ assistantId, topicId, groupId }))
   }
 
+  const updateGroupsOrder = (groups: TopicGroup[]) => {
+    dispatch(updateTopicGroups(groups))
+    // 保存到localStorage 以便页面刷新后保持顺序
+    try {
+      localStorage.setItem('topicGroups_order', JSON.stringify(groups))
+    } catch (e) {
+      console.error('Error saving topic groups order:', e)
+    }
+  }
+
   return {
     topicGroups,
     addGroup,
     updateGroup,
     removeGroup,
-    updateTopicGroup: updateTopicGroupForTopic
+    updateTopicGroup: updateTopicGroupForTopic,
+    updateGroupsOrder
   }
 }
 
