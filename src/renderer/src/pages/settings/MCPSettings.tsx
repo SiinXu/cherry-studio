@@ -283,7 +283,7 @@ const MCPSettings: FC = () => {
           </Text>
         </div>
 
-        <Card bordered={false} style={{ background: theme === 'dark' ? '#1f1f1f' : '#fff' }}>
+        <Card variant="borderless" style={{ background: theme === 'dark' ? '#1f1f1f' : '#fff' }}>
           <Table
             dataSource={mcpServers}
             columns={columns}

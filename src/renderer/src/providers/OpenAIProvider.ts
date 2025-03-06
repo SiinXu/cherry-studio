@@ -39,8 +39,6 @@ import {
 import { CompletionsParams } from '.'
 import BaseProvider from './BaseProvider'
 
-type ReasoningEffort = 'high' | 'medium' | 'low'
-
 export default class OpenAIProvider extends BaseProvider {
   private sdk: OpenAI
 
@@ -243,7 +241,6 @@ export default class OpenAIProvider extends BaseProvider {
     }))
   }
 
-
   private openAIToolsToMcpTool(
     mcpTools: MCPTool[] | undefined,
     llmTool: ChatCompletionMessageToolCall
@@ -255,7 +252,6 @@ export default class OpenAIProvider extends BaseProvider {
     }
     tool.inputSchema = JSON.parse(llmTool.function.arguments)
     return tool
->>>>>>> upstream/main
   }
 
   async completions({ messages, assistant, onChunk, onFilterMessages, mcpTools }: CompletionsParams): Promise<void> {
@@ -330,11 +326,7 @@ export default class OpenAIProvider extends BaseProvider {
     const { abortController, cleanup } = this.createAbortController(lastUserMessage?.id)
     const { signal } = abortController
 
-<<<<<<< HEAD
-    const tools = mcpTools ? this.mcpToolsToOpenAITools(mcpTools) : undefined
-=======
     const tools = mcpTools && mcpTools.length > 0 ? this.mcpToolsToOpenAITools(mcpTools) : undefined
->>>>>>> upstream/main
 
     const reqMessages: ChatCompletionMessageParam[] = [systemMessage, ...userMessages].filter(
       Boolean
@@ -407,17 +399,9 @@ export default class OpenAIProvider extends BaseProvider {
           } as ChatCompletionAssistantMessageParam)
 
           for (const toolCall of toolCalls) {
-<<<<<<< HEAD
-            const mcpTool = this.openAIToolsToMcpTool(toolCall)
-            console.log('mcpTool', JSON.stringify(mcpTool, null, 2))
-
-            if (!mcpTool) {
-              console.log('Invalid tool', toolCall)
-=======
             const mcpTool = this.openAIToolsToMcpTool(mcpTools, toolCall)
 
             if (!mcpTool) {
->>>>>>> upstream/main
               continue
             }
 
@@ -427,11 +411,6 @@ export default class OpenAIProvider extends BaseProvider {
               args: mcpTool.inputSchema
             })
 
-<<<<<<< HEAD
-            console.log(`Tool ${mcpTool.serverName} - ${mcpTool.name} Call Response:`)
-            console.log(toolCallResponse)
-
-=======
             reqMessages.push({
               role: 'tool',
               content: JSON.stringify(toolCallResponse, null, 2),
