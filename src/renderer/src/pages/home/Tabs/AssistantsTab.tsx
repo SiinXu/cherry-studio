@@ -3,15 +3,18 @@ import {
   DownOutlined,
   EditOutlined,
   FolderAddOutlined,
+  HolderOutlined,
   LoadingOutlined,
   PlusOutlined,
   RightOutlined
 } from '@ant-design/icons'
+import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd'
 import { useAgents } from '@renderer/hooks/useAgents'
 import { useAssistants } from '@renderer/hooks/useAssistant'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { useAppSelector } from '@renderer/store'
 import { Assistant, AssistantGroup } from '@renderer/types'
+import { droppableReorder } from '@renderer/utils'
 import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
 import { Alert, Form, Input, Modal, Spin } from 'antd'
 import { FC, useEffect, useRef, useState } from 'react'
@@ -34,14 +37,27 @@ const Assistants: FC<AssistantsTabProps> = ({
   onCreateAssistant,
   onCreateDefaultAssistant
 }) => {
-  const { assistants, addGroup, updateGroup, removeGroup, updateAssistantGroup, addAssistant } = useAssistants()
+  const { assistants, addGroup, updateGroup, removeGroup, updateAssistantGroup, addAssistant, updateGroupsOrder } =
+    useAssistants()
   const { groups, isLoading, loadingError } = useAppSelector((state) => state.assistants) // 直接从store获取状态
   const { enableAssistantGroup } = useSettings()
   const { addAgent } = useAgents()
   const [form] = Form.useForm()
   const [groupModalVisible, setGroupModalVisible] = useState(false)
   const [currentGroup, setCurrentGroup] = useState<AssistantGroup | null>(null)
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(safeMap(groups, (g) => g.id))) // 默认展开所有分组
+  // 从localStorage获取已保存的分组展开状态，如果没有则默认全部展开
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
+    try {
+      const savedState = localStorage.getItem('assistantGroups_expandedState')
+      if (savedState) {
+        const parsedState = JSON.parse(savedState)
+        return new Set(parsedState)
+      }
+    } catch (e) {
+      console.error('Error loading group expanded state:', e)
+    }
+    return new Set(safeMap(groups, (g) => g.id)) // 默认展开所有分组
+  })
   const [dragging, setDragging] = useState(false)
   const dropTargetRef = useRef<string | null>(null)
   const { t } = useTranslation()
@@ -111,12 +127,21 @@ const Assistants: FC<AssistantsTabProps> = ({
   // 切换分组的展开/折叠状态
   const toggleGroupExpanded = (groupId: string, e: React.MouseEvent) => {
     e.stopPropagation() // 阻止事件冒泡
+    let newExpandedGroups: Set<string>
     if (expandedGroups.has(groupId)) {
       const newSet = new Set(expandedGroups)
       newSet.delete(groupId)
-      setExpandedGroups(newSet)
+      newExpandedGroups = newSet
     } else {
-      setExpandedGroups(new Set([...expandedGroups, groupId]))
+      newExpandedGroups = new Set([...expandedGroups, groupId])
+    }
+    // 设置新状态
+    setExpandedGroups(newExpandedGroups)
+    // 保存到localStorage
+    try {
+      localStorage.setItem('assistantGroups_expandedState', JSON.stringify(Array.from(newExpandedGroups)))
+    } catch (e) {
+      console.error('Error saving group expanded state:', e)
     }
   }
 
@@ -156,58 +181,92 @@ const Assistants: FC<AssistantsTabProps> = ({
     dropTargetRef.current = null
   }
 
+  // 处理分组拖拽结束事件
+  const handleGroupDragEnd = (result: DropResult) => {
+    setDragging(false)
+    const { source, destination } = result
+
+    // 如果没有目标位置或拖拽到相同位置，则不执行任何操作
+    if (!destination || (source.index === destination.index && source.droppableId === destination.droppableId)) {
+      return
+    }
+
+    // 使用droppableReorder工具函数重新排序分组
+    const reorderedGroups = droppableReorder<AssistantGroup>([...groups], source.index, destination.index)
+
+    // 更新Redux中的分组顺序
+    updateGroupsOrder(reorderedGroups)
+
+    // 可以选择性地存储分组顺序到localStorage
+    try {
+      localStorage.setItem('assistantGroups_order', JSON.stringify(reorderedGroups.map((g) => g.id)))
+    } catch (e) {
+      console.error('Error saving group order:', e)
+    }
+  }
+
   // 渲染一个分组
-  const renderGroup = (group: AssistantGroup) => {
+  const renderGroup = (group: AssistantGroup, index: number) => {
     const groupAssistants = safeFilter(assistants, (a) => a.groupId === group.id)
     const isExpanded = expandedGroups.has(group.id)
 
     return (
-      <GroupContainer
-        key={group.id}
-        data-groupid={group.id}
-        onDragOver={(e) => handleAssistantDragOver(e, group.id)}
-        onDragLeave={handleAssistantDragLeave}
-        onDrop={(e) => handleAssistantDrop(e, group.id)}
-        className={dropTargetRef.current === group.id ? 'drag-over' : ''}>
-        <GroupHeader onClick={(e) => toggleGroupExpanded(group.id, e)} className="group-header-style">
-          <GroupTitle>
-            <GroupIcon>{isExpanded ? <DownOutlined /> : <RightOutlined />}</GroupIcon>
-            <div>{group.name}</div>
-            <GroupCount>{groupAssistants.length}</GroupCount>
-          </GroupTitle>
-          <GroupActions className="group-actions">
-            <EditOutlined onClick={(e) => handleEditGroup(group, e)} />
-            <DeleteOutlined
-              className="delete-icon"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleDeleteGroup(group.id)
-              }}
-            />
-          </GroupActions>
-        </GroupHeader>
-        <GroupContent className={isExpanded ? 'expanded' : 'collapsed'}>
-          {safeMap(groupAssistants, (assistant) => (
-            <div
-              key={assistant.id}
-              draggable="true"
-              onDragStart={(e) => handleAssistantDragStart(e, assistant.id)}
-              onDragEnd={handleAssistantDragEnd}
-              className="assistant-item-wrapper">
-              <AssistantItem
-                assistant={assistant}
-                isActive={activeAssistant && assistant.id === activeAssistant.id}
-                onSwitch={setActiveAssistant}
-                addAgent={addAgent}
-                addAssistant={addAssistant}
-                onCreateDefaultAssistant={onCreateDefaultAssistant}
-                onMoveToGroup={(assistantId, groupId) => updateAssistantGroup(assistantId, groupId)}
-                groups={groups}
-              />
-            </div>
-          ))}
-        </GroupContent>
-      </GroupContainer>
+      <Draggable key={group.id} draggableId={group.id} index={index}>
+        {(provided) => (
+          <GroupContainer
+            {...provided.draggableProps}
+            ref={provided.innerRef}
+            data-groupid={group.id}
+            onDragOver={(e) => handleAssistantDragOver(e, group.id)}
+            onDragLeave={handleAssistantDragLeave}
+            onDrop={(e) => handleAssistantDrop(e, group.id)}
+            className={dropTargetRef.current === group.id ? 'drag-over' : ''}>
+            <GroupHeader className="group-header-style">
+              <div onClick={(e) => toggleGroupExpanded(group.id, e)} style={{ display: 'flex', flex: 1 }}>
+                <GroupTitle>
+                  <GroupIcon>{isExpanded ? <DownOutlined /> : <RightOutlined />}</GroupIcon>
+                  <div>{group.name}</div>
+                  <GroupCount>{groupAssistants.length}</GroupCount>
+                </GroupTitle>
+              </div>
+              <GroupActions className="group-actions">
+                <span {...provided.dragHandleProps} className="drag-handle">
+                  <HolderOutlined />
+                </span>
+                <EditOutlined onClick={(e) => handleEditGroup(group, e)} />
+                <DeleteOutlined
+                  className="delete-icon"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDeleteGroup(group.id)
+                  }}
+                />
+              </GroupActions>
+            </GroupHeader>
+            <GroupContent className={isExpanded ? 'expanded' : 'collapsed'}>
+              {safeMap(groupAssistants, (assistant) => (
+                <div
+                  key={assistant.id}
+                  draggable="true"
+                  onDragStart={(e) => handleAssistantDragStart(e, assistant.id)}
+                  onDragEnd={handleAssistantDragEnd}
+                  className="assistant-item-wrapper">
+                  <AssistantItem
+                    assistant={assistant}
+                    isActive={activeAssistant && assistant.id === activeAssistant.id}
+                    onSwitch={setActiveAssistant}
+                    addAgent={addAgent}
+                    addAssistant={addAssistant}
+                    onCreateDefaultAssistant={onCreateDefaultAssistant}
+                    onMoveToGroup={(assistantId, groupId) => updateAssistantGroup(assistantId, groupId)}
+                    groups={groups}
+                  />
+                </div>
+              ))}
+            </GroupContent>
+          </GroupContainer>
+        )}
+      </Draggable>
     )
   }
 
@@ -256,8 +315,17 @@ const Assistants: FC<AssistantsTabProps> = ({
                   {/* 分割线 - 当分组展示时 */}
                   {ungroupedAssistants.length > 0 && groups.length > 0 && <SectionDivider />}
 
-                  {/* 分组区域 */}
-                  <GroupsContainer>{safeMap(groups, renderGroup)}</GroupsContainer>
+                  {/* 分组区域 - 可拖拽排序 */}
+                  <DragDropContext onDragEnd={handleGroupDragEnd}>
+                    <Droppable droppableId="groups-droppable">
+                      {(provided) => (
+                        <GroupsContainer {...provided.droppableProps} ref={provided.innerRef}>
+                          {safeMap(groups, (group, index) => renderGroup(group, index))}
+                          {provided.placeholder}
+                        </GroupsContainer>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
                 </>
               ) : (
                 // 未启用分组时的原始显示方式
@@ -464,6 +532,17 @@ const GroupActions = styled.div`
 
   .delete-icon:hover {
     color: var(--color-error);
+  }
+
+  .drag-handle {
+    cursor: grab;
+    color: var(--color-text-3);
+    &:hover {
+      color: var(--color-text-1);
+    }
+    &:active {
+      cursor: grabbing;
+    }
   }
 `
 

@@ -16,6 +16,7 @@ import {
   updateAssistantSettings,
   updateDefaultAssistant,
   updateGroup,
+  updateGroupsOrder,
   updateTopic,
   updateTopics
 } from '@renderer/store/assistants'
@@ -49,7 +50,8 @@ export function useAssistants() {
     updateGroup: (group: AssistantGroup) => dispatch(updateGroup(group)),
     removeGroup: (id: string) => dispatch(removeGroup({ id })),
     updateAssistantGroup: (assistantId: string, groupId?: string) =>
-      dispatch(updateAssistantGroup({ assistantId, groupId }))
+      dispatch(updateAssistantGroup({ assistantId, groupId })),
+    updateGroupsOrder: (groups: AssistantGroup[]) => dispatch(updateGroupsOrder(groups))
   }
 }
 

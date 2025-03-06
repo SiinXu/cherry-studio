@@ -34,18 +34,18 @@ if (!app.requestSingleInstanceLock()) {
   app.whenReady().then(async () => {
     // 设置内容安全策略，在所有环境中应用
     session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-      const csp = app.isPackaged 
+      const csp = app.isPackaged
         ? "default-src 'self'; script-src 'self';"
         : "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline';"
-      
+
       callback({
         responseHeaders: {
           ...details.responseHeaders,
           'Content-Security-Policy': [csp]
         }
-      });
-    });
-    
+      })
+    })
+
     // 在应用准备好后清除样式相关缓存
     if (app.isPackaged) {
       try {

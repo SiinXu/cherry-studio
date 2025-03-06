@@ -296,19 +296,19 @@ export async function fetchModels(provider: Provider) {
 }
 
 export async function fetchEmojiSuggestion(prompt: string): Promise<string> {
-  if (!prompt || prompt.trim() === '') {
+  if (!prompt || prompt.trim() === "") {
     // 如果没有提示词，返回一些默认的 emoji
-    const defaultEmojis = ['🤖', '💡', '✨', '🧠', '📚']
+    const defaultEmojis = ["🤖", "💡", "✨", "🧠", "📚"]
     return defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]
   }
 
   // 优先使用本地生成方法，避免模型不存在的错误
   try {
-    const { generateEmojiFromPrompt } = await import('@renderer/utils')
+    const { generateEmojiFromPrompt } = await import("@renderer/utils")
     return await generateEmojiFromPrompt(prompt)
   } catch (localError) {
-    console.error('Error generating emoji locally:', localError)
-
+    console.error("Error generating emoji locally:", localError)
+    
     // 本地生成失败后，尝试使用 AI 生成 emoji
     try {
       // 从 store 中获取所有提供商
@@ -318,14 +318,14 @@ export async function fetchEmojiSuggestion(prompt: string): Promise<string> {
       const provider = providers.find((p) => hasApiKey(p))
 
       if (provider) {
-        const { EMOJI_GENERATOR_PROMPT } = await import('@renderer/config/prompts')
+        const { EMOJI_GENERATOR_PROMPT } = await import("@renderer/config/prompts")
         const AI = new AiProvider(provider)
 
         // 使用 AI 生成 emoji
-        const systemPrompt = EMOJI_GENERATOR_PROMPT + '\n\n输入: ' + prompt
+        const systemPrompt = EMOJI_GENERATOR_PROMPT + "\n\n输入: " + prompt
         const completion = await AI.generateText({
           prompt: systemPrompt,
-          content: ''
+          content: ""
         })
 
         // 从返回结果中提取 emoji
@@ -343,14 +343,14 @@ export async function fetchEmojiSuggestion(prompt: string): Promise<string> {
 
         // 尝试匹配常见的 emoji 符号名称
         const emojiNameMap = {
-          ':robot:': '🤖',
-          ':bulb:': '💡',
-          ':sparkles:': '✨',
-          ':brain:': '🧠',
-          ':books:': '📚',
-          ':computer:': '💻',
-          ':star2:': '🌟',
-          ':jigsaw:': '🧩'
+          ":robot:": "🤖",
+          ":bulb:": "💡",
+          ":sparkles:": "✨",
+          ":brain:": "🧠",
+          ":books:": "📚",
+          ":computer:": "💻",
+          ":star2:": "🌟",
+          ":jigsaw:": "🧩"
         }
 
         for (const [name, emoji] of Object.entries(emojiNameMap)) {
@@ -359,13 +359,13 @@ export async function fetchEmojiSuggestion(prompt: string): Promise<string> {
           }
         }
       }
-
+      
       // 如果没有可用的AI提供商或AI提取失败，使用默认emoji
-      return '🤖'
+      return "🤖"
     } catch (aiError) {
-      console.error('Error generating emoji with AI:', aiError)
+      console.error("Error generating emoji with AI:", aiError)
       // 出错时返回一个默认 emoji
-      return '🤖'
+      return "🤖"
     }
   }
-}
+}}

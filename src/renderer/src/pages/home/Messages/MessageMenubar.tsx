@@ -67,7 +67,7 @@ const MessageMenubar: FC<Props> = (props) => {
     messageContainerRef,
     onEditMessage,
     onDeleteMessage,
-    onGetMessages,
+    onGetMessages
   } = props
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)

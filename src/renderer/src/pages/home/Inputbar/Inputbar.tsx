@@ -96,15 +96,17 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
 
   const [tokenCount, setTokenCount] = useState(0)
 
-  const debouncedEstimate = useCallback((newText: string) => {
-    const debouncedFn = debounce(() => {
-      if (showInputEstimatedTokens) {
-        const count = estimateTxtTokens(newText) || 0
-        setTokenCount(count)
-      }
-    }, 500)
-    debouncedFn()
-  }, [showInputEstimatedTokens]
+  const debouncedEstimate = useCallback(
+    (newText: string) => {
+      const debouncedFn = debounce(() => {
+        if (showInputEstimatedTokens) {
+          const count = estimateTxtTokens(newText) || 0
+          setTokenCount(count)
+        }
+      }, 500)
+      debouncedFn()
+    },
+    [showInputEstimatedTokens]
   )
 
   useEffect(() => {

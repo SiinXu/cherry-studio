@@ -230,7 +230,6 @@ export default class MCPService extends EventEmitter {
         }
       )
 
-
       await client.connect(transport)
       this.clients[name] = client
       this.activeServers.set(name, { client, server })

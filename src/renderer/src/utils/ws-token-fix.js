@@ -5,8 +5,8 @@
 
 // 在全局范围定义__WS_TOKEN__变量
 if (typeof window !== 'undefined' && typeof __WS_TOKEN__ === 'undefined') {
-  window.__WS_TOKEN__ = 'development-ws-token-placeholder';
-  console.log('已添加临时 __WS_TOKEN__ 以解决开发环境错误');
+  window.__WS_TOKEN__ = 'development-ws-token-placeholder'
+  console.log('已添加临时 __WS_TOKEN__ 以解决开发环境错误')
 }
 
-export default {};
+export default {}

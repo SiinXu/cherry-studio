@@ -79,8 +79,7 @@ const initialState: ShortcutsState = {
       editable: true,
       enabled: true,
       system: false
-    },
-
+    }
   ]
 }
 
