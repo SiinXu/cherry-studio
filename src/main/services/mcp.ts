@@ -219,7 +219,6 @@ export default class MCPService extends EventEmitter {
       } else {
         throw new Error('Either baseUrl or command must be provided')
       }
-      }
 
       const client = new this.Client(
         {
