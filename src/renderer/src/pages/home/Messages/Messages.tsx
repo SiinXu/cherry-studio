@@ -146,7 +146,7 @@ const Messages: FC<Props> = ({ assistant, topic, setActiveTopic }) => {
       await db.topics.update(topic.id, { messages: _messages })
       await deleteMessageFiles(message)
     },
-    [messages, topic.id, t]
+    [messages, topic.id]
   )
 
   const onDeleteGroupMessages = useCallback(
@@ -159,7 +159,7 @@ const Messages: FC<Props> = ({ assistant, topic, setActiveTopic }) => {
         await deleteMessageFiles(message)
       }
     },
-    [messages, topic.id, t]
+    [messages, topic.id]
   )
 
   const onGetMessages = useCallback(() => {
@@ -181,7 +181,8 @@ const Messages: FC<Props> = ({ assistant, topic, setActiveTopic }) => {
         if (data && data.id !== topic.id) {
           TopicManager.clearTopicMessages(data.id)
           updateTopic({ ...data, name: defaultTopic.name, messages: [] })
-          return        }
+          return
+        }
 
         // Clear messages of current topic
         setMessages([])
