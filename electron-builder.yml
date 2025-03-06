@@ -41,11 +41,12 @@ win:
   target:
     - target: nsis
     - target: portable
+
+portable:
   # 保留 Windows 便携版用户数据
-  portable:
-    splashImage: false
-    requestExecutionLevel: user
-    unpackDirName: data
+  splashImage: false
+  requestExecutionLevel: user
+  unpackDirName: data
 
 nsis:
   artifactName: ${productName}-${version}-setup.${ext}
