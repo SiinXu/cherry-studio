@@ -30,6 +30,11 @@ files:
 asarUnpack:
   - resources/**
   - '**/*.{node,dll,metal,exp,lib}'
+
+# 保留用户数据
+asar: true
+removePackageScripts: true
+removePackageKeywords: true
 win:
   executableName: Cherry Studio
   artifactName: ${productName}-${version}-portable.${ext}
