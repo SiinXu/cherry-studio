@@ -65,7 +65,6 @@ export class WindowService {
         webviewTag: true,
         allowRunningInsecureContent: !app.isPackaged, // 只在开发环境允许不安全内容
         contextIsolation: true, // 启用上下文隔离
-        enableRemoteModule: false, // 禁用远程模块
         nodeIntegration: false // 禁用节点集成
       }
     })
@@ -343,7 +342,6 @@ export class WindowService {
         webviewTag: true,
         allowRunningInsecureContent: !app.isPackaged, // 只在开发环境允许不安全内容
         contextIsolation: true, // 启用上下文隔离
-        enableRemoteModule: false, // 禁用远程模块
         nodeIntegration: false // 禁用节点集成
       }
     })
@@ -423,7 +421,6 @@ export class WindowService {
         webSecurity: app.isPackaged, // 打包时启用webSecurity
         allowRunningInsecureContent: !app.isPackaged, // 只在开发环境允许不安全内容
         contextIsolation: true, // 启用上下文隔离
-        enableRemoteModule: false, // 禁用远程模块
         nodeIntegration: false // 禁用节点集成
       }
     })
