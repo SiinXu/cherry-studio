@@ -1,7 +1,7 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
 import { Assistant, AssistantMessage, AssistantSettings } from '@renderer/types'
 import { ensureValidAssistant } from '@renderer/utils/safeAssistantUtils'
-import { Button, Card, Col, Divider, Form as FormAntd, FormInstance, Row, Space, Switch } from 'antd'
+import { Button, Card, Col, Divider, Form, FormInstance, Row, Space, Switch } from 'antd'
 import TextArea from 'antd/es/input/TextArea'
 import { FC, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -15,7 +15,7 @@ interface Props {
 
 const AssistantMessagesSettings: FC<Props> = ({ assistant, updateAssistant, updateAssistantSettings }) => {
   const { t } = useTranslation()
-  const [form] = FormAntd.useForm()
+  const [form] = Form.useForm()
   const formRef = useRef<FormInstance>(null)
   const safeAssistant = ensureValidAssistant(assistant)
   const [messages, setMessagess] = useState<AssistantMessage[]>(safeAssistant.messages || [])
@@ -88,7 +88,7 @@ const AssistantMessagesSettings: FC<Props> = ({ assistant, updateAssistant, upda
 
   return (
     <Container>
-      <Form ref={formRef} layout="vertical" form={form} labelAlign="right" colon={false}>
+      <StyledForm ref={formRef} layout="vertical" form={form} labelAlign="right" colon={false}>
         <Form.Item label={t('agents.edit.settings.hide_preset_messages')}>
           <Switch checked={hideMessages} onChange={onChangeHideMessages} />
         </Form.Item>
@@ -148,7 +148,7 @@ const AssistantMessagesSettings: FC<Props> = ({ assistant, updateAssistant, upda
             </Button>
           )}
         </Form.Item>
-      </Form>
+      </StyledForm>
       <div style={{ minHeight: 50 }} />
     </Container>
   )
@@ -162,7 +162,7 @@ const Container = styled.div`
   padding-top: 10px;
 `
 
-const Form = styled(FormAntd)`
+const StyledForm = styled(Form)`
   .ant-form-item-no-colon {
     font-weight: 500;
   }
