@@ -3,7 +3,6 @@ import { HStack } from '@renderer/components/Layout'
 import PromptPopup from '@renderer/components/Popups/PromptPopup'
 import { isEmbeddingModel } from '@renderer/config/models'
 import { TRANSLATE_PROMPT } from '@renderer/config/prompts'
-import { getModelUniqId } from '@renderer/services/ModelService'
 import { useTheme } from '@renderer/context/ThemeProvider'
 import { useDefaultModel } from '@renderer/hooks/useAssistant'
 import { useProviders } from '@renderer/hooks/useProvider'
@@ -11,7 +10,6 @@ import { useSettings } from '@renderer/hooks/useSettings'
 import { hasModel } from '@renderer/services/ModelService'
 import { useAppDispatch } from '@renderer/store'
 import { setTranslateModelPrompt } from '@renderer/store/settings'
-import { Model } from '@renderer/types'
 import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
 import { Button, Select, Tooltip } from 'antd'
 import { find, sortBy } from 'lodash'
@@ -41,7 +39,7 @@ const ModelSettings: FC = () => {
       .filter((m) => !isEmbeddingModel(m))
       .map((m) => ({
         label: `${m.name} | ${p.isSystem ? t(`provider.${p.id}`) : p.name}`,
-        value: getModelUniqId(m)
+        value: m.id
       }))
   }))
 
@@ -85,12 +83,18 @@ const ModelSettings: FC = () => {
             {t('settings.models.default_assistant_model')}
           </div>
         </SettingTitle>
-        <HStack alignItems="center">
+        <HStack $alignItems="center">
           <Select
             value={defaultModelValue}
             defaultValue={defaultModelValue}
             style={{ width: 360 }}
-            onChange={(value) => setDefaultModel(find(allModels, { id: value }) as Model)}
+            onChange={(value) => {
+              const model = find(allModels, { id: value })
+              if (model) {
+                console.debug('[ModelSettings] Setting default model:', model)
+                setDefaultModel(model)
+              }
+            }}
             options={selectOptions}
             showSearch
             placeholder={t('settings.models.empty')}
@@ -106,12 +110,18 @@ const ModelSettings: FC = () => {
             {t('settings.models.topic_naming_model')}
           </div>
         </SettingTitle>
-        <HStack alignItems="center">
+        <HStack $alignItems="center">
           <Select
             value={defaultTopicNamingModel}
             defaultValue={defaultTopicNamingModel}
             style={{ width: 360 }}
-            onChange={(value) => setTopicNamingModel(find(allModels, { id: value }) as Model)}
+            onChange={(value) => {
+              const model = find(allModels, { id: value })
+              if (model) {
+                console.debug('[ModelSettings] Setting topic naming model:', model)
+                setTopicNamingModel(model)
+              }
+            }}
             options={selectOptions}
             showSearch
             placeholder={t('settings.models.empty')}
@@ -127,12 +137,18 @@ const ModelSettings: FC = () => {
             {t('settings.models.translate_model')}
           </div>
         </SettingTitle>
-        <HStack alignItems="center">
+        <HStack $alignItems="center">
           <Select
             value={defaultTranslateModel}
             defaultValue={defaultTranslateModel}
             style={{ width: 360 }}
-            onChange={(value) => setTranslateModel(find(allModels, { id: value }) as Model)}
+            onChange={(value) => {
+              const model = find(allModels, { id: value })
+              if (model) {
+                console.debug('[ModelSettings] Setting translate model:', model)
+                setTranslateModel(model)
+              }
+            }}
             options={selectOptions}
             showSearch
             placeholder={t('settings.models.empty')}
