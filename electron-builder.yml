@@ -41,6 +41,12 @@ win:
   target:
     - target: nsis
     - target: portable
+  # 保留 Windows 便携版用户数据
+  portable:
+    splashImage: false
+    requestExecutionLevel: user
+    unpackDirName: data
+
 nsis:
   artifactName: ${productName}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -49,6 +55,9 @@ nsis:
   allowToChangeInstallationDirectory: true
   oneClick: false
   include: build/nsis-installer.nsh
+  # 保留 Windows 安装版用户数据
+  deleteAppDataOnUninstall: false
+  perMachine: false
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   notarize: false
