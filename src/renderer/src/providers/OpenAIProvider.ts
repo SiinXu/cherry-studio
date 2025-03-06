@@ -233,40 +233,17 @@ export default class OpenAIProvider extends BaseProvider {
     return mcpTools.map((tool) => ({
       type: 'function',
       function: {
-<<<<<<< HEAD
-        name: `mcp.${tool.serverName}.${tool.name}`,
-        description: tool.description,
-        parameters: {
-          type: 'object',
-          properties: tool.inputSchema
-=======
         name: tool.id,
         description: tool.description,
         parameters: {
           type: 'object',
           properties: tool.inputSchema.properties
->>>>>>> upstream/main
         }
       }
     }))
   }
 
-<<<<<<< HEAD
-  private openAIToolsToMcpTool(tool: ChatCompletionMessageToolCall): MCPTool | undefined {
-    const parts = tool.function.name.split('.')
-    if (parts[0] !== 'mcp') {
-      console.log('Invalid tool name', tool.function.name)
-      return undefined
-    }
-    const serverName = parts[1]
-    const name = parts[2]
 
-    return {
-      serverName: serverName,
-      name: name,
-      inputSchema: JSON.parse(tool.function.arguments)
-    } as MCPTool
-=======
   private openAIToolsToMcpTool(
     mcpTools: MCPTool[] | undefined,
     llmTool: ChatCompletionMessageToolCall
@@ -455,7 +432,6 @@ export default class OpenAIProvider extends BaseProvider {
             console.log(toolCallResponse)
 
 =======
->>>>>>> upstream/main
             reqMessages.push({
               role: 'tool',
               content: JSON.stringify(toolCallResponse, null, 2),
