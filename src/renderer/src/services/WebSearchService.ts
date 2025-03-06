@@ -1,6 +1,7 @@
 import store from '@renderer/store'
 import { setDefaultProvider } from '@renderer/store/websearch'
 import { WebSearchProvider, WebSearchResponse } from '@renderer/types'
+import { hasObjectKey } from '@renderer/utils'
 import WebSearchEngineProvider from '@renderer/webSearchProvider/WebSearchEngineProvider'
 import dayjs from 'dayjs'
 
@@ -38,7 +39,20 @@ class WebSearchService {
   public isWebSearchEnabled(): boolean {
     const { defaultProvider, providers } = this.getWebSearchState()
     const provider = providers.find((provider) => provider.id === defaultProvider)
-    return provider?.enabled ?? false
+
+    if (!provider) {
+      return false
+    }
+
+    if (hasObjectKey(provider, 'apiKey')) {
+      return provider.apiKey !== ''
+    }
+
+    if (hasObjectKey(provider, 'apiHost')) {
+      return provider.apiHost !== ''
+    }
+
+    return false
   }
 
   /**
@@ -52,7 +66,7 @@ class WebSearchService {
     let provider = providers.find((provider) => provider.id === defaultProvider)
 
     if (!provider) {
-      provider = providers.find((p) => p.enabled) || providers[0]
+      provider = providers[0]
       if (provider) {
         // 可选：自动更新默认提供商
         store.dispatch(setDefaultProvider(provider.id))
