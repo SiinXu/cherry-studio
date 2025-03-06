@@ -35,7 +35,7 @@ jobs:
         with:
           name: macos-build
           path: |
-            dist/Cherry Studio*.dmg
+            dist/*.dmg
             dist/latest-mac.yml
 
       - name: Create Release
@@ -43,7 +43,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            dist/Cherry Studio*.dmg
+            dist/*.dmg
             dist/latest-mac.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
