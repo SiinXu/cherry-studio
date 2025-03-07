@@ -78,6 +78,7 @@ export type Message = {
   askId?: string
   useful?: boolean
   error?: Record<string, any>
+  enabledMCPs?: MCPServer[]
   metadata?: {
     // Gemini
     groundingMetadata?: any
@@ -85,6 +86,8 @@ export type Message = {
     citations?: string[]
     // Web search
     webSearch?: WebSearchResponse
+    // MCP Tools
+    mcpTools?: MCPToolResponse[]
   }
 }
 
@@ -375,4 +378,10 @@ export interface MCPTool {
 
 export interface MCPConfig {
   servers: MCPServer[]
+}
+
+export interface MCPToolResponse {
+  tool: MCPTool
+  status: string
+  response?: any
 }
