@@ -564,7 +564,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
   }, [assistant, model, updateAssistant])
 
   return (
-    <Container onDragOver={handleDragOver} onDro$p={handleDrop} className="inputbar">
+    <Container onDragOver={handleDragOver} onDrop={handleDrop} className="inputbar">
       <NarrowLayout style={{ width: '100%' }}>
         <InputBarContainer
           id="inputbar"
