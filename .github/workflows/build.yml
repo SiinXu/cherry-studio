@@ -54,11 +54,25 @@ jobs:
           # u6e05u9664u4e4bu524du7684u7f13u5b58
           yarn cache clean --all
 
-      # u5b89u88c5u4f9du8d56
+      # 安装构建依赖和工具
+      - name: Install build dependencies
+        run: |
+          # 安装编译工具
+          if [ "${{ matrix.platform }}" == "win" ]; then
+            npm install -g windows-build-tools --vs2019
+          fi
+          
+          if [ "${{ matrix.platform }}" == "mac" ]; then
+            # 确保macOS有必要的编译工具
+            xcode-select --install || true
+          fi
+      
+      # 安装依赖
       - name: Install dependencies
         run: |
-          # u4f7fu7528u65b0u7248Yarnu5b89u88c5u4f9du8d56
-          yarn install
+          # 使用新版Yarn安装依赖
+          yarn config set network-timeout 300000
+          yarn install --network-timeout 300000
         
       - name: Update version in package.json
         shell: bash
