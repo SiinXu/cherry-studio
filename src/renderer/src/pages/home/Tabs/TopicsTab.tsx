@@ -191,7 +191,8 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     e.preventDefault()
     const topicId = e.dataTransfer.getData('topicId')
     if (topicId && assistant.id) {
-      updateTopicGroup(assistant.id, topicId, groupId)
+      // 使用正确的函数处理话题拖拽
+      updateTopicGroup(assistant.id, topicId, groupId || undefined)
     }
     setDragging(false)
     dropTargetRef.current = null
@@ -350,7 +351,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
             data-groupid={group.id}
             onDragOver={(e) => handleTopicDragOver(e, group.id)}
             onDragLeave={handleTopicDragLeave}
-            onDro$p={(e) => handleTopicDrop(e, group.id)}
+            onDrop={(e) => handleTopicDrop(e, group.id)}
             className={`${dropTargetRef.current === group.id ? 'drag-over' : ''} ${snapshot.isDragging ? 'dragging' : ''}`}
             style={provided.draggableProps.style}>
             <GroupHeader onClick={(e) => toggleGroupExpanded(group.id, e)} className="group-header-style">
@@ -590,9 +591,9 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
           <UngroupedSection
             onDragOver={(e) => handleTopicDragOver(e, null)}
             onDragLeave={handleTopicDragLeave}
-            onDro$p={(e) => handleTopicDrop(e, null)}
+            onDrop={(e) => handleTopicDrop(e, null)}
             className={dropTargetRef.current === null ? 'drag-over' : ''}
-            $enableGrou$p={enableTopicsGroup}>
+            $enableGroup={enableTopicsGroup}>
             <p className="section-title">{t('topics.ungrouped')}</p>
             {ungroupedTopics.map(renderTopicItem)}
           </UngroupedSection>
@@ -614,7 +615,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
         </>
       ) : (
         // 未启用分组时的原始显示方式
-        <UngroupedSection $enableGrou$p={enableTopicsGroup}>
+        <UngroupedSection $enableGroup={enableTopicsGroup}>
           {assistant.topics.map((topic) => renderTopicItem(topic))}
         </UngroupedSection>
       )}

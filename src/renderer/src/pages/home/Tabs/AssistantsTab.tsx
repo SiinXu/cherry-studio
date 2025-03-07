@@ -37,6 +37,7 @@ const Assistants: FC<AssistantsTabProps> = ({
   onCreateAssistant,
   onCreateDefaultAssistant
 }) => {
+
   const { assistants, addGroup, updateGroup, removeGroup, updateAssistantGroup, addAssistant, updateGroupsOrder } =
     useAssistants()
   const { groups, isLoading, loadingError } = useAppSelector((state) => state.assistants) // 直接从store获取状态
@@ -175,7 +176,8 @@ const Assistants: FC<AssistantsTabProps> = ({
     e.preventDefault()
     const assistantId = e.dataTransfer.getData('assistantId')
     if (assistantId) {
-      updateAssistantGroup(assistantId, groupId)
+      // 传递正确的参数格式给Redux action，null值表示移到未分组区域
+      updateAssistantGroup(assistantId, groupId || undefined)
     }
     setDragging(false)
     dropTargetRef.current = null
@@ -219,7 +221,7 @@ const Assistants: FC<AssistantsTabProps> = ({
             data-groupid={group.id}
             onDragOver={(e) => handleAssistantDragOver(e, group.id)}
             onDragLeave={handleAssistantDragLeave}
-            onDro$p={(e) => handleAssistantDrop(e, group.id)}
+            onDrop={(e) => handleAssistantDrop(e, group.id)}
             className={dropTargetRef.current === group.id ? 'drag-over' : ''}>
             <GroupHeader className="group-header-style">
               <div onClick={(e) => toggleGroupExpanded(group.id, e)} style={{ display: 'flex', flex: 1 }}>
@@ -258,7 +260,7 @@ const Assistants: FC<AssistantsTabProps> = ({
                     addAgent={addAgent}
                     addAssistant={addAssistant}
                     onCreateDefaultAssistant={onCreateDefaultAssistant}
-                    onMoveToGrou$p={(assistantId, groupId) => updateAssistantGroup(assistantId, groupId)}
+                    onMoveToGroup={(assistantId, groupId) => updateAssistantGroup(assistantId, groupId)}
                     groups={groups}
                   />
                 </div>
@@ -287,9 +289,9 @@ const Assistants: FC<AssistantsTabProps> = ({
                   <UngroupedSection
                     onDragOver={(e) => handleAssistantDragOver(e, null)}
                     onDragLeave={handleAssistantDragLeave}
-                    onDro$p={(e) => handleAssistantDrop(e, null)}
+                    onDrop={(e) => handleAssistantDrop(e, null)}
                     className={dropTargetRef.current === null ? 'drag-over' : ''}
-                    $enableGrou$p={true}>
+                    $enableGroup={true}>
                     <p className="section-title">{t('assistants.ungrouped')}</p>
                     {safeMap(ungroupedAssistants, (assistant) => (
                       <div
@@ -305,7 +307,7 @@ const Assistants: FC<AssistantsTabProps> = ({
                           addAgent={addAgent}
                           addAssistant={addAssistant}
                           onCreateDefaultAssistant={onCreateDefaultAssistant}
-                          onMoveToGrou$p={(assistantId, groupId) => updateAssistantGroup(assistantId, groupId)}
+                          onMoveToGroup={(assistantId, groupId) => updateAssistantGroup(assistantId, groupId)}
                           groups={groups}
                         />
                       </div>
@@ -329,7 +331,7 @@ const Assistants: FC<AssistantsTabProps> = ({
                 </>
               ) : (
                 // 未启用分组时的原始显示方式
-                <UngroupedSection $enableGrou$p={false}>
+                <UngroupedSection $enableGroup={false}>
                   {safeMap(assistants, (assistant) => (
                     <div key={assistant.id} className="assistant-item-wrapper">
                       <AssistantItem

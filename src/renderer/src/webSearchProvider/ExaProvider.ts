@@ -43,7 +43,7 @@ class MockExaClient {
 const ExaClient = MockExaClient
 
 export default class ExaProvider extends BaseWebSearchProvider {
-  private exa: ExaClient
+  private exa: MockExaClient
 
   constructor(provider: WebSearchProvider) {
     super(provider)
