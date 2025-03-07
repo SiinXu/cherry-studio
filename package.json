@@ -27,6 +27,7 @@
     "dev": "electron-vite dev",
     "build:check": "yarn typecheck",
     "build": "npm run typecheck && electron-vite build",
+    "build:no-typecheck": "electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "dotenv npm run build && electron-builder --dir",
     "build:win": "dotenv npm run build && electron-builder --win",

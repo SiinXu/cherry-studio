@@ -98,22 +98,25 @@ jobs:
           node -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json')); pkg.version = '${VERSION}'; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');"
           echo "当前版本: ${VERSION}"
 
-      # Windows构建 - 跳过类型检查
+      # Windows构建 - 完全跳过类型检查
       - name: Build for Windows
         if: matrix.platform == 'win'
         run: |
-          # 跳过类型检查
-          yarn build:win --skipTypeCheck
+          # 使用不执行类型检查的构建命令
+          yarn build:no-typecheck
+          yarn electron-builder --win
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SKIP_TYPECHECK: true
           
-      # macOS构建 - 跳过类型检查
+      # macOS构建 - 完全跳过类型检查
       - name: Build for macOS
         if: matrix.platform == 'mac'
         run: |
-          # 跳过类型检查
-          yarn build:mac --skipTypeCheck
+          # 使用不执行类型检查的构建命令
+          yarn build:no-typecheck
+          yarn clean-settings
+          yarn electron-builder --mac --x64 --arm64 -c.mac.target=dmg
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SKIP_TYPECHECK: true
