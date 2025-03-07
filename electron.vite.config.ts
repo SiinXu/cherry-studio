@@ -70,6 +70,7 @@ export default defineConfig({
     build: {
       assetsInlineLimit: 4096, // 设置资源内联阈值（小于4kb的文件不会被内联）
       rollupOptions: {
+        external: ['@agentic/exa'], // 将@agentic/exa标记为外部依赖，解决构建问题
         output: {
           manualChunks: undefined, // 禁用手动分块
           chunkFileNames: 'assets/js/[name]-[hash].js',
