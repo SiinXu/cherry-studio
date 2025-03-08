@@ -1,5 +1,21 @@
 {
   "translation": {
+    "topics": {
+      "add": "添加话题",
+      "move_to_group": "移动到分组",
+      "no_group": "无分组",
+      "new": "新话题",
+      "group": {
+        "add": "添加分组",
+        "edit": "编辑分组",
+        "name": "分组名称",
+        "name.required": "请输入分组名称",
+        "name.placeholder": "输入分组名称",
+        "description": "分组描述",
+        "description.placeholder": "输入分组描述（可选）"
+      },
+      "ungrouped": "未分组"
+    },
     "agents": {
       "add.button": "添加到助手",
       "add.knowledge_base": "知识库",
@@ -167,14 +183,12 @@
       "topics.export.word": "导出为 Word",
       "topics.export.yuque": "导出到语雀",
       "topics.list": "话题列表",
-    
       "topics.move_to": "移动到",
       "topics.pinned": "固定话题",
       "topics.prompt": "话题提示词",
       "topics.prompt.edit.title": "编辑话题提示词",
       "topics.prompt.tips": "话题提示词: 针对当前话题提供额外的补充提示词",
       "topics.title": "话题",
-
       "topics.unpinned": "取消固定",
       "translate": "翻译",
       "topics.duplicate_to": "复制到"
@@ -1011,24 +1025,6 @@
         "window": "外部窗口",
         "tab": "新标签页"
       }
-    },
-    "topics": {
-      "add": "添加话题",
-      "group": {
-        "add": "添加分组",
-        "edit": "编辑分组",
-        "name": "分组名称",
-        "name.required": "请输入分组名称",
-        "name.placeholder": "输入分组名称",
-        "description": "分组描述",
-        "description.placeholder": "输入分组描述（可选）"
-      },
-     
-      "move_to_group": "移动到分组",
-      "no_group": "无分组",
-      "new": "新话题",
-     
-      "ungrouped": "未分组"
     },
     "translate": {
       "any.language": "任意语言",

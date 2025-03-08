@@ -210,7 +210,17 @@ export enum ThemeMode {
   auto = 'auto'
 }
 
-export type LanguageVarious = 'zh-CN' | 'zh-TW' | 'en-US' | 'ru-RU' | 'ja-JP'
+export type LanguageVarious =
+  | 'zh-CN'
+  | 'zh-TW'
+  | 'zh-HK'
+  | 'en-US'
+  | 'ru-RU'
+  | 'ja-JP'
+  | 'ko-KR'
+  | 'de-DE'
+  | 'es-ES'
+  | 'fr-FR'
 
 export type TranslateLanguageVarious = 'chinese' | 'chinese-traditional' | 'english' | 'japanese' | 'russian'
 
