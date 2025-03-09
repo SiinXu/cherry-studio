@@ -189,14 +189,13 @@ const SandboxBrowser: FC<SandboxBrowserProps> = ({
     return (
       <ToolkitSwitcher>
         <Radio.Group value={currentToolkit} onChange={(e) => handleToolkitChange(e.target.value)}>
-          {Array.isArray(toolkits) && 
+          {Array.isArray(toolkits) &&
             toolkits.map((toolkit) => (
               <Radio.Button key={toolkit} value={toolkit}>
                 {getToolkitIcon(toolkit)}
                 <span style={{ marginLeft: '4px' }}>{getToolkitName(toolkit)}</span>
               </Radio.Button>
-            ))
-          }
+            ))}
         </Radio.Group>
       </ToolkitSwitcher>
     )
@@ -345,8 +344,7 @@ const SandboxBrowser: FC<SandboxBrowserProps> = ({
                 <StatisticsLabel>{key || ''}:</StatisticsLabel>
                 <StatisticsValue>{value || ''}</StatisticsValue>
               </StatisticsItem>
-            ))
-          }
+            ))}
         </StatisticsList>
         {result.chart && <ChartPlaceholder>{t('owl.chart_placeholder')}</ChartPlaceholder>}
       </div>
