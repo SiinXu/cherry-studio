@@ -49,7 +49,10 @@ const api = {
     binaryFile: (fileId: string) => ipcRenderer.invoke('file:binaryFile', fileId)
   },
   fs: {
-    read: (path: string) => ipcRenderer.invoke('fs:read', path)
+    read: (path: string) => ipcRenderer.invoke('fs:read', path),
+    write: (path: string, data: string) => ipcRenderer.invoke('fs:write', path, data),
+    exists: (path: string) => ipcRenderer.invoke('fs:exists', path),
+    mkdir: (path: string) => ipcRenderer.invoke('fs:mkdir', path)
   },
   export: {
     toWord: (markdown: string, fileName: string) => ipcRenderer.invoke('export:word', markdown, fileName)
@@ -119,6 +122,35 @@ const api = {
   },
   shell: {
     openExternal: shell.openExternal
+  },
+
+  owl: {
+    // 会话管理
+    createSession: (options?: any) => ipcRenderer.invoke('owl:create-session', options),
+    getSession: (sessionId: string) => ipcRenderer.invoke('owl:get-session', sessionId),
+    deleteSession: (sessionId: string) => ipcRenderer.invoke('owl:delete-session', sessionId),
+    listSessions: () => ipcRenderer.invoke('owl:list-sessions'),
+
+    // 消息处理
+    sendMessage: (sessionId: string, message: any) => ipcRenderer.invoke('owl:send-message', sessionId, message),
+    getMessages: (sessionId: string) => ipcRenderer.invoke('owl:get-messages', sessionId),
+
+    // 工具处理
+    executeTool: (sessionId: string, tool: any) => ipcRenderer.invoke('owl:execute-tool', sessionId, tool),
+    getToolResults: (sessionId: string) => ipcRenderer.invoke('owl:get-tool-results', sessionId),
+
+    // 配置管理
+    updateApiKey: (keyType: string, apiKey: string) => ipcRenderer.invoke('owl:update-api-key', keyType, apiKey),
+    getConfig: () => ipcRenderer.invoke('owl:get-config'),
+    updateConfig: (config: any) => ipcRenderer.invoke('owl:update-config', config),
+
+    // 初始化与验证
+    initialize: () => ipcRenderer.invoke('owl:initialize'),
+    validateApiKey: (apiKey: string, provider?: string) => ipcRenderer.invoke('owl:validate-api-key', apiKey, provider),
+
+    // 质量评估
+    evaluateQuality: (content: string, type: 'content' | 'code' | 'design') =>
+      ipcRenderer.invoke('owl:evaluate-quality', content, type)
   }
 }
 

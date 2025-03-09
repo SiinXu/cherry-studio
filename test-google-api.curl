@@ -1,0 +1,91 @@
+#!/bin/bash
+
+# 设置API密钥
+API_KEY="YOUR_API_KEY"  # 请替换为你的实际API密钥
+
+# 颜色定义
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}===== Google Gemini API 测试工具 =====${NC}"
+echo "测试环境信息:"
+echo "操作系统: $(uname -s)"
+echo "时间: $(date)"
+echo "==============================="
+
+# 测试DNS解析
+echo -e "\n${YELLOW}测试DNS解析...${NC}"
+if host generativelanguage.googleapis.com > /dev/null; then
+  echo -e "${GREEN}✓ DNS解析成功${NC}"
+else
+  echo -e "${RED}✗ DNS解析失败${NC}"
+fi
+
+# 测试HTTPS连接
+echo -e "\n${YELLOW}测试HTTPS连接...${NC}"
+if curl -s --head --connect-timeout 5 https://generativelanguage.googleapis.com/ > /dev/null; then
+  echo -e "${GREEN}✓ HTTPS连接成功${NC}"
+else
+  echo -e "${RED}✗ HTTPS连接失败${NC}"
+fi
+
+# 创建请求数据
+echo -e "\n${YELLOW}准备API请求...${NC}"
+REQUEST_DATA='{
+  "contents":[
+    {
+      "role":"user",
+      "parts":[
+        {
+          "text":"简单的API测试消息，请回复一个简短的确认"
+        }
+      ]
+    }
+  ],
+  "generationConfig":{
+    "temperature":0.1,
+    "maxOutputTokens":50
+  }
+}'
+
+# 显示请求信息
+echo "API URL: https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
+echo "请求内容:"
+echo "$REQUEST_DATA" | jq '.' 2>/dev/null || echo "$REQUEST_DATA"
+
+# 发送API请求
+echo -e "\n${YELLOW}发送API请求...${NC}"
+RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=$API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "$REQUEST_DATA")
+
+# 提取HTTP状态码和响应体
+HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+RESPONSE_BODY=$(echo "$RESPONSE" | sed '$d')
+
+# 检查响应
+echo -e "\n${YELLOW}API响应:${NC}"
+echo "HTTP状态码: $HTTP_CODE"
+
+if [ "$HTTP_CODE" -eq 200 ]; then
+  echo -e "${GREEN}✓ API请求成功${NC}"
+  # 保存响应到文件
+  TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+  RESPONSE_FILE="api-response-$TIMESTAMP.json"
+  echo "$RESPONSE_BODY" > "$RESPONSE_FILE"
+  echo "响应已保存到: $RESPONSE_FILE"
+  
+  # 提取和显示模型回复
+  echo -e "\n${YELLOW}模型回复:${NC}"
+  echo "$RESPONSE_BODY" | jq -r '.candidates[0].content.parts[0].text' 2>/dev/null || echo "$RESPONSE_BODY"
+else
+  echo -e "${RED}✗ API请求失败${NC}"
+  echo "错误响应:"
+  echo "$RESPONSE_BODY" | jq '.' 2>/dev/null || echo "$RESPONSE_BODY"
+fi
+
+echo -e "\n${BLUE}测试完成${NC}"

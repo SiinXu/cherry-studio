@@ -37,7 +37,6 @@ const Assistants: FC<AssistantsTabProps> = ({
   onCreateAssistant,
   onCreateDefaultAssistant
 }) => {
-
   const { assistants, addGroup, updateGroup, removeGroup, updateAssistantGroup, addAssistant, updateGroupsOrder } =
     useAssistants()
   const { groups, isLoading, loadingError } = useAppSelector((state) => state.assistants) // 直接从store获取状态

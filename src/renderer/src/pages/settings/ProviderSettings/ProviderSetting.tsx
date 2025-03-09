@@ -221,7 +221,7 @@ const ProviderSetting: FC<Props> = ({ provider: _provider }) => {
   return (
     <SettingContainer theme={theme}>
       <SettingTitle>
-        <Flex align="center" $ga$p={8}>
+        <Flex align="center" gap={8}>
           <ProviderName>{provider.isSystem ? t(`provider.${provider.id}`) : provider.name}</ProviderName>
           {officialWebsite! && (
             <Link target="_blank" href={providerConfig.websites.official}>
@@ -258,7 +258,7 @@ const ProviderSetting: FC<Props> = ({ provider: _provider }) => {
       </Space.Compact>
       {apiKeyWebsite && (
         <SettingHelpTextRow style={{ justifyContent: 'space-between' }}>
-          <HStack $ga$p={5}>
+          <HStack $gap={5}>
             <SettingHelpLink target="_blank" href={apiKeyWebsite}>
               {t('settings.provider.get_api_key')}
             </SettingHelpLink>
@@ -359,7 +359,7 @@ const ProviderSetting: FC<Props> = ({ provider: _provider }) => {
           <SettingHelpText>{t('settings.provider.docs_more_details')}</SettingHelpText>
         </SettingHelpTextRow>
       )}
-      <Flex $ga$p={10} style={{ marginTop: '10px' }}>
+      <Flex gap={10} style={{ marginTop: '10px' }}>
         <Button type="primary" onClick={onManageModel} icon={<EditOutlined />}>
           {t('button.manage')}
         </Button>

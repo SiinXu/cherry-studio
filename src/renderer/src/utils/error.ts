@@ -59,6 +59,39 @@ export function formatMessageError(error: any): Record<string, any> {
   }
 }
 
+/**
+ * 专门处理IPC调用错误，提取有用的错误信息
+ * @param error 原始IPC错误对象
+ * @returns 格式化后的错误信息对象
+ */
+export function formatIpcError(error: any): Record<string, any> {
+  try {
+    // 首先尝试使用常规错误处理
+    const detailedError = getErrorDetails(error)
+
+    // 移除不必要的字段
+    delete detailedError?.headers
+    delete detailedError?.stack
+    delete detailedError?.request_id
+
+    // 添加IPC特定的错误类型标识
+    detailedError.isIpcError = true
+
+    // 确保始终有错误消息
+    if (!detailedError.message) {
+      detailedError.message = '未知IPC错误'
+    }
+
+    return detailedError
+  } catch (e) {
+    // 如果无法处理错误对象，返回简单错误消息
+    return {
+      isIpcError: true,
+      message: String(error) || '未知IPC错误'
+    }
+  }
+}
+
 export function getErrorMessage(error: any): string {
   return error?.message || error?.toString() || ''
 }

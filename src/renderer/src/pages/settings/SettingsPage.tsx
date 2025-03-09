@@ -1,4 +1,5 @@
 import {
+  ApiOutlined,
   CloudOutlined,
   CodeOutlined,
   GlobalOutlined,
@@ -11,6 +12,7 @@ import {
 } from '@ant-design/icons'
 import { Navbar, NavbarCenter } from '@renderer/components/app/Navbar'
 import { isLocalAi } from '@renderer/config/env'
+import { useSettings } from '@renderer/hooks/useSettings'
 import ModelSettings from '@renderer/pages/settings/ModelSettings/ModelSettings'
 import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -23,6 +25,7 @@ import DataSettings from './DataSettings/DataSettings'
 import DisplaySettings from './DisplaySettings/DisplaySettings'
 import GeneralSettings from './GeneralSettings'
 import MCPSettings from './MCPSettings'
+import OwlSettings from './OwlSettings/OwlSettings'
 import ProvidersList from './ProviderSettings'
 import QuickAssistantSettings from './QuickAssistantSettings'
 import ShortcutSettings from './ShortcutSettings'
@@ -31,6 +34,7 @@ import WebSearchSettings from './WebSearchSettings'
 const SettingsPage: FC = () => {
   const { pathname } = useLocation()
   const { t } = useTranslation()
+  const { advancedFeatures } = useSettings()
 
   const isRoute = (path: string): string => (pathname.startsWith(path) ? 'active' : '')
 
@@ -100,6 +104,14 @@ const SettingsPage: FC = () => {
               {t('settings.data.title')}
             </MenuItem>
           </MenuItemLink>
+          {advancedFeatures && (
+            <MenuItemLink to="/settings/owl">
+              <MenuItem className={isRoute('/settings/owl')}>
+                <ApiOutlined />
+                {t('settings.owl.title') || 'OWL 框架'}
+              </MenuItem>
+            </MenuItemLink>
+          )}
           <MenuItemLink to="/settings/about">
             <MenuItem className={isRoute('/settings/about')}>
               <InfoCircleOutlined />
@@ -119,6 +131,7 @@ const SettingsPage: FC = () => {
             <Route path="quickAssistant" element={<QuickAssistantSettings />} />
             {/* 高级设置已移除，功能已移到显示设置中 */}
             <Route path="shortcut/*" element={<ShortcutSettings />} />
+            <Route path="owl" element={<OwlSettings />} />
             <Route path="about" element={<AboutSettings />} />
           </Routes>
         </SettingContent>

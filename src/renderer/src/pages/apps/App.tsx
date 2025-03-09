@@ -17,8 +17,8 @@ interface Props {
 const App: FC<Props> = ({ app, onClick, size = 60 }) => {
   const { t } = useTranslation()
   const { minapps, pinned, updatePinnedMinapps } = useMinapps()
-  const isPinned = pinned.some((p) => p.id === app.id)
-  const isVisible = minapps.some((m) => m.id === app.id)
+  const isPinned = (pinned || []).some((p) => p?.id === app?.id)
+  const isVisible = (minapps || []).some((m) => m?.id === app?.id)
 
   const handleClick = () => {
     MinApp.start(app)
@@ -31,7 +31,7 @@ const App: FC<Props> = ({ app, onClick, size = 60 }) => {
       label: isPinned ? t('minapp.sidebar.remove.title') : t('minapp.sidebar.add.title'),
       onClick: () => {
         console.debug('togglePin', app)
-        const newPinned = isPinned ? pinned.filter((item) => item.id !== app.id) : [...(pinned || []), app]
+        const newPinned = isPinned ? (pinned || []).filter((item) => item?.id !== app?.id) : [...(pinned || []), app]
         updatePinnedMinapps(newPinned)
       }
     }
@@ -42,8 +42,8 @@ const App: FC<Props> = ({ app, onClick, size = 60 }) => {
   return (
     <Dropdown menu={{ items: menuItems }} trigger={['contextMenu']}>
       <Container onClick={handleClick}>
-        <MinAppIcon size={size} ap$p={app} />
-        <AppTitle>{app.name}</AppTitle>
+        <MinAppIcon size={size} app={app} />
+        <AppTitle>{app?.name || ''}</AppTitle>
       </Container>
     </Dropdown>
   )

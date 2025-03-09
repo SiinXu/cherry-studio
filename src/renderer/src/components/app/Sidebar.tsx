@@ -1,4 +1,5 @@
 import {
+  ApiOutlined,
   FileSearchOutlined,
   FolderOutlined,
   PictureOutlined,
@@ -13,6 +14,7 @@ import { useMinapps } from '@renderer/hooks/useMinapps'
 import { modelGenerating, useRuntime } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { isEmoji } from '@renderer/utils'
+import { safeFilter } from '@renderer/utils/safeArrayUtils'
 import type { MenuProps } from 'antd'
 import { Tooltip } from 'antd'
 import { Avatar } from 'antd'
@@ -121,7 +123,7 @@ const Sidebar: FC = () => {
 const MainMenus: FC = () => {
   const { t } = useTranslation()
   const { pathname } = useLocation()
-  const { sidebarIcons } = useSettings()
+  const { sidebarIcons, advancedFeatures, enableOWL } = useSettings()
   const { minappShow } = useRuntime()
   const navigate = useNavigate()
 
@@ -135,7 +137,8 @@ const MainMenus: FC = () => {
     translate: <TranslationOutlined />,
     minapp: <i className="iconfont icon-appstore" />,
     knowledge: <FileSearchOutlined />,
-    files: <FolderOutlined />
+    files: <FolderOutlined />,
+    owl: <ApiOutlined style={{ fontSize: 16, color: 'var(--color-primary)' }} />
   }
 
   const pathMap = {
@@ -145,15 +148,42 @@ const MainMenus: FC = () => {
     translate: '/translate',
     minapp: '/apps',
     knowledge: '/knowledge',
-    files: '/files'
+    files: '/files',
+    owl: '/owl'
   }
 
-  return sidebarIcons.visible.map((icon) => {
+  // 手动添加OWL图标到可见图标列表
+  const visibleIconsList = [...sidebarIcons.visible]
+
+  // 如果不包含owl，则添加
+  if (!visibleIconsList.includes('owl')) {
+    visibleIconsList.push('owl')
+    console.log('Sidebar - 手动添加OWL图标')
+  }
+
+  // 过滤侧边栏图标
+  const visibleIcons = safeFilter(visibleIconsList, (icon) => {
+    if (icon === 'owl') {
+      console.log('Sidebar - OWL图标可见性检查:', { advancedFeatures, enableOWL, showOwlIcon: true })
+      return true // 始终显示OWL图标
+    }
+    return true
+  })
+
+  // 自定义OWL图标的提示文本
+  const getIconTooltip = (icon: string) => {
+    if (icon === 'owl') {
+      return t('owl.agent_title') || 'OWL Agent'
+    }
+    return t(`${icon}.title`)
+  }
+
+  return visibleIcons.map((icon) => {
     const path = pathMap[icon]
     const isActive = path === '/' ? isRoute(path) : isRoutes(path)
 
     return (
-      <Tooltip key={icon} title={t(`${icon}.title`)} mouseEnterDelay={0.8} placement="right">
+      <Tooltip key={icon} title={getIconTooltip(icon)} mouseEnterDelay={0.8} placement="right">
         <StyledLink
           onClick={async () => {
             if (minappShow) {
@@ -192,7 +222,7 @@ const PinnedApps: FC = () => {
             <StyledLink>
               <Dropdown menu={{ items: menuItems }} trigger={['contextMenu']}>
                 <Icon onClick={() => MinApp.start(app)} className={isActive ? 'active' : ''}>
-                  <MinAppIcon size={20} ap$p={app} style={{ borderRadius: 6 }} />
+                  <MinAppIcon size={20} app={app} style={{ borderRadius: 6 }} />
                 </Icon>
               </Dropdown>
             </StyledLink>

@@ -9,6 +9,7 @@ import store from '@renderer/store'
 import { setMinappShow } from '@renderer/store/runtime'
 import { MinAppType } from '@renderer/types'
 import { delay } from '@renderer/utils'
+import { safeGet, safeObject } from '@renderer/utils/safeObjectUtils'
 import { Avatar, Drawer } from 'antd'
 import { WebviewTag } from 'electron'
 import { useEffect, useRef, useState } from 'react'
@@ -23,8 +24,10 @@ interface Props {
 }
 
 const PopupContainer: React.FC<Props> = ({ app, resolve }) => {
+  // 确保app对象始终存在，防止空引用错误
+  const safeApp = safeObject(app, { id: '', name: '', url: '', logo: AppLogo })
   const { pinned, updatePinnedMinapps } = useMinapps()
-  const isPinned = pinned.some((p) => p.id === app.id)
+  const isPinned = pinned.some((p) => p.id === safeApp.id)
   const [open, setOpen] = useState(true)
   const [opened, setOpened] = useState(false)
   const [isReady, setIsReady] = useState(false)
@@ -32,8 +35,10 @@ const PopupContainer: React.FC<Props> = ({ app, resolve }) => {
 
   useBridge()
 
-  const canOpenExternalLink = app.url.startsWith('http://') || app.url.startsWith('https://')
-  const canPinned = DEFAULT_MIN_APPS.some((i) => i.id === app?.id)
+  // 使用安全访问确保不会因为属性不存在而出错
+  const appUrl = safeGet(safeApp, 'url') || ''
+  const canOpenExternalLink = appUrl.startsWith('http://') || appUrl.startsWith('https://')
+  const canPinned = DEFAULT_MIN_APPS.some((i) => i.id === safeApp.id)
 
   const onClose = async (_delay = 0.3) => {
     setOpen(false)
@@ -49,7 +54,7 @@ const PopupContainer: React.FC<Props> = ({ app, resolve }) => {
   }
   const onReload = () => {
     if (webviewRef.current) {
-      webviewRef.current.src = app.url
+      webviewRef.current.src = appUrl
     }
   }
 
@@ -61,14 +66,14 @@ const PopupContainer: React.FC<Props> = ({ app, resolve }) => {
   }
 
   const onTogglePin = () => {
-    const newPinned = isPinned ? pinned.filter((item) => item.id !== app.id) : [...pinned, app]
+    const newPinned = isPinned ? pinned.filter((item) => item.id !== safeApp.id) : [...pinned, safeApp]
     updatePinnedMinapps(newPinned)
   }
   const isInDevelopment = process.env.NODE_ENV === 'development'
   const Title = () => {
     return (
       <TitleContainer style={{ justifyContent: 'space-between' }}>
-        <TitleText>{app.name}</TitleText>
+        <TitleText>{safeApp.name}</TitleText>
         <ButtonsGroup className={isWindows ? 'windows' : ''}>
           <Button onClick={onReload}>
             <ReloadOutlined />
@@ -140,13 +145,13 @@ const PopupContainer: React.FC<Props> = ({ app, resolve }) => {
       style={{ marginLeft: 'var(--sidebar-width)' }}>
       {!isReady && (
         <EmptyView>
-          <Avatar src={app.logo} size={80} style={{ border: '1px solid var(--color-border)', marginTop: -150 }} />
+          <Avatar src={safeApp.logo} size={80} style={{ border: '1px solid var(--color-border)', marginTop: -150 }} />
           <BeatLoader color="var(--color-text-2)" size="10" style={{ marginTop: 15 }} />
         </EmptyView>
       )}
       {opened && (
         <webview
-          src={app.url}
+          src={appUrl}
           ref={webviewRef}
           style={WebviewStyle}
           allowpopups={'true' as any}
@@ -239,6 +244,12 @@ export default class MinApp {
   static app: MinAppType | null = null
 
   static async start(app: MinAppType) {
+    // 安全检查，确保app对象存在
+    if (!app) {
+      console.error('Cannot start MinApp: app is undefined')
+      return
+    }
+
     if (app?.id && MinApp.app?.id === app?.id) {
       return
     }
@@ -249,17 +260,19 @@ export default class MinApp {
       await delay(0)
     }
 
-    if (!app.logo) {
-      app.logo = AppLogo
+    // 确保logo属性存在
+    const safeApp = { ...app }
+    if (!safeApp.logo) {
+      safeApp.logo = AppLogo
     }
 
-    MinApp.app = app
+    MinApp.app = safeApp
     store.dispatch(setMinappShow(true))
 
     return new Promise<any>((resolve) => {
       TopView.show(
         <PopupContainer
-          ap$p={app}
+          app={safeApp}
           resolve={(v) => {
             resolve(v)
             this.close()

@@ -3,8 +3,8 @@ import type { FileMetadataResponse, ListFilesResponse, UploadFileResponse } from
 import { ExtractChunkData } from '@llm-tools/embedjs-interfaces'
 import { AppInfo, FileType, KnowledgeBaseParams, KnowledgeItem, LanguageVarious, WebDavConfig } from '@renderer/types'
 import type { LoaderReturn } from '@shared/config/types'
-import type { BrowserWindowConstructorOptions, OpenDialogOptions, SaveDialogOptions } from 'electron'
 import type { UpdateInfo } from 'builder-util-runtime'
+import type { BrowserWindowConstructorOptions, OpenDialogOptions, SaveDialogOptions } from 'electron'
 import { Readable } from 'stream'
 
 declare global {
@@ -133,6 +133,33 @@ declare global {
         callTool: ({ client, name, args }: { client: string; name: string; args: any }) => Promise<any>
         // status
         cleanup: () => Promise<void>
+      }
+      owl: {
+        // 会话管理
+        createSession: (options?: any) => Promise<any>
+        getSession: (sessionId: string) => Promise<any>
+        deleteSession: (sessionId: string) => Promise<void>
+        listSessions: () => Promise<any[]>
+
+        // 消息处理
+        sendMessage: (sessionId: string, message: any) => Promise<any>
+        getMessages: (sessionId: string) => Promise<any[]>
+
+        // 工具处理
+        executeTool: (sessionId: string, tool: any) => Promise<any>
+        getToolResults: (sessionId: string) => Promise<any>
+
+        // 配置管理
+        updateApiKey: (keyType: string, apiKey: string) => Promise<void>
+        getConfig: () => Promise<any>
+        updateConfig: (config: any) => Promise<void>
+
+        // 初始化与验证
+        initialize: () => Promise<void>
+        validateApiKey: (apiKey: string, provider?: string) => Promise<boolean>
+
+        // 质量评估
+        evaluateQuality: (content: string, type: 'content' | 'code' | 'design') => Promise<any>
       }
     }
   }

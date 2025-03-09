@@ -477,8 +477,50 @@ class KnowledgeService {
     _: Electron.IpcMainInvokeEvent,
     { search, base }: { search: string; base: KnowledgeBaseParams }
   ): Promise<ExtractChunkData[]> => {
-    const ragApplication = await this.getRagApplication(base)
-    return await ragApplication.search(search)
+    try {
+      // 验证输入参数
+      if (!search || !base) {
+        Logger.error('知识库搜索错误: 缺少必要参数', { search: !!search, base: !!base })
+        return []
+      }
+
+      // 获取RAG应用实例，添加超时处理
+      const ragApplicationPromise = this.getRagApplication(base)
+      const timeoutPromise = new Promise<null>((_, reject) => {
+        setTimeout(() => reject(new Error('获取RAG应用实例超时')), 15000)
+      })
+
+      const ragApplication = (await Promise.race([ragApplicationPromise, timeoutPromise])) as RAGApplication
+
+      if (!ragApplication) {
+        Logger.error('知识库搜索错误: 无法获取RAG应用实例')
+        return []
+      }
+
+      // 执行搜索，添加错误处理和超时
+      const searchPromise = ragApplication.search(search)
+      const searchTimeoutPromise = new Promise<null>((_, reject) => {
+        setTimeout(() => reject(new Error('知识库搜索操作超时')), 30000)
+      })
+
+      const results = (await Promise.race([searchPromise, searchTimeoutPromise])) as ExtractChunkData[]
+      return results || []
+    } catch (error) {
+      // 详细记录错误
+      const err = error as Error
+      Logger.error(`知识库搜索失败: ${err.message}`, error)
+
+      // 发送错误通知到主窗口
+      const mainWindow = windowService.getMainWindow()
+      mainWindow?.webContents.send('knowledge-base-error', {
+        method: 'search',
+        error: err.message,
+        timestamp: new Date().toISOString()
+      })
+
+      // 返回空结果而不是抛出错误
+      return []
+    }
   }
 }
 

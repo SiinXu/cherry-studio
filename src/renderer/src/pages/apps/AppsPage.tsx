@@ -16,10 +16,10 @@ const AppsPage: FC = () => {
   const { minapps } = useMinapps()
 
   const filteredApps = search
-    ? minapps.filter(
-        (app) => app.name.toLowerCase().includes(search.toLowerCase()) || app.url.includes(search.toLowerCase())
+    ? (minapps || []).filter(
+        (app) => app?.name?.toLowerCase()?.includes(search.toLowerCase()) || app?.url?.includes(search.toLowerCase())
       )
-    : minapps
+    : minapps || []
 
   // Calculate the required number of lines
   const itemsPerRow = Math.floor(930 / 115) // Maximum width divided by the width of each item (including spacing)
@@ -53,7 +53,7 @@ const AppsPage: FC = () => {
       <ContentContainer id="content-container">
         <AppsContainer style={{ height: containerHeight }}>
           {filteredApps.map((app) => (
-            <App key={app.id} ap$p={app} />
+            <App key={app?.id || `app-${Math.random().toString(36).substr(2, 9)}`} app={app} />
           ))}
           {isEmpty(filteredApps) && (
             <Center style={{ flex: 1 }}>

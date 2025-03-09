@@ -100,6 +100,76 @@ export class ConfigManager {
     this.store.set('enableQuickAssistant', value)
   }
 
+  // OWL服务配置
+  getOwlLanguageModelApiKey(): string {
+    // 开发环境中返回测试API密钥，生产环境中保持用户设置
+    if (!app.isPackaged) {
+      const savedKey = this.store.get('owlLanguageModelApiKey', '') as string
+      return savedKey || 'test-api-key-for-development-environment'
+    }
+    return this.store.get('owlLanguageModelApiKey', '') as string
+  }
+
+  setOwlLanguageModelApiKey(apiKey: string) {
+    this.store.set('owlLanguageModelApiKey', apiKey)
+    this.notifySubscribers('owlLanguageModelApiKey', apiKey)
+  }
+
+  getOwlExternalResourcesApiKey(): string {
+    // 开发环境中返回测试API密钥，生产环境中保持用户设置
+    if (!app.isPackaged) {
+      const savedKey = this.store.get('owlExternalResourcesApiKey', '') as string
+      return savedKey || 'test-external-resources-key-dev'
+    }
+    return this.store.get('owlExternalResourcesApiKey', '') as string
+  }
+
+  setOwlExternalResourcesApiKey(apiKey: string) {
+    this.store.set('owlExternalResourcesApiKey', apiKey)
+    this.notifySubscribers('owlExternalResourcesApiKey', apiKey)
+  }
+
+  getOwlModelProvider(): 'openai' | 'anthropic' | 'google' | 'local' {
+    return this.store.get('owlModelProvider', 'openai') as 'openai' | 'anthropic' | 'google' | 'local'
+  }
+
+  setOwlModelProvider(provider: 'openai' | 'anthropic' | 'google' | 'local') {
+    this.store.set('owlModelProvider', provider)
+    this.notifySubscribers('owlModelProvider', provider)
+  }
+
+  getAdvancedSettings(): boolean {
+    // 开发环境中默认启用高级设置，方便测试
+    if (!app.isPackaged) {
+      const saved = this.store.get('advancedSettings', null)
+      // 如果用户明确设置了禁用，则尊重用户设置
+      if (saved === false) return false
+      return true
+    }
+    return this.store.get('advancedSettings', false) as boolean
+  }
+
+  setAdvancedSettings(value: boolean) {
+    this.store.set('advancedSettings', value)
+    this.notifySubscribers('advancedSettings', value)
+  }
+
+  getEnableOwl(): boolean {
+    // 开发环境中默认启用OWL，方便测试
+    if (!app.isPackaged) {
+      const saved = this.store.get('enableOwl', null)
+      // 如果用户明确设置了禁用，则尊重用户设置
+      if (saved === false) return false
+      return true
+    }
+    return this.store.get('enableOwl', false) as boolean
+  }
+
+  setEnableOwl(value: boolean) {
+    this.store.set('enableOwl', value)
+    this.notifySubscribers('enableOwl', value)
+  }
+
   set(key: string, value: any) {
     this.store.set(key, value)
   }

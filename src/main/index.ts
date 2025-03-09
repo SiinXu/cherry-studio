@@ -2,8 +2,10 @@ import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { replaceDevtoolsFont } from '@main/utils/windowUtil'
 import { app, session } from 'electron'
 import installExtension, { REDUX_DEVTOOLS } from 'electron-devtools-installer'
+import log from 'electron-log'
 
-import { registerIpc } from './ipc'
+// 导入新的IPC初始化模块
+import { initializeIpc, setupErrorHandlers } from './ipcInit'
 import { registerShortcuts } from './services/ShortcutService'
 import { TrayService } from './services/TrayService'
 import { windowService } from './services/WindowService'
@@ -30,6 +32,9 @@ if (!app.requestSingleInstanceLock()) {
     // 强制使用新的渲染版本
     app.commandLine.appendSwitch('disable-gpu-program-cache')
   }
+
+  // 设置全局错误处理程序
+  setupErrorHandlers()
 
   app.whenReady().then(async () => {
     // 设置内容安全策略，在所有环境中应用
@@ -69,7 +74,18 @@ if (!app.requestSingleInstanceLock()) {
     // Set app user model id for windows
     electronApp.setAppUserModelId(import.meta.env.VITE_MAIN_BUNDLE_ID || 'com.kangfenmao.CherryStudio')
 
+    // 先创建主窗口
+    log.info('创建主窗口...')
     const mainWindow = windowService.createMainWindow()
+
+    // 初始化IPC处理程序，直接使用主窗口
+    log.info('开始初始化IPC处理程序...')
+    const ipcInitialized = await initializeIpc(mainWindow)
+    if (!ipcInitialized) {
+      log.error('IPC处理程序初始化失败，应用程序可能无法正常工作')
+    } else {
+      log.info('IPC处理程序初始化完成')
+    }
     new TrayService()
 
     app.on('activate', function () {
@@ -81,9 +97,10 @@ if (!app.requestSingleInstanceLock()) {
       }
     })
 
+    // 注册快捷键
+    log.info('注册快捷键...')
     registerShortcuts(mainWindow)
-
-    registerIpc(mainWindow, app)
+    log.info('快捷键注册完成')
 
     replaceDevtoolsFont(mainWindow)
 

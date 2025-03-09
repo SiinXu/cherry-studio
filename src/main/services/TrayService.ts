@@ -43,23 +43,28 @@ export class TrayService {
 
     this.tray = tray
 
-    const locale = locales[configManager.getLanguage()]
-    const { tray: trayLocale } = locale.translation
+    const locale = locales[configManager.getLanguage()] || locales['en-US']
+    const trayLocale = locale?.translation?.tray || {
+      show_window: '显示窗口',
+      show_mini_window: '快捷助手',
+      quit: '退出'
+    }
 
     const enableQuickAssistant = configManager.getEnableQuickAssistant()
 
+    // 构建模板菜单，并确保即使本地化数据缺失也有默认值
     const template = [
       {
-        label: trayLocale.show_window,
+        label: trayLocale?.show_window || '显示窗口',
         click: () => windowService.showMainWindow()
       },
       enableQuickAssistant && {
-        label: trayLocale.show_mini_window,
+        label: trayLocale?.show_mini_window || '快捷助手',
         click: () => windowService.showMiniWindow()
       },
       { type: 'separator' },
       {
-        label: trayLocale.quit,
+        label: trayLocale?.quit || '退出',
         click: () => this.quit()
       }
     ].filter(Boolean) as MenuItemConstructorOptions[]
@@ -86,18 +91,28 @@ export class TrayService {
   }
 
   private updateTray() {
-    const showTray = configManager.getTray()
-    if (showTray) {
-      this.createTray()
-    } else {
+    try {
+      const showTray = configManager.getTray()
+      if (showTray) {
+        this.createTray()
+      } else {
+        this.destroyTray()
+      }
+    } catch (error) {
+      console.error('更新托盘时出错:', error)
+      // 出错时默认不显示托盘
       this.destroyTray()
     }
   }
 
   public restartTray() {
-    if (configManager.getTray()) {
-      this.destroyTray()
-      this.createTray()
+    try {
+      if (configManager.getTray()) {
+        this.destroyTray()
+        this.createTray()
+      }
+    } catch (error) {
+      console.error('重启托盘时出错:', error)
     }
   }
 

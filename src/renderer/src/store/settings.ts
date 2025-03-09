@@ -4,7 +4,7 @@ import { CodeStyleVarious, LanguageVarious, ThemeMode, TranslateLanguageVarious 
 
 export type SendMessageShortcut = 'Enter' | 'Shift+Enter' | 'Ctrl+Enter' | 'Command+Enter'
 
-export type SidebarIcon = 'assistants' | 'agents' | 'paintings' | 'translate' | 'minapp' | 'knowledge' | 'files'
+export type SidebarIcon = 'assistants' | 'agents' | 'paintings' | 'translate' | 'minapp' | 'knowledge' | 'files' | 'owl'
 
 export const DEFAULT_SIDEBAR_ICONS: SidebarIcon[] = [
   'assistants',
@@ -13,7 +13,8 @@ export const DEFAULT_SIDEBAR_ICONS: SidebarIcon[] = [
   'translate',
   'minapp',
   'knowledge',
-  'files'
+  'files',
+  'owl'
 ]
 
 export interface SettingsState {
@@ -81,6 +82,16 @@ export interface SettingsState {
   yuqueToken: string | null
   yuqueUrl: string | null
   yuqueRepoId: string | null
+  // 高级功能配置
+  advancedFeatures: boolean
+  // OWL框架相关配置
+  enableOWL: boolean
+  owlLanguageModelApiKey: string
+  owlExternalResourcesApiKey: string
+  owlSandboxBrowserMode: 'iframe' | 'window' | 'tab'
+  owlModelProvider: 'openai' | 'anthropic' | 'google' | 'local'
+  owlToolkits: string[]
+  owlLogLevel: 'debug' | 'info' | 'warning' | 'error'
 }
 
 export type MultiModelMessageStyle = 'horizontal' | 'vertical' | 'fold' | 'grid'
@@ -146,7 +157,17 @@ const initialState: SettingsState = {
   notionSplitSize: 90,
   yuqueToken: '',
   yuqueUrl: '',
-  yuqueRepoId: ''
+  yuqueRepoId: '',
+  // 高级功能配置
+  advancedFeatures: true,
+  // OWL框架相关配置
+  enableOWL: true,
+  owlLanguageModelApiKey: 'your-api-key-here',
+  owlExternalResourcesApiKey: '',
+  owlSandboxBrowserMode: 'iframe',
+  owlModelProvider: 'openai',
+  owlToolkits: ['web_search', 'web_browser', 'code_interpreter', 'file_manager', 'image_generation', 'data_analysis'],
+  owlLogLevel: 'info'
 }
 
 const settingsSlice = createSlice({
@@ -338,6 +359,36 @@ const settingsSlice = createSlice({
     },
     setEnableTopicsGroup: (state, action: PayloadAction<boolean>) => {
       state.enableTopicsGroup = action.payload
+    },
+    // 设置高级功能开关
+    setAdvancedFeatures: (state, action: PayloadAction<boolean>) => {
+      state.advancedFeatures = action.payload
+      // 如果关闭高级功能，也关闭OWL功能
+      if (!action.payload) {
+        state.enableOWL = false
+      }
+    },
+    // OWL相关设置
+    setEnableOWL: (state, action: PayloadAction<boolean>) => {
+      state.enableOWL = action.payload
+    },
+    setOwlLanguageModelApiKey: (state, action: PayloadAction<string>) => {
+      state.owlLanguageModelApiKey = action.payload
+    },
+    setOwlExternalResourcesApiKey: (state, action: PayloadAction<string>) => {
+      state.owlExternalResourcesApiKey = action.payload
+    },
+    setOwlSandboxBrowserMode: (state, action: PayloadAction<'iframe' | 'window' | 'tab'>) => {
+      state.owlSandboxBrowserMode = action.payload
+    },
+    setOwlModelProvider: (state, action: PayloadAction<'openai' | 'anthropic' | 'google' | 'local'>) => {
+      state.owlModelProvider = action.payload
+    },
+    setOwlToolkits: (state, action: PayloadAction<string[]>) => {
+      state.owlToolkits = action.payload
+    },
+    setOwlLogLevel: (state, action: PayloadAction<'debug' | 'info' | 'warning' | 'error'>) => {
+      state.owlLogLevel = action.payload
     }
   }
 })
@@ -385,6 +436,15 @@ export const {
   setCodeStyle,
   setTranslateModelPrompt,
   setAutoTranslateWithSpace,
+  // 高级功能和OWL相关设置
+  setAdvancedFeatures,
+  setEnableOWL,
+  setOwlLanguageModelApiKey,
+  setOwlExternalResourcesApiKey,
+  setOwlSandboxBrowserMode,
+  setOwlModelProvider,
+  setOwlToolkits,
+  setOwlLogLevel,
   setEnableTopicNaming,
   setPasteLongTextThreshold,
   setCustomCss,

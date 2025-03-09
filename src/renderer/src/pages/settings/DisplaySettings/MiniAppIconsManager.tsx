@@ -120,7 +120,7 @@ const MiniAppIconsManager: FC<MiniAppManagerProps> = ({
               {(provided: DroppableProvided) => (
                 <ProgramList ref={provided.innerRef} {...provided.droppableProps}>
                   {(listType === 'visible' ? visibleMiniApps : disabledMiniApps).map((program, index) => (
-                    <Draggable key={program.id} draggableId={String(program.id)} index={index}>
+                    <Draggable key={`${listType}-${program.id}`} draggableId={String(program.id)} index={index}>
                       {(provided: DraggableProvided) => renderProgramItem(program, provided, listType)}
                     </Draggable>
                   ))}

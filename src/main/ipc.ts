@@ -10,11 +10,12 @@ import AppUpdater from './services/AppUpdater'
 import BackupManager from './services/BackupManager'
 import { configManager } from './services/ConfigManager'
 import { ExportService } from './services/ExportService'
-import FileService from './services/FileService'
+import { fileService } from './services/FileService'
 import FileStorage from './services/FileStorage'
 import { GeminiService } from './services/GeminiService'
 import KnowledgeService from './services/KnowledgeService'
 import MCPService from './services/mcp'
+import { owlService } from './services/OwlService'
 import { registerShortcuts, unregisterAllShortcuts } from './services/ShortcutService'
 import { TrayService } from './services/TrayService'
 import { windowService } from './services/WindowService'
@@ -140,7 +141,10 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
   ipcMain.handle('file:binaryFile', fileManager.binaryFile)
 
   // fs
-  ipcMain.handle('fs:read', FileService.readFile)
+  ipcMain.handle('fs:read', fileService.readFile.bind(fileService))
+  ipcMain.handle('fs:write', fileService.writeFile.bind(fileService))
+  ipcMain.handle('fs:exists', fileService.exists.bind(fileService))
+  ipcMain.handle('fs:mkdir', fileService.mkdir.bind(fileService))
 
   // minapp
   ipcMain.handle('minapp', (_, args) => {
@@ -200,6 +204,32 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
   ipcMain.handle('gemini:list-files', GeminiService.listFiles)
   ipcMain.handle('gemini:delete-file', GeminiService.deleteFile)
 
+  // OWL服务
+  ipcMain.handle('owl:initialize', async (_, options) => {
+    return await owlService.initialize(options)
+  })
+  ipcMain.handle('owl:evaluate-quality', async (_, content, type) => {
+    return await owlService.evaluateQuality(content, type)
+  })
+  ipcMain.handle('owl:call-model-api', async (_, messages, toolDefinitions) => {
+    return await owlService.callModelApi(messages, toolDefinitions)
+  })
+  ipcMain.handle('owl:create-session', async (_, enabledToolkits) => {
+    // 调用OwlService的createSession方法创建新会话
+    return await owlService.createSession(enabledToolkits)
+  })
+  ipcMain.handle('owl:add-message', async (_, sessionId, message) => {
+    // 调用OwlService的addMessage方法添加消息
+    return await owlService.addMessage(sessionId, message)
+  })
+  ipcMain.handle('owl:clear-session', async (_, sessionId) => {
+    // 清除指定会话
+    log.info(`清除OWL会话: ${sessionId}`)
+    // 可以在这里添加实际的会话清理逻辑，比如从内存或数据库中删除相关数据
+    // 例如：await owlService.removeSessionData(sessionId)
+    return true
+  })
+
   // mini window
   ipcMain.handle('miniwindow:show', () => windowService.showMiniWindow())
   ipcMain.handle('miniwindow:hide', () => windowService.hideMiniWindow())
@@ -251,4 +281,8 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
   app.on('before-quit', async () => {
     await mcpService.cleanup()
   })
+
+  // 确保OwlService实例被创建并注册
+  log.info('已注册OWL服务IPC处理程序')
+  // owlService在导入时已经初始化并注册了IPC处理程序
 }

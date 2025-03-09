@@ -7,6 +7,7 @@ import { useSettings } from '@renderer/hooks/useSettings'
 import { useAppDispatch } from '@renderer/store'
 import {
   DEFAULT_SIDEBAR_ICONS,
+  setAdvancedFeatures,
   setClickAssistantToShowTopic,
   setCustomCss,
   setShowTopicTime,
@@ -39,7 +40,8 @@ const DisplaySettings: FC = () => {
     enableAssistantGroup,
     setEnableAssistantGroup,
     enableTopicsGroup,
-    setEnableTopicsGroup
+    setEnableTopicsGroup,
+    advancedFeatures
   } = useSettings()
   const { minapps, disabled, updateMinapps, updateDisabledMinapps } = useMinapps()
   const { theme: themeMode } = useTheme()
@@ -176,6 +178,18 @@ const DisplaySettings: FC = () => {
         <SettingRow>
           <SettingRowTitle>{t('settings.advanced.topicsGroup')}</SettingRowTitle>
           <Switch checked={enableTopicsGroup} onChange={(checked) => setEnableTopicsGroup(checked)} />
+        </SettingRow>
+      </SettingGroup>
+
+      <SettingGroup theme={theme}>
+        <SettingTitle>{t('settings.display.advanced.title') || '高级功能配置'}</SettingTitle>
+        <SettingDivider />
+        <SettingRow>
+          <SettingRowTitle>{t('settings.advanced.features') || '启用高级功能'}</SettingRowTitle>
+          <Switch checked={advancedFeatures} onChange={(checked) => dispatch(setAdvancedFeatures(checked))} />
+          <div style={{ marginLeft: '10px', fontSize: '12px', color: 'var(--color-text-2)' }}>
+            {t('settings.advanced.features.description') || '启用后可使用包括OWL框架在内的高级功能'}
+          </div>
         </SettingRow>
       </SettingGroup>
       <SettingGroup theme={theme}>
