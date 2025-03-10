@@ -623,11 +623,8 @@
         "title": "高级设置",
         "assistantGroup": "助手分组",
         "topicsGroup": "话题分组",
-        "auto_switch_to_topics": "自动切换到话题",
-        "features": "高级功能",
-    "features.description": "启用实验性高级功能"
+        "auto_switch_to_topics": "自动切换到话题"
       },
-      "owl.title": "OWL 代理设置",
       "assistant": "默认助手",
       "assistant.model_params": "模型参数",
       "assistant.title": "默认助手",
@@ -733,7 +730,6 @@
       "display.group.title": "分组设置",
       "display.topic.title": "话题设置",
       "display.assistant.title": "助手设置",
-      "display.advanced.title": "高级显示设置",
       "font_size.title": "消息字体大小",
       "general": "常规设置",
       "general.backup.button": "备份",
@@ -933,85 +929,6 @@
         "serverPlural": "服务器"
       }
     },
-    "owl": {
-      "title": "OWL 智能代理",
-      "description": "OWL是一个高级智能代理框架，可以帮助您执行复杂任务、访问外部资源并进行交互式操作。通过安全的沙盒环境确保所有操作可控可管。",
-      "settings": "设置",
-      "advanced_features_disabled": "高级功能未启用，请先开启此功能",
-      "go_to_settings": "前往设置",
-      "owl_disabled": "OWL智能代理功能尚未启用",
-      "go_to_owl_settings": "前往OWL设置",
-      "agent_behavior": "代理行为",
-      "timeout_seconds": "超时时间 (秒)",
-      "max_steps": "最大步骤数",
-      "advanced_configuration": "高级配置选项",
-      "advanced_hint": "这些高级选项允许您更精细地控制OWL框架的行为。除非您了解这些选项的作用，否则建议保留默认值。",
-      "settings_title": "OWL 框架设置",
-      "enable": "启用 OWL",
-      "language_model_api_key": "语言模型 API 密钥",
-      "api_key_placeholder": "请输入 API 密钥",
-      "language_model_api_key_hint": "此 API 密钥用于访问语言模型服务，例如 OpenAI API。请在相关网站上注册并获取您的 API 密钥。",
-      "external_resources_api_key": "外部资源 API 密钥",
-      "external_resources_api_key_hint": "此 API 密钥用于访问外部资源，如搜索引擎、数据库等。",
-      "sandbox_browser_mode": "沙盒浏览器模式",
-      "sandbox_mode": {
-        "iframe": "内嵌框架 (iframe)",
-        "window": "新窗口 (window)",
-        "tab": "新标签页 (tab)"
-      },
-      "agent_response": "正在处理您的请求: \"{{request}}\"\n\n使用 {{model}} 模型\n已启用工具集: {{toolkits}}\n当前活动工具集: {{activeToolkit}}\n\n这是一个示例响应，实际功能将在OWL框架集成后实现。",
-      "sandbox_browser_mode_hint": "选择 OWL Agent 执行任务时沙盒浏览器的显示方式。iframe 模式将在当前页面中显示，window 模式将打开一个新窗口，tab 模式将打开一个新标签页。",
-      "model_title": "模型设置",
-      "model_provider": "模型提供商",
-      "model_provider_hint": "选择您希望使用的语言模型提供商",
-      "toolkits_title": "工具集配置",
-      "enabled_toolkits": "启用的工具集",
-      "toolkits_hint": "选择您希望OWL Agent可以使用的工具集",
-      "toolkits_description": "每个工具集提供不同的功能，根据您的需求选择合适的工具集。启用的工具越多，OWL Agent能够执行的任务范围就越广。",
-      "log_level": "日志级别",
-      "log_level_hint": "控制OWL框架的日志详细程度。Debug级别提供最详细的日志，而Error级别仅显示错误信息。",
-      "advanced_options": "高级选项",
-      "local_model": "本地模型",
-      "security_title": "安全设置",
-      "security_note": "注意：OWL框架在沙盒环境中运行，以确保安全性。然而，您仍然应该谨慎处理API密钥和其他敏感信息。OWL Agent的所有操作都将受到监控和限制，以防止潜在的安全风险。",
-      "toolkit": {
-        "web_search": "网页搜索",
-        "web_browser": "网页浏览器",
-        "code_interpreter": "代码解释器",
-        "file_manager": "文件管理器",
-        "image_generation": "图像生成",
-        "data_analysis": "数据分析"
-      },
-      "sandbox": {
-        "refresh_external_window": "刷新外部窗口",
-        "copy_url": "复制URL",
-        "refresh": "刷新",
-        "collapse": "收起",
-        "expand": "展开",
-        "open_in_new_window": "在新窗口中打开",
-        "open_in_new_tab": "在新标签页中打开"
-      },
-      "log": {
-        "toolkit_change": "工具集已切换至：{{name}}",
-        "user_message": "用户消息：{{message}}",
-        "model_provider": "模型提供商：{{provider}}",
-        "available_toolkits": "可用工具集：{{toolkits}}"
-      },
-      "empty_conversation": "开始与 OWL 代理对话",
-      "you": "您",
-      "agent_name": "OWL 代理",
-      "agent_title": "OWL 代理助手",
-      "agent_description": "基于语言模型的智能代理，能够使用多种工具来帮助您完成任务。",
-      "unknown": "未知",
-      "input_placeholder": "输入指令，让OWL代理为您工作...",
-      "processing": "正在处理...",
-      "send": "发送",
-      "config_incomplete": "请先完成OWL代理的配置，包括模型提供商API密钥和其他必要的设置。",
-        "iframe": "内嵌框架",
-        "window": "外部窗口",
-        "tab": "新标签页"
-      }
-    },
     "topics": {
       "add": "添加话题",
       "group": {
@@ -1099,3 +1016,4 @@
       }
     }
   }
+}
