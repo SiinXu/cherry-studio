@@ -1,4 +1,5 @@
 import store from '@renderer/store'
+import axios from 'axios'
 
 import { formatIpcError } from '../utils/error'
 import { safeIpcInvoke, safeIpcInvokeWithRetry } from '../utils/safeIpcUtils'
@@ -821,38 +822,130 @@ class OwlService {
         Authorization: `Bearer ${this.options.languageModelApiKey}`
       }
 
-      // 使用safeIpcInvoke调用主进程发送HTTP请求，避免在渲染进程中直接发送网络请求
-      const response = await safeIpcInvokeWithRetry('owl:http-request', [
-        {
-          url: 'https://api.openai.com/v1/chat/completions',
-          method: 'POST',
-          headers,
-          data,
-          timeout: 60000 // 60秒超时
+      // 先尝试使用IPC调用主进程发送HTTP请求
+      let response
+      try {
+        response = await safeIpcInvokeWithRetry(
+          'owl:http-request',
+          [
+            {
+              url: 'https://api.openai.com/v1/chat/completions',
+              method: 'POST',
+              headers,
+              data,
+              timeout: 60000 // 60秒超时
+            }
+          ],
+          undefined,
+          1
+        ) // 只重试一次，如果失败快速切换到备用方案
+      } catch (error) {
+        this.logMessage('warning', `IPC调用失败，切换到直接HTTP请求: ${error}`)
+      }
+
+      // 如果IPC调用失败，直接使用axios作为备用方案
+      if (!response) {
+        this.logMessage('info', '使用备用HTTP请求方法')
+        try {
+          const axiosResponse = await axios({
+            url: 'https://api.openai.com/v1/chat/completions',
+            method: 'POST',
+            headers,
+            data,
+            timeout: 60000 // 60秒超时
+          })
+
+          response = {
+            status: axiosResponse.status,
+            statusText: axiosResponse.statusText,
+            data: axiosResponse.data,
+            headers: axiosResponse.headers
+          }
+        } catch (axiosError: any) {
+          throw new Error(`备用HTTP请求失败: ${axiosError.message}`)
         }
-      ])
+      }
+
+      // 记录原始响应数据用于调试 - 对于任何日志级别都记录，帮助排查格式问题
+      if (response) {
+        try {
+          // 记录响应状态和头信息
+          this.logMessage('info', `OpenAI响应状态: ${response.status || '未知'}`)
+          this.logMessage('info', `OpenAI响应头: ${JSON.stringify(response.headers || {})}`)
+          if (response.data) {
+            this.logMessage('info', `OpenAI响应数据结构: ${Object.keys(response.data).join(', ')}`)
+
+            // 如果存在choices字段，检查其结构
+            if (response.data.choices && Array.isArray(response.data.choices)) {
+              this.logMessage('info', `OpenAI响应包含${response.data.choices.length}个选项`)
+              if (response.data.choices.length > 0) {
+                const firstChoice = response.data.choices[0]
+                this.logMessage('info', `第一个choice结构: ${Object.keys(firstChoice).join(', ')}`)
+
+                // 检查message字段
+                if (firstChoice.message) {
+                  this.logMessage('info', `message字段结构: ${Object.keys(firstChoice.message).join(', ')}`)
+                }
+              }
+            }
+          }
+        } catch (logError) {
+          this.logMessage('warning', `记录响应时出错: ${logError}`)
+        }
+      }
 
       // 处理响应
       if (response && response.data) {
-        const result = response.data
+        try {
+          const result = response.data
 
-        // 格式化返回结果
-        const modelResponse: ModelApiResponse = {
-          content: safeGet(result, 'choices[0].message.content') || ''
+          // 记录响应结构以便调试
+          this.logMessage('debug', `OpenAI响应结构: ${Object.keys(result).join(', ')}`)
+
+          // 创建基本响应对象
+          const modelResponse: ModelApiResponse = { content: '' }
+
+          // 尝试从不同可能的位置获取内容
+          if (safeGet(result, 'choices') && safeGet(result, 'choices').length > 0) {
+            const firstChoice = safeGet(result, 'choices[0]')
+
+            // 获取消息内容
+            if (safeGet(firstChoice, 'message.content')) {
+              modelResponse.content = safeGet(firstChoice, 'message.content')
+            } else if (safeGet(firstChoice, 'text')) {
+              modelResponse.content = safeGet(firstChoice, 'text')
+            } else if (safeGet(firstChoice, 'content')) {
+              modelResponse.content = safeGet(firstChoice, 'content')
+            }
+
+            // 处理工具调用
+            const toolCalls = safeGet(firstChoice, 'message.tool_calls') || []
+            if (toolCalls.length > 0) {
+              try {
+                modelResponse.toolCalls = toolCalls.map((call: any) => ({
+                  name: call.function?.name || '',
+                  arguments: call.function?.arguments ? JSON.parse(call.function.arguments) : {}
+                }))
+              } catch (parseError) {
+                this.logMessage('warning', `解析工具调用参数时出错: ${parseError}`)
+              }
+            }
+          } else if (safeGet(result, 'content')) {
+            // 某些API版本可能直接返回content
+            modelResponse.content = safeGet(result, 'content')
+          }
+
+          // 确保至少有空内容而不是undefined
+          modelResponse.content = modelResponse.content || ''
+
+          return modelResponse
+        } catch (parseError) {
+          this.logMessage('error', `解析OpenAI响应时出错: ${parseError}`)
+          throw new Error(`解析响应失败: ${parseError}`)
         }
-
-        // 处理工具调用
-        const toolCalls = safeGet(result, 'choices[0].message.tool_calls') || []
-        if (toolCalls.length > 0) {
-          modelResponse.toolCalls = toolCalls.map((call: any) => ({
-            name: call.function.name,
-            arguments: JSON.parse(call.function.arguments)
-          }))
-        }
-
-        return modelResponse
       }
 
+      this.logMessage('warning', `响应缺失或不完整: ${JSON.stringify(response || {}).substring(0, 200)}...`)
       throw new Error('服务器响应格式异常')
     } catch (error: any) {
       this.logMessage('error', `OpenAI API调用失败: ${error.message || '未知错误'}`)
@@ -896,38 +989,136 @@ class OwlService {
         'anthropic-version': '2023-06-01'
       }
 
-      // 使用safeIpcInvoke调用主进程发送HTTP请求
-      const response = await safeIpcInvokeWithRetry('owl:http-request', [
-        {
-          url: 'https://api.anthropic.com/v1/messages',
-          method: 'POST',
-          headers,
-          data,
-          timeout: 60000 // 60秒超时
+      // 先尝试使用IPC调用主进程发送HTTP请求
+      let response
+      try {
+        response = await safeIpcInvokeWithRetry(
+          'owl:http-request',
+          [
+            {
+              url: 'https://api.anthropic.com/v1/messages',
+              method: 'POST',
+              headers,
+              data,
+              timeout: 60000 // 60秒超时
+            }
+          ],
+          undefined,
+          1
+        ) // 只重试一次，如果失败快速切换到备用方案
+      } catch (error) {
+        this.logMessage('warning', `IPC调用失败，切换到直接HTTP请求: ${error}`)
+      }
+
+      // 如果IPC调用失败，直接使用axios作为备用方案
+      if (!response) {
+        this.logMessage('info', '使用备用HTTP请求方法')
+        try {
+          const axiosResponse = await axios({
+            url: 'https://api.anthropic.com/v1/messages',
+            method: 'POST',
+            headers,
+            data,
+            timeout: 60000 // 60秒超时
+          })
+
+          response = {
+            status: axiosResponse.status,
+            statusText: axiosResponse.statusText,
+            data: axiosResponse.data,
+            headers: axiosResponse.headers
+          }
+        } catch (axiosError: any) {
+          throw new Error(`备用HTTP请求失败: ${axiosError.message}`)
         }
-      ])
+      }
+
+      // 记录原始响应数据用于调试 - 对于任何日志级别都记录，帮助排查格式问题
+      if (response) {
+        try {
+          // 记录响应状态和头信息
+          this.logMessage('info', `Anthropic响应状态: ${response.status || '未知'}`)
+          this.logMessage('info', `Anthropic响应头: ${JSON.stringify(response.headers || {})}`)
+
+          if (response.data) {
+            this.logMessage('info', `Anthropic响应数据结构: ${Object.keys(response.data).join(', ')}`)
+
+            // 确认是否存在content字段并检查其结构
+            if (response.data.content && Array.isArray(response.data.content)) {
+              this.logMessage('info', `Anthropic content字段包含${response.data.content.length}个项目`)
+
+              if (response.data.content.length > 0) {
+                const firstContent = response.data.content[0]
+                this.logMessage('info', `第一个content项结构: ${Object.keys(firstContent).join(', ')}`)
+                this.logMessage('info', `content项类型: ${firstContent.type || '未知'}`)
+              }
+            }
+
+            // 检查工具调用字段
+            if (response.data.tool_use) {
+              this.logMessage(
+                'info',
+                `存在tool_use字段: ${JSON.stringify(response.data.tool_use).substring(0, 200)}...`
+              )
+            }
+          }
+        } catch (logError) {
+          this.logMessage('warning', `记录Anthropic响应时出错: ${logError}`)
+        }
+      }
 
       // 处理响应
       if (response && response.data) {
-        const result = response.data
+        try {
+          const result = response.data
 
-        // 格式化返回结果
-        const modelResponse: ModelApiResponse = {
-          content: safeGet(result, 'content[0].text') || ''
+          // 记录响应结构以便调试
+          this.logMessage('debug', `Anthropic响应结构: ${Object.keys(result).join(', ')}`)
+
+          // 创建基本响应对象
+          const modelResponse: ModelApiResponse = { content: '' }
+
+          // 尝试从不同可能的位置获取内容
+          if (safeGet(result, 'content') && Array.isArray(safeGet(result, 'content'))) {
+            // 标准Claude响应格式
+            const contentArray = safeGet(result, 'content') || []
+            for (const contentItem of contentArray) {
+              if (contentItem.type === 'text') {
+                modelResponse.content += contentItem.text || ''
+              }
+            }
+          } else if (safeGet(result, 'text')) {
+            // 有些API版本可能直接返回text
+            modelResponse.content = safeGet(result, 'text')
+          } else if (safeGet(result, 'content.text')) {
+            // 或者可能嵌套在content对象中
+            modelResponse.content = safeGet(result, 'content.text')
+          }
+
+          // 处理工具调用 - Claude的工具调用格式
+          const toolUse = safeGet(result, 'tool_use') || []
+          if (toolUse && Array.isArray(toolUse) && toolUse.length > 0) {
+            try {
+              modelResponse.toolCalls = toolUse.map((call: any) => ({
+                name: call.name || '',
+                arguments: call.input || {}
+              }))
+            } catch (parseError) {
+              this.logMessage('warning', `解析Anthropic工具调用参数时出错: ${parseError}`)
+            }
+          }
+
+          // 确保至少有空内容而不是undefined
+          modelResponse.content = modelResponse.content || ''
+
+          return modelResponse
+        } catch (parseError) {
+          this.logMessage('error', `解析Anthropic响应时出错: ${parseError}`)
+          throw new Error(`解析响应失败: ${parseError}`)
         }
-
-        // 处理工具调用
-        const toolCalls = safeGet(result, 'tool_use') || []
-        if (toolCalls && toolCalls.length > 0) {
-          modelResponse.toolCalls = toolCalls.map((call: any) => ({
-            name: call.name,
-            arguments: call.input
-          }))
-        }
-
-        return modelResponse
       }
 
+      this.logMessage('warning', `响应缺失或不完整: ${JSON.stringify(response || {}).substring(0, 200)}...`)
       throw new Error('服务器响应格式异常')
     } catch (error: any) {
       this.logMessage('error', `Anthropic API调用失败: ${error.message || '未知错误'}`)

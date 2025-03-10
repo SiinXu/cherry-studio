@@ -148,6 +148,47 @@ export async function initializeIpc(mainWindow: BrowserWindow): Promise<boolean>
 
     // 直接注册OWL相关的处理程序，确保它们一定可用
     log.info('确保OWL处理程序被直接注册...')
+    // 无条件注册http-request处理程序，确保它始终可用
+    log.info('无条件注册owl:http-request处理程序以确保其可用性')
+    // 先移除任何现有的处理程序以防止重复注册
+    ipcMain.removeHandler('owl:http-request')
+    ipcMain.handle('owl:http-request', async (_, requestData) => {
+      try {
+        log.info(`执行HTTP请求: ${requestData[0]?.url || '未知URL'}`)
+
+        // 验证请求数据
+        if (!requestData || !requestData[0] || !requestData[0].url) {
+          throw new Error('无效的请求数据')
+        }
+
+        // 使用axios执行请求
+        const response = await axios({
+          method: requestData[0].method || 'GET',
+          url: requestData[0].url,
+          headers: requestData[0].headers || {},
+          data: requestData[0].data,
+          timeout: requestData[0].timeout || 30000
+        })
+
+        // 返回响应数据
+        return {
+          status: response.status,
+          statusText: response.statusText,
+          data: response.data,
+          headers: response.headers
+        }
+      } catch (error: any) {
+        // 错误处理
+        log.error(`HTTP请求失败: ${error.message || '未知错误'}`)
+        return {
+          error: true,
+          message: error.message || '请求失败',
+          status: error.response?.status,
+          data: error.response?.data
+        }
+      }
+    })
+    log.info('owl:http-request处理程序已无条件注册')
     const owlHandlers = [
       'owl:initialize',
       'owl:create-session',
@@ -155,7 +196,6 @@ export async function initializeIpc(mainWindow: BrowserWindow): Promise<boolean>
       'owl:clear-session',
       'owl:call-model',
       'owl:evaluate-quality',
-      'owl:http-request',
       'owl:test-api-connection'
     ]
 
@@ -196,44 +236,7 @@ export async function initializeIpc(mainWindow: BrowserWindow): Promise<boolean>
           return await owlService.evaluateQuality(content, type)
         })
       }
-      if (!isHandlerRegistered('owl:http-request')) {
-        ipcMain.handle('owl:http-request', async (_, requestData) => {
-          try {
-            log.info(`执行HTTP请求: ${requestData[0].url}`)
-
-            // 验证请求数据
-            if (!requestData || !requestData[0] || !requestData[0].url) {
-              throw new Error('无效的请求数据')
-            }
-
-            // 使用axios执行请求
-            const response = await axios({
-              method: requestData[0].method || 'GET',
-              url: requestData[0].url,
-              headers: requestData[0].headers || {},
-              data: requestData[0].data,
-              timeout: requestData[0].timeout || 30000
-            })
-
-            // 返回响应数据
-            return {
-              status: response.status,
-              statusText: response.statusText,
-              data: response.data,
-              headers: response.headers
-            }
-          } catch (error: any) {
-            // 错误处理
-            log.error(`HTTP请求失败: ${error.message || '未知错误'}`)
-            return {
-              error: true,
-              message: error.message || '请求失败',
-              status: error.response?.status,
-              data: error.response?.data
-            }
-          }
-        })
-      }
+      // owl:http-request已经在上面无条件注册，这里跳过
 
       if (!isHandlerRegistered('owl:test-api-connection')) {
         ipcMain.handle('owl:test-api-connection', async () => {
