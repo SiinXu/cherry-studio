@@ -52,7 +52,12 @@ const OwlSettings: FC = () => {
         </SettingRow>
         <SettingDivider />
         <SettingRow>
-          <SettingRowTitle>{t('owl.language_model_api_key')}</SettingRowTitle>
+          <SettingRowTitle>
+            {t('owl.language_model_api_key')}
+            <Tooltip title={t('owl.language_model_api_key_hint')}>
+              <InfoCircleOutlined style={{ marginLeft: 8, color: 'var(--color-text-3)' }} />
+            </Tooltip>
+          </SettingRowTitle>
           <Input.Password
             placeholder={t('owl.api_key_placeholder')}
             value={owlLanguageModelApiKey}
@@ -60,11 +65,15 @@ const OwlSettings: FC = () => {
             style={{ width: '300px' }}
             disabled={!enableOWL}
           />
-          <Hint>{t('owl.language_model_api_key_hint')}</Hint>
         </SettingRow>
         <SettingDivider />
         <SettingRow>
-          <SettingRowTitle>{t('owl.external_resources_api_key')}</SettingRowTitle>
+          <SettingRowTitle>
+            {t('owl.external_resources_api_key')}
+            <Tooltip title={t('owl.external_resources_api_key_hint')}>
+              <InfoCircleOutlined style={{ marginLeft: 8, color: 'var(--color-text-3)' }} />
+            </Tooltip>
+          </SettingRowTitle>
           <Input.Password
             placeholder={t('owl.api_key_placeholder')}
             value={owlExternalResourcesApiKey}
@@ -72,11 +81,15 @@ const OwlSettings: FC = () => {
             style={{ width: '300px' }}
             disabled={!enableOWL}
           />
-          <Hint>{t('owl.external_resources_api_key_hint')}</Hint>
         </SettingRow>
         <SettingDivider />
         <SettingRow>
-          <SettingRowTitle>{t('owl.sandbox_browser_mode')}</SettingRowTitle>
+          <SettingRowTitle>
+            {t('owl.sandbox_browser_mode')}
+            <Tooltip title={t('owl.sandbox_browser_mode_hint')}>
+              <InfoCircleOutlined style={{ marginLeft: 8, color: 'var(--color-text-3)' }} />
+            </Tooltip>
+          </SettingRowTitle>
           <Select
             value={owlSandboxBrowserMode}
             onChange={(value) => dispatch(setOwlSandboxBrowserMode(value))}
@@ -97,7 +110,6 @@ const OwlSettings: FC = () => {
               }
             ]}
           />
-          <Hint>{t('owl.sandbox_browser_mode_hint')}</Hint>
         </SettingRow>
       </SettingGroup>
 
@@ -131,7 +143,7 @@ const OwlSettings: FC = () => {
         <SettingRow>
           <SettingRowTitle>
             {t('owl.enabled_toolkits')}
-            <Tooltip title={t('owl.toolkits_hint')}>
+            <Tooltip title={t('owl.toolkits_description')}>
               <InfoCircleOutlined style={{ marginLeft: 8, color: 'var(--color-text-3)' }} />
             </Tooltip>
           </SettingRowTitle>
@@ -149,12 +161,16 @@ const OwlSettings: FC = () => {
                 <Checkbox value="data_analysis">{t('owl.toolkit.data_analysis')}</Checkbox>
               </ToolkitOptions>
             </Checkbox.Group>
-            <Hint>{t('owl.toolkits_description')}</Hint>
           </div>
         </SettingRow>
         <SettingDivider />
         <SettingRow>
-          <SettingRowTitle>{t('owl.log_level')}</SettingRowTitle>
+          <SettingRowTitle>
+            {t('owl.log_level')}
+            <Tooltip title={t('owl.log_level_hint')}>
+              <InfoCircleOutlined style={{ marginLeft: 8, color: 'var(--color-text-3)' }} />
+            </Tooltip>
+          </SettingRowTitle>
           <Select
             value={owlLogLevel}
             onChange={(value) => dispatch(setOwlLogLevel(value))}
@@ -167,7 +183,6 @@ const OwlSettings: FC = () => {
               { value: 'error', label: 'Error' }
             ]}
           />
-          <Hint>{t('owl.log_level_hint')}</Hint>
         </SettingRow>
       </SettingGroup>
 
@@ -210,12 +225,7 @@ const EmptyMessage = styled.div`
   color: var(--color-text-2);
 `
 
-const Hint = styled.div`
-  margin-top: 5px;
-  font-size: 12px;
-  color: var(--color-text-2);
-  max-width: 400px;
-`
+// 已移除未使用的Hint组件
 
 const ToolkitOptions = styled.div`
   display: grid;

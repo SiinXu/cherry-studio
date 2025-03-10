@@ -1,4 +1,4 @@
-import { SyncOutlined } from '@ant-design/icons'
+import { InfoCircleOutlined, SyncOutlined } from '@ant-design/icons'
 import { isMac } from '@renderer/config/constant'
 import { DEFAULT_MIN_APPS } from '@renderer/config/minapps'
 import { useTheme } from '@renderer/context/ThemeProvider'
@@ -14,7 +14,7 @@ import {
   setSidebarIcons
 } from '@renderer/store/settings'
 import { ThemeMode } from '@renderer/types'
-import { Button, Input, Segmented, Switch } from 'antd'
+import { Button, Input, Segmented, Switch, Tooltip } from 'antd'
 import { FC, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
@@ -185,11 +185,13 @@ const DisplaySettings: FC = () => {
         <SettingTitle>{t('settings.display.advanced.title') || '高级功能配置'}</SettingTitle>
         <SettingDivider />
         <SettingRow>
-          <SettingRowTitle>{t('settings.advanced.features') || '启用高级功能'}</SettingRowTitle>
+          <SettingRowTitle>
+            {t('settings.advanced.features') || '启用高级功能'}
+            <Tooltip title={t('settings.advanced.features.description') || '启用后可使用包括OWL框架在内的高级功能'}>
+              <InfoCircleOutlined style={{ marginLeft: 8, color: 'var(--color-text-3)' }} />
+            </Tooltip>
+          </SettingRowTitle>
           <Switch checked={advancedFeatures} onChange={(checked) => dispatch(setAdvancedFeatures(checked))} />
-          <div style={{ marginLeft: '10px', fontSize: '12px', color: 'var(--color-text-2)' }}>
-            {t('settings.advanced.features.description') || '启用后可使用包括OWL框架在内的高级功能'}
-          </div>
         </SettingRow>
       </SettingGroup>
       <SettingGroup theme={theme}>
