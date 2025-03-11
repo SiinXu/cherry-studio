@@ -139,7 +139,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
       role: 'user',
       content: text,
       assistantId: assistant.id,
-      topicId: assistant.topics[0].id || uuid(),
+      topicId: (assistant.topics && assistant.topics.length > 0 && assistant.topics[0].id) || uuid(),
       createdAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
       type: 'text',
       status: 'success'
@@ -170,7 +170,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic }) => {
     setTimeout(() => resizeTextArea(), 0)
 
     setExpend(false)
-  }, [inputEmpty, text, assistant.id, assistant.topics, selectedKnowledgeBases, files, mentionModels])
+  }, [inputEmpty, text, assistant.id, assistant.topics, selectedKnowledgeBases, files, mentionModels, enabledMCPs])
 
   const translate = async () => {
     if (isTranslating) {
