@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 import { MCPServer, Shortcut, ThemeMode } from '@types'
-import { BrowserWindow, ipcMain, ProxyConfig, session, shell } from 'electron'
+import { BrowserWindow, ipcMain, session, shell } from 'electron'
 import log from 'electron-log'
 
 import { titleBarOverlayDark, titleBarOverlayLight } from './config'
@@ -15,6 +15,7 @@ import FileStorage from './services/FileStorage'
 import { GeminiService } from './services/GeminiService'
 import KnowledgeService from './services/KnowledgeService'
 import MCPService from './services/mcp'
+import { ProxyConfig, proxyManager } from './services/ProxyManager'
 import { registerShortcuts, unregisterAllShortcuts } from './services/ShortcutService'
 import { TrayService } from './services/TrayService'
 import { windowService } from './services/WindowService'
@@ -41,9 +42,9 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
   }))
 
   ipcMain.handle('app:proxy', async (_, proxy: string) => {
-    const sessions = [session.defaultSession, session.fromPartition('persist:webview')]
-    const proxyConfig: ProxyConfig = proxy === 'system' ? { mode: 'system' } : proxy ? { proxyRules: proxy } : {}
-    await Promise.all(sessions.map((session) => session.setProxy(proxyConfig)))
+    const proxyConfig: ProxyConfig =
+      proxy === 'system' ? { mode: 'system' } : proxy ? { mode: 'custom', url: proxy } : { mode: 'none' }
+    await proxyManager.configureProxy(proxyConfig)
   })
 
   ipcMain.handle('app:reload', () => mainWindow.reload())
@@ -213,6 +214,10 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
   )
 
   // Register MCP handlers
+  ipcMain.on('mcp:servers-from-renderer', (_event, servers) => {
+    mcpService.setServers(servers)
+  })
+
   ipcMain.handle('mcp:list-servers', async () => {
     return mcpService.listAvailableServices()
   })
@@ -245,6 +250,11 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
 
   ipcMain.handle('mcp:cleanup', async () => {
     return mcpService.cleanup()
+  })
+
+  // Listen for changes in MCP servers and notify renderer
+  mcpService.on('servers-updated', (servers) => {
+    mainWindow?.webContents.send('mcp:servers-updated', servers)
   })
 
   // Clean up MCP services when app quits

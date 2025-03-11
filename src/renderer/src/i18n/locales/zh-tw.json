@@ -39,6 +39,21 @@
       "delete.content": "刪除助手會刪除所有該助手下的話題和文件，確定要繼續嗎？",
       "delete.title": "刪除助手",
       "edit.title": "編輯助手",
+      "save.success": "儲存成功",
+      "save.title": "儲存到智慧代理人",
+      "search": "搜尋助手...",
+      "settings.default_model": "預設模型",
+      "settings.knowledge_base": "知識庫設定",
+      "settings.model": "模型設定",
+      "settings.preset_messages": "預設訊息",
+      "settings.prompt": "提示詞設定",
+      "settings.reasoning_effort": "思維鏈長度",
+      "settings.reasoning_effort.high": "長",
+      "settings.reasoning_effort.low": "短",
+      "settings.reasoning_effort.medium": "中",
+      "settings.reasoning_effort.off": "關",
+      "settings.reasoning_effort.tip": "僅支援 OpenAI o 系列和 Anthropic 推理模型",
+      "title": "助手",
       "ungrouped": "未分組",
       "group": {
         "add": "創建分組",
@@ -56,22 +71,7 @@
       "move_to_group": "移至分組",
       "move_to_no_group": "從分組中移除",
       "moved_to_group": "已移至分組：{group}",
-      "moved_to_no_group": "已從分組中移除",
-      "save.success": "儲存成功",
-      "save.title": "儲存到智慧代理人",
-      "search": "搜尋助手...",
-      "settings.default_model": "預設模型",
-      "settings.knowledge_base": "知識庫設定",
-      "settings.model": "模型設定",
-      "settings.preset_messages": "預設訊息",
-      "settings.prompt": "提示詞設定",
-      "settings.reasoning_effort": "思維鏈長度",
-      "settings.reasoning_effort.high": "長",
-      "settings.reasoning_effort.low": "短",
-      "settings.reasoning_effort.medium": "中",
-      "settings.reasoning_effort.off": "關",
-      "settings.reasoning_effort.tip": "僅支援 OpenAI o 系列和 Anthropic 推理模型",
-      "title": "助手"
+      "moved_to_no_group": "已從分組中移除"
     },
     "auth": {
       "error": "自動取得金鑰失敗，請手動取得",
@@ -167,16 +167,20 @@
       "topics.export.word": "匯出為 Word",
       "topics.export.yuque": "匯出到語雀",
       "topics.list": "話題列表",
-    
       "topics.move_to": "移動到",
       "topics.pinned": "固定話題",
       "topics.prompt": "話題提示詞",
       "topics.prompt.edit.title": "編輯話題提示詞",
       "topics.prompt.tips": "話題提示詞：針對目前話題提供額外的補充提示詞",
       "topics.title": "話題",
-
       "topics.unpinned": "取消固定",
-      "translate": "翻譯"
+      "translate": "翻譯",
+      "navigation": {
+        "prev": "上一條訊息",
+        "next": "下一條訊息",
+        "first": "已經是第一條訊息",
+        "last": "已經是最後一條訊息"
+      }
     },
     "common": {
       "add": "新增",
@@ -188,7 +192,6 @@
       "chat": "聊天",
       "clear": "清除",
       "close": "關閉",
-      "confirm": "OK",
       "copy": "複製",
       "cut": "剪下",
       "default": "預設",
@@ -217,7 +220,8 @@
       "select": "選擇",
       "topics": "話題",
       "warning": "警告",
-      "you": "您"
+      "you": "您",
+      "confirm": "OK"
     },
     "docs": {
       "title": "幫助文件"
@@ -423,6 +427,8 @@
       "message.multi_model_style.grid": "卡片配置",
       "message.multi_model_style.horizontal": "橫向排列",
       "message.multi_model_style.vertical": "縱向堆疊",
+      "message.multi_model_style.fold.compress": "切換到緊湊排列",
+      "message.multi_model_style.fold.expand": "切換到展開排列",
       "message.style": "訊息樣式",
       "message.style.bubble": "氣泡",
       "message.style.plain": "簡潔",
@@ -441,7 +447,11 @@
       "upgrade.success.button": "重新啟動",
       "upgrade.success.content": "請重新啟動應用以完成升級",
       "upgrade.success.title": "升級成功",
-      "warn.notion.exporting": "正在匯出到 Notion，請勿重複請求匯出！"
+      "warn.notion.exporting": "正在匯出到 Notion，請勿重複請求匯出！",
+      "error.markdown.export.preconf": "導出 Markdown 文件到預先設定的路徑失敗",
+      "error.markdown.export.specified": "導出 Markdown 文件失敗",
+      "success.markdown.export.preconf": "成功導出 Markdown 文件到預先設定的路徑",
+      "success.markdown.export.specified": "成功導出 Markdown 文件"
     },
     "minapp": {
       "sidebar.add.title": "新增到側邊欄",
@@ -500,8 +510,9 @@
       },
       "vision": "視覺",
       "websearch": "網路搜尋",
-      "edit": "編輯模型", 
-      "no_matches": "無可用模型"
+      "edit": "編輯模型",
+      "no_matches": "無可用模型",
+      "tool_calling": "工具調用"
     },
     "navbar": {
       "expand": "伸縮對話框",
@@ -619,8 +630,6 @@
       "about.website.button": "網站",
       "about.website.title": "官方網站",
       "advanced.auto_switch_to_topics": "自動切換到話題",
-      "advanced.assistantGroup": "助手分組",
-      "advanced.topicsGroup": "話題分組",
       "advanced.title": "進階設定",
       "assistant": "預設助手",
       "assistant.model_params": "模型參數",
@@ -704,7 +713,12 @@
           "title": "語雀設定",
           "token": "語雀 Token",
           "token_placeholder": "請輸入語雀 Token"
-        }
+        },
+        "markdown_export.title": "Markdown 匯出",
+        "markdown_export.path": "預設匯出路徑",
+        "markdown_export.path_placeholder": "匯出路徑",
+        "markdown_export.select": "選擇",
+        "markdown_export.help": "若填入，每次匯出時將自動儲存至該路徑；否則，將彈出儲存對話框。"
       },
       "display.custom.css": "自訂 CSS",
       "display.custom.css.placeholder": "/* 這裡寫自訂 CSS */",
@@ -724,7 +738,6 @@
       "display.sidebar.translate.icon": "顯示翻譯圖示",
       "display.sidebar.visible": "顯示的圖示",
       "display.title": "顯示設定",
-      "display.group.title": "分組設定",
       "display.topic.title": "話題設定",
       "font_size.title": "訊息字型大小",
       "general": "一般設定",
@@ -789,6 +802,22 @@
       "models.translate_model_description": "翻譯服務使用的模型",
       "models.translate_model_prompt_message": "請輸入翻譯模型提示詞",
       "models.translate_model_prompt_title": "翻譯模型提示詞",
+      "models.check.button_caption": "健康檢查",
+      "models.check.title": "模型健康檢查",
+      "models.check.passed": "通過",
+      "models.check.failed": "失敗",
+      "models.check.single": "單個",
+      "models.check.all": "所有",
+      "models.check.disabled": "關閉",
+      "models.check.enabled": "開啟",
+      "models.check.start": "開始",
+      "models.check.enable_concurrent": "並行檢查",
+      "models.check.use_all_keys": "使用密鑰",
+      "models.check.all_models_passed": "所有模型檢查通過",
+      "models.check.model_status_summary": "{{provider}}: {{count_passed}}個模型通過所有密鑰，{{count_failed}}個模型未通過所有密鑰，{{count_partial}}個模型未通過某些密鑰",
+      "models.check.no_api_keys": "未找到API密鑰，請先添加API密鑰。",
+      "models.check.select_api_key": "選擇要使用的API密鑰：",
+      "models.check.keys_status_count": "通過：{{count_passed}}個密鑰，失敗：{{count_failed}}個密鑰",
       "moresetting": "更多設定",
       "moresetting.warn": "風險警告",
       "moresetting.check.warn": "請謹慎勾選此選項，勾選錯誤會導致模型無法正常使用！！！",
@@ -924,23 +953,10 @@
         "duplicateName": "已存在同名伺服器",
         "serverSingular": "伺服器",
         "serverPlural": "伺服器"
-      }
-    },
-    "topics": {
-      "add": "添加話題",
-      "group": {
-        "add": "添加分組",
-        "edit": "編輯分組",
-        "name": "分組名稱",
-        "name.required": "請輸入分組名稱",
-        "name.placeholder": "輸入分組名稱",
-        "description": "分組描述",
-        "description.placeholder": "輸入分組描述（可選）"
       },
-      "move_to_group": "移動到分組",
-      "no_group": "無分組",
-      "new": "新話題",
-      "ungrouped": "未分組"
+      "advanced.assistantGroup": "助手分組",
+      "advanced.topicsGroup": "話題分組",
+      "display.group.title": "分組設定"
     },
     "translate": {
       "any.language": "任意語言",
@@ -963,7 +979,9 @@
       "output.placeholder": "翻譯",
       "processing": "翻譯中...",
       "title": "翻譯",
-      "tooltip.newline": "換行"
+      "tooltip.newline": "換行",
+      "scroll_sync.enable": "開啟滾動同步",
+      "scroll_sync.disable": "關閉滾動同步"
     },
     "tray": {
       "quit": "結束",
@@ -1009,6 +1027,22 @@
         "copying_files": "複製文件... {{progress}}%",
         "completed": "復原完成"
       }
+    },
+    "topics": {
+      "add": "添加話題",
+      "group": {
+        "add": "添加分組",
+        "edit": "編輯分組",
+        "name": "分組名稱",
+        "name.required": "請輸入分組名稱",
+        "name.placeholder": "輸入分組名稱",
+        "description": "分組描述",
+        "description.placeholder": "輸入分組描述（可選）"
+      },
+      "move_to_group": "移動到分組",
+      "no_group": "無分組",
+      "new": "新話題",
+      "ungrouped": "未分組"
     }
   }
 }

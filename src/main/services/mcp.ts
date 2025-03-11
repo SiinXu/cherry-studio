@@ -1,12 +1,15 @@
 import { MCPServer, MCPTool } from '@types'
 import log from 'electron-log'
-import Store from 'electron-store'
 import { EventEmitter } from 'events'
 import { v4 as uuidv4 } from 'uuid'
 
-const store = new Store()
+import { windowService } from './WindowService'
 
+/**
+ * Service for managing Model Context Protocol servers and tools
+ */
 export default class MCPService extends EventEmitter {
+  private servers: MCPServer[] = []
   private activeServers: Map<string, any> = new Map()
   private clients: { [key: string]: any } = {}
   private Client: any
@@ -15,26 +18,76 @@ export default class MCPService extends EventEmitter {
   private initialized = false
   private initPromise: Promise<void> | null = null
 
-  constructor() {
-    super()
-    this.init().catch((err) => {
-      log.error('[MCP] Failed to initialize MCP service:', err)
-    })
-  }
-  private getServersFromStore(): MCPServer[] {
-    return store.get('mcp.servers', []) as MCPServer[]
+  // Simplified server loading state management
+  private readyState = {
+    serversLoaded: false,
+    promise: null as Promise<void> | null,
+    resolve: null as ((value: void) => void) | null
   }
 
-  public async init() {
+  constructor() {
+    super()
+    this.createServerLoadingPromise()
+    this.requestServers()
+  }
+
+  /**
+   * Create a promise that resolves when servers are loaded
+   */
+  private createServerLoadingPromise(): void {
+    this.readyState.promise = new Promise<void>((resolve) => {
+      this.readyState.resolve = resolve
+    })
+  }
+
+  /**
+   * Request server data from renderer process Redux
+   */
+  public requestServers(): void {
+    const mainWindow = windowService.getMainWindow()
+    if (mainWindow) {
+      log.info('[MCP] Requesting servers from Redux')
+      mainWindow.webContents.send('mcp:request-servers')
+    } else {
+      log.warn('[MCP] Main window not available, cannot request servers')
+    }
+  }
+
+  /**
+   * Set servers received from Redux and trigger initialization if needed
+   */
+  public setServers(servers: MCPServer[]): void {
+    this.servers = servers
+    log.info(`[MCP] Received ${servers.length} servers from Redux`)
+
+    // Mark servers as loaded and resolve the waiting promise
+    if (!this.readyState.serversLoaded && this.readyState.resolve) {
+      this.readyState.serversLoaded = true
+      this.readyState.resolve()
+      this.readyState.resolve = null
+    }
+
+    // Initialize if not already initialized
+    if (!this.initialized) {
+      this.init().catch(this.logError('Failed to initialize MCP service'))
+    }
+  }
+
+  /**
+   * Initialize the MCP service if not already initialized
+   */
+  public async init(): Promise<void> {
     // If already initialized, return immediately
     if (this.initialized) return
 
     // If initialization is in progress, return that promise
     if (this.initPromise) return this.initPromise
 
-    // Create and store the initialization promise
     this.initPromise = (async () => {
       try {
+        // Wait for servers to be loaded from Redux
+        await this.waitForServers()
+
         log.info('[MCP] Starting initialization')
 
         // 使用重试机制加载客户端
@@ -43,9 +96,16 @@ export default class MCPService extends EventEmitter {
 
         while (retries < maxRetries) {
           try {
-            this.Client = await this.importClient()
-            this.stoioTransport = await this.importStdioClientTransport()
-            this.sseTransport = await this.importSSEClientTransport()
+            // Load SDK components in parallel for better performance
+            const [Client, StdioTransport, SSETransport] = await Promise.all([
+              this.importClient(),
+              this.importStdioClientTransport(),
+              this.importSSEClientTransport()
+            ])
+
+            this.Client = Client
+            this.stoioTransport = StdioTransport
+            this.sseTransport = SSETransport
             break // 如果加载成功，跳出循环
           } catch (loadErr) {
             retries++
@@ -57,11 +117,16 @@ export default class MCPService extends EventEmitter {
           }
         }
 
-        // Mark as initialized before loading servers to prevent recursive initialization
+        // 这部分已在上面的重试机制中实现
+
+        // Mark as initialized before loading servers
         this.initialized = true
 
-        await this.load(this.getServersFromStore())
+        // Load active servers
+        await this.loadActiveServers()
         log.info('[MCP] Initialization completed successfully')
+
+        return
       } catch (err) {
         this.initialized = false // Reset flag on error
         log.error('[MCP] Failed to initialize:', err)
@@ -74,6 +139,27 @@ export default class MCPService extends EventEmitter {
     return this.initPromise
   }
 
+  /**
+   * Wait for servers to be loaded from Redux
+   */
+  private async waitForServers(): Promise<void> {
+    if (!this.readyState.serversLoaded && this.readyState.promise) {
+      log.info('[MCP] Waiting for servers data from Redux...')
+      await this.readyState.promise
+      log.info('[MCP] Servers received, continuing initialization')
+    }
+  }
+
+  /**
+   * Helper to create consistent error logging functions
+   */
+  private logError(message: string) {
+    return (err: Error) => log.error(`[MCP] ${message}:`, err)
+  }
+
+  /**
+   * Import the MCP client SDK
+   */
   private async importClient() {
     try {
       // 使用原始导入路径，已知可用
@@ -85,33 +171,45 @@ export default class MCPService extends EventEmitter {
     }
   }
 
+  /**
+   * Import the stdio transport
+   */
   private async importStdioClientTransport() {
     try {
       // 使用原始导入路径，已知可用
       const { StdioClientTransport } = await import('@modelcontextprotocol/sdk/client/stdio.js')
       return StdioClientTransport
     } catch (err) {
-      log.error('[MCP] Failed to import Transport:', err)
+      log.error('[MCP] Failed to import StdioTransport:', err)
       throw err
     }
   }
 
+  /**
+   * Import the SSE transport
+   */
   private async importSSEClientTransport() {
     try {
       // 使用原始导入路径，已知可用
       const { SSEClientTransport } = await import('@modelcontextprotocol/sdk/client/sse.js')
       return SSEClientTransport
     } catch (err) {
-      log.error('[MCP] Failed to import Transport:', err)
+      log.error('[MCP] Failed to import SSETransport:', err)
       throw err
     }
   }
 
+  /**
+   * List all available MCP servers
+   */
   public async listAvailableServices(): Promise<MCPServer[]> {
     await this.ensureInitialized()
-    return this.getServersFromStore()
+    return this.servers
   }
 
+  /**
+   * Ensure the service is initialized before operations
+   */
   private async ensureInitialized() {
     if (!this.initialized) {
       log.debug('[MCP] Ensuring initialization')
@@ -119,104 +217,124 @@ export default class MCPService extends EventEmitter {
     }
   }
 
+  /**
+   * Add a new MCP server
+   */
   public async addServer(server: MCPServer): Promise<void> {
     await this.ensureInitialized()
-    try {
-      const servers = this.getServersFromStore()
-      if (servers.some((s) => s.name === server.name)) {
-        throw new Error(`Server with name ${server.name} already exists`)
-      }
 
-      servers.push(server)
-      store.set('mcp.servers', servers)
+    // Check for duplicate name
+    if (this.servers.some((s) => s.name === server.name)) {
+      throw new Error(`Server with name ${server.name} already exists`)
+    }
 
-      if (server.isActive) {
-        await this.activate(server)
-      }
-    } catch (error) {
-      log.error('Failed to add MCP server:', error)
-      throw error
+    // Add to servers list
+    const updatedServers = [...this.servers, server]
+    this.servers = updatedServers
+    this.notifyReduxServersChanged(updatedServers)
+
+    // Activate if needed
+    if (server.isActive) {
+      await this.activate(server).catch(this.logError(`Failed to activate server ${server.name}`))
     }
   }
 
+  /**
+   * Update an existing MCP server
+   */
   public async updateServer(server: MCPServer): Promise<void> {
     await this.ensureInitialized()
-    try {
-      const servers = this.getServersFromStore()
-      const index = servers.findIndex((s) => s.name === server.name)
 
-      if (index === -1) {
-        throw new Error(`Server ${server.name} not found`)
-      }
-
-      const wasActive = servers[index].isActive
-      if (wasActive && !server.isActive) {
-        await this.deactivate(server.name)
-      } else if (!wasActive && server.isActive) {
-        await this.activate(server)
-      }
-
-      servers[index] = server
-      store.set('mcp.servers', servers)
-    } catch (error) {
-      log.error('Failed to update MCP server:', error)
-      throw error
+    const index = this.servers.findIndex((s) => s.name === server.name)
+    if (index === -1) {
+      throw new Error(`Server ${server.name} not found`)
     }
+
+    // Check activation status change
+    const wasActive = this.servers[index].isActive
+    if (wasActive && !server.isActive) {
+      await this.deactivate(server.name)
+    } else if (!wasActive && server.isActive) {
+      await this.activate(server)
+    }
+
+    // Update servers list
+    const updatedServers = [...this.servers]
+    updatedServers[index] = server
+    this.servers = updatedServers
+    this.notifyReduxServersChanged(updatedServers)
   }
 
+  /**
+   * Delete an MCP server
+   */
   public async deleteServer(serverName: string): Promise<void> {
     await this.ensureInitialized()
-    try {
-      if (this.clients[serverName]) {
-        await this.deactivate(serverName)
-      }
 
-      const servers = this.getServersFromStore()
-      const filteredServers = servers.filter((s) => s.name !== serverName)
-      store.set('mcp.servers', filteredServers)
-    } catch (error) {
-      log.error('Failed to delete MCP server:', error)
-      throw error
+    // Deactivate if running
+    if (this.clients[serverName]) {
+      await this.deactivate(serverName)
     }
+
+    // Update servers list
+    const filteredServers = this.servers.filter((s) => s.name !== serverName)
+    this.servers = filteredServers
+    this.notifyReduxServersChanged(filteredServers)
   }
 
+  /**
+   * Set a server's active state
+   */
   public async setServerActive(params: { name: string; isActive: boolean }): Promise<void> {
     await this.ensureInitialized()
-    try {
-      const { name, isActive } = params
-      const servers = this.getServersFromStore()
-      const server = servers.find((s) => s.name === name)
 
-      if (!server) {
-        throw new Error(`Server ${name} not found`)
-      }
+    const { name, isActive } = params
+    const server = this.servers.find((s) => s.name === name)
 
-      server.isActive = isActive
-      store.set('mcp.servers', servers)
+    if (!server) {
+      throw new Error(`Server ${name} not found`)
+    }
 
-      if (isActive) {
-        await this.activate(server)
-      } else {
-        await this.deactivate(name)
-      }
-    } catch (error) {
-      log.error('Failed to set MCP server active status:', error)
-      throw error
+    // Update server status
+    server.isActive = isActive
+    this.notifyReduxServersChanged([...this.servers])
+
+    // Activate or deactivate as needed
+    if (isActive) {
+      await this.activate(server)
+    } else {
+      await this.deactivate(name)
     }
   }
 
+  /**
+   * Notify Redux in the renderer process about server changes
+   */
+  private notifyReduxServersChanged(servers: MCPServer[]): void {
+    const mainWindow = windowService.getMainWindow()
+    if (mainWindow) {
+      mainWindow.webContents.send('mcp:servers-changed', servers)
+    }
+  }
+
+  /**
+   * Activate an MCP server
+   */
   public async activate(server: MCPServer): Promise<void> {
     await this.ensureInitialized()
+
+    const { name, baseUrl, command, args, env } = server
+
+    // Skip if already running
+    if (this.clients[name]) {
+      log.info(`[MCP] Server ${name} is already running`)
+      return
+    }
+
+    let transport: any = null
+
     try {
-      const { name, baseUrl, command, args, env } = server
-
-      if (this.clients[name]) {
-        log.info(`[MCP] Server ${name} is already running`)
-        return
-      }
-
-      let transport: any = null
-
+      // Create appropriate transport based on configuration
       if (baseUrl) {
         transport = new this.sseTransport(new URL(baseUrl))
       } else if (command) {
@@ -240,141 +358,171 @@ export default class MCPService extends EventEmitter {
         throw new Error('Either baseUrl or command must be provided')
       }
 
-      const client = new this.Client(
-        {
-          name: name,
-          version: '1.0.0'
-        },
-        {
-          capabilities: {}
-        }
-      )
+      // Create and connect client
+      const client = new this.Client({ name, version: '1.0.0' }, { capabilities: {} })
 
       await client.connect(transport)
+
+      // Store client and server info
       this.clients[name] = client
       this.activeServers.set(name, { client, server })
 
       log.info(`[MCP] Server ${name} started successfully`)
       this.emit('server-started', { name })
     } catch (error) {
-      log.error('[MCP] Error activating server:', error)
+      log.error(`[MCP] Error activating server ${name}:`, error)
       throw error
     }
   }
 
+  /**
+   * Deactivate an MCP server
+   */
   public async deactivate(name: string): Promise<void> {
     await this.ensureInitialized()
+
+    if (!this.clients[name]) {
+      log.warn(`[MCP] Server ${name} is not running`)
+      return
+    }
+
     try {
-      if (this.clients[name]) {
-        log.info(`[MCP] Stopping server: ${name}`)
-        await this.clients[name].close()
-        delete this.clients[name]
-        this.activeServers.delete(name)
-        this.emit('server-stopped', { name })
-      } else {
-        log.warn(`[MCP] Server ${name} is not running`)
-      }
+      log.info(`[MCP] Stopping server: ${name}`)
+      await this.clients[name].close()
+      delete this.clients[name]
+      this.activeServers.delete(name)
+      this.emit('server-stopped', { name })
     } catch (error) {
-      log.error('[MCP] Error deactivating server:', error)
+      log.error(`[MCP] Error deactivating server ${name}:`, error)
       throw error
     }
   }
 
+  /**
+   * List available tools from active MCP servers
+   */
   public async listTools(serverName?: string): Promise<MCPTool[]> {
     await this.ensureInitialized()
+
     try {
+      // If server name provided, list tools for that server only
       if (serverName) {
-        if (!this.clients[serverName]) {
-          throw new Error(`MCP Client ${serverName} not found`)
-        }
-        const { tools } = await this.clients[serverName].listTools()
-        return tools.map((tool: any) => {
-          tool.serverName = serverName
-          tool.id = 'f' + uuidv4().replace(/-/g, '')
-          return tool
-        })
-      } else {
-        let allTools: MCPTool[] = []
-        for (const clientName in this.clients) {
-          try {
-            const { tools } = await this.clients[clientName].listTools()
-            log.info(`[MCP] Tools for ${clientName}:`, tools)
-            allTools = allTools.concat(
-              tools.map((tool: MCPTool) => {
-                tool.serverName = clientName
-                tool.id = 'f' + uuidv4().replace(/-/g, '')
-                return tool
-              })
-            )
-          } catch (error) {
-            log.error(`[MCP] Error listing tools for ${clientName}:`, error)
-          }
-        }
-        log.info(`[MCP] Total tools listed: ${allTools.length}`)
-        return allTools
+        return await this.listToolsFromServer(serverName)
       }
+
+      // Otherwise list tools from all active servers
+      let allTools: MCPTool[] = []
+
+      for (const clientName in this.clients) {
+        try {
+          const tools = await this.listToolsFromServer(clientName)
+          allTools = allTools.concat(tools)
+        } catch (error) {
+          this.logError(`[MCP] Error listing tools for ${clientName}`)
+        }
+      }
+
+      log.info(`[MCP] Total tools listed: ${allTools.length}`)
+      return allTools
     } catch (error) {
-      log.error('[MCP] Error listing tools:', error)
+      this.logError('Error listing tools:')
       return []
     }
   }
 
+  /**
+   * Helper method to list tools from a specific server
+   */
+  private async listToolsFromServer(serverName: string): Promise<MCPTool[]> {
+    if (!this.clients[serverName]) {
+      throw new Error(`MCP Client ${serverName} not found`)
+    }
+
+    const { tools } = await this.clients[serverName].listTools()
+    return tools.map((tool: any) => ({
+      ...tool,
+      serverName,
+      id: 'f' + uuidv4().replace(/-/g, '')
+    }))
+  }
+
+  /**
+   * Call a tool on an MCP server
+   */
   public async callTool(params: { client: string; name: string; args: any }): Promise<any> {
     await this.ensureInitialized()
-    try {
-      const { client, name, args } = params
-      if (!this.clients[client]) {
-        throw new Error(`MCP Client ${client} not found`)
-      }
 
-      log.info('[MCP] Calling:', client, name, args)
-      const result = await this.clients[client].callTool({
+    const { client, name, args } = params
+
+    if (!this.clients[client]) {
+      throw new Error(`MCP Client ${client} not found`)
+    }
+
+    log.info('[MCP] Calling:', client, name, args)
+
+    try {
+      return await this.clients[client].callTool({
         name,
         arguments: args
       })
-      return result
     } catch (error) {
-      log.error(`[MCP] Error calling tool ${params.name} on ${params.client}:`, error)
+      log.error(`[MCP] Error calling tool ${name} on ${client}:`, error)
       throw error
     }
   }
 
+  /**
+   * Clean up all MCP resources
+   */
   public async cleanup(): Promise<void> {
-    try {
-      for (const name in this.clients) {
-        await this.deactivate(name).catch((err) => {
+    const clientNames = Object.keys(this.clients)
+
+    if (clientNames.length === 0) {
+      log.info('[MCP] No active servers to clean up')
+      return
+    }
+
+    log.info(`[MCP] Cleaning up ${clientNames.length} active servers`)
+
+    // Deactivate all clients
+    await Promise.allSettled(
+      clientNames.map((name) =>
+        this.deactivate(name).catch((err) => {
           log.error(`[MCP] Error during cleanup of ${name}:`, err)
         })
-      }
-      this.clients = {}
-      this.activeServers.clear()
-      log.info('[MCP] All servers cleaned up')
-    } catch (error) {
-      log.error('[MCP] Failed to clean up servers:', error)
-      throw error
-    }
+      )
+    )
+
+    this.clients = {}
+    this.activeServers.clear()
+    log.info('[MCP] All servers cleaned up')
   }
 
-  public async load(servers: MCPServer[]): Promise<void> {
-    log.info(`[MCP] Loading ${servers.length} servers`)
-
-    const activeServers = servers.filter((server) => server.isActive)
+  /**
+   * Load all active servers
+   */
+  private async loadActiveServers(): Promise<void> {
+    const activeServers = this.servers.filter((server) => server.isActive)
 
     if (activeServers.length === 0) {
       log.info('[MCP] No active servers to load')
       return
     }
 
-    for (const server of activeServers) {
-      log.info(`[MCP] Activating server: ${server.name}`)
-      try {
-        await this.activate(server)
-        log.info(`[MCP] Successfully activated server: ${server.name}`)
-      } catch (error) {
-        log.error(`[MCP] Failed to activate server ${server.name}:`, error)
-        this.emit('server-error', { name: server.name, error })
-      }
-    }
+    log.info(`[MCP] Loading ${activeServers.length} active servers`)
+
+    // Activate servers in parallel for better performance
+    await Promise.allSettled(
+      activeServers.map(async (server) => {
+        try {
+          await this.activate(server)
+          log.info(`[MCP] Successfully activated server: ${server.name}`)
+        } catch (error) {
+          this.logError(`Failed to activate server ${server.name}`)
+          this.emit('server-error', { name: server.name, error })
+        }
+      })
+    )
 
     log.info(`[MCP] Loaded and activated ${Object.keys(this.clients).length} servers`)
   }

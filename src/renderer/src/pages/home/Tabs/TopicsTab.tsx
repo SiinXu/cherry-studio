@@ -28,7 +28,7 @@ import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import store from '@renderer/store'
 import { setGenerating } from '@renderer/store/runtime'
 import { Assistant, Topic, TopicGroup } from '@renderer/types'
-import { droppableReorder } from '@renderer/utils'
+import { droppableReorder, removeSpecialCharactersForFileName } from '@renderer/utils'
 import { copyTopicAsMarkdown } from '@renderer/utils/copy'
 import {
   exportMarkdownToNotion,
@@ -490,7 +490,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
               key: 'word',
               onClick: async () => {
                 const markdown = await topicToMarkdown(topic)
-                window.api.export.toWord(markdown, topic.name)
+                window.api.export.toWord(markdown, removeSpecialCharactersForFileName(topic.name))
               }
             },
             {
