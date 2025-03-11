@@ -10,7 +10,16 @@
   ],
   "compilerOptions": {
     "composite": true,
+    "target": "esnext",
+    "module": "commonjs",
+    "strict": true,
+    "jsx": "react",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "types": [
+      "node",
       "electron-vite/node"
     ],
     "baseUrl": ".",
