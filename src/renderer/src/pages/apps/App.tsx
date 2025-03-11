@@ -42,7 +42,7 @@ const App: FC<Props> = ({ app, onClick, size = 60 }) => {
   return (
     <Dropdown menu={{ items: menuItems }} trigger={['contextMenu']}>
       <Container onClick={handleClick}>
-        <MinAppIcon size={size} ap$p={app} />
+        <MinAppIcon size={size} app={app} />
         <AppTitle>{app.name}</AppTitle>
       </Container>
     </Dropdown>

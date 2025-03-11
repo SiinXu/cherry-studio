@@ -336,7 +336,7 @@ const MCPSettings: FC = () => {
                 name="baseUrl"
                 label={t('settings.mcp.url')}
                 rules={[{ required: serverType === 'sse', message: t('settings.mcp.baseUrlRequired') }]}
-                toolti$p={t('settings.mcp.baseUrlTooltip')}>
+                tooltip={t('settings.mcp.baseUrlTooltip')}>
                 <Input placeholder="http://localhost:3000/sse" />
               </Form.Item>
             )}
@@ -350,11 +350,11 @@ const MCPSettings: FC = () => {
                   <Input placeholder="uvx or npx" />
                 </Form.Item>
 
-                <Form.Item name="args" label={t('settings.mcp.args')} toolti$p={t('settings.mcp.argsTooltip')}>
+                <Form.Item name="args" label={t('settings.mcp.args')} tooltip={t('settings.mcp.argsTooltip')}>
                   <TextArea rows={3} placeholder="arg1\narg2" style={{ fontFamily: 'monospace' }} />
                 </Form.Item>
 
-                <Form.Item name="env" label={t('settings.mcp.env')} toolti$p={t('settings.mcp.envTooltip')}>
+                <Form.Item name="env" label={t('settings.mcp.env')} tooltip={t('settings.mcp.envTooltip')}>
                   <TextArea rows={3} placeholder="KEY1=value1\nKEY2=value2" style={{ fontFamily: 'monospace' }} />
                 </Form.Item>
               </>
