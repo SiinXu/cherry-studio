@@ -1,8 +1,8 @@
-import { MCPServer, MCPTool } from '@types'
 import log from 'electron-log'
 import { EventEmitter } from 'events'
 import { v4 as uuidv4 } from 'uuid'
 
+import { MCPServer, MCPTool } from '../../renderer/src/types'
 import { windowService } from './WindowService'
 
 /**
