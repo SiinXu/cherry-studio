@@ -4,14 +4,17 @@ import {
   isOpenAIoSeries,
   isReasoningModel,
   isSupportedModel,
-  isVisionModel,
-  NOT_SUPPORTED_REGEX
+  isVisionModel
 } from '@renderer/config/models'
 import { getStoreSetting } from '@renderer/hooks/useSettings'
 import i18n from '@renderer/i18n'
 import { getAssistantSettings, getDefaultModel, getTopNamingModel } from '@renderer/services/AssistantService'
 import { EVENT_NAMES } from '@renderer/services/EventService'
-import { filterContextMessages, filterUserRoleStartMessages } from '@renderer/services/MessagesService'
+import {
+  filterContextMessages,
+  filterEmptyMessages,
+  filterUserRoleStartMessages
+} from '@renderer/services/MessagesService'
 import {
   Assistant,
   FileTypes,
@@ -22,8 +25,14 @@ import {
   Provider,
   Suggestion
 } from '@renderer/types'
-import { removeSpecialCharacters } from '@renderer/utils'
-import { safeMap } from '@renderer/utils/safeArrayUtils'
+import { removeSpecialCharactersForTopicName } from '@renderer/utils'
+import {
+  callMCPTool,
+  filterMCPTools,
+  mcpToolsToOpenAITools,
+  openAIToolsToMcpTool,
+  upsertMCPToolResponse
+} from '@renderer/utils/mcp-tools'
 import { takeRight } from 'lodash'
 import OpenAI, { AzureOpenAI } from 'openai'
 import {
@@ -37,13 +46,8 @@ import {
 
 import { CompletionsParams } from '.'
 import BaseProvider from './BaseProvider'
-import {
-  callMCPTool,
-  filterMCPTools,
-  mcpToolsToOpenAITools,
-  openAIToolsToMcpTool,
-  upsertMCPToolResponse
-} from './mcpToolUtils'
+
+type ReasoningEffort = 'high' | 'medium' | 'low'
 
 export default class OpenAIProvider extends BaseProvider {
   private sdk: OpenAI
@@ -162,7 +166,7 @@ export default class OpenAIProvider extends BaseProvider {
       }
     }
 
-    if (this.isOpenAIo1(model)) {
+    if (this.isOpenAIReasoning(model)) {
       return {
         max_tokens: undefined,
         max_completion_tokens: maxTokens
@@ -198,27 +202,26 @@ export default class OpenAIProvider extends BaseProvider {
         }
       }
 
-      const effort_ratio =
-        assistant?.settings?.reasoning_effort === 'high'
-          ? 0.8
-          : assistant?.settings?.reasoning_effort === 'medium'
-            ? 0.5
-            : assistant?.settings?.reasoning_effort === 'low'
-              ? 0.2
-              : undefined
-
       if (model.id.includes('claude-3.7-sonnet') || model.id.includes('claude-3-7-sonnet')) {
-        if (!effort_ratio) {
-          return {
-            type: 'disabled'
-          }
+        const effortRatios: Record<ReasoningEffort, number> = {
+          high: 0.8,
+          medium: 0.5,
+          low: 0.2
         }
+
+        const effort = assistant?.settings?.reasoning_effort as ReasoningEffort
+        const effortRatio = effortRatios[effort]
+
+        if (!effortRatio) {
+          return {}
+        }
+
+        const maxTokens = assistant?.settings?.maxTokens || DEFAULT_MAX_TOKENS
+        const budgetTokens = Math.trunc(Math.max(Math.min(maxTokens * effortRatio, 32000), 1024))
+
         return {
           thinking: {
-            budget_tokens: Math.max(
-              Math.min((assistant?.settings?.maxTokens || DEFAULT_MAX_TOKENS) * effort_ratio, 32000),
-              1024
-            )
+            budget_tokens: budgetTokens
           }
         }
       }
@@ -229,8 +232,8 @@ export default class OpenAIProvider extends BaseProvider {
     return {}
   }
 
-  private isOpenAIo1(model: Model) {
-    return model.id.startsWith('o1')
+  private isOpenAIReasoning(model: Model) {
+    return model.id.startsWith('o1') || model.id.startsWith('o3')
   }
 
   async completions({ messages, assistant, onChunk, onFilterMessages, mcpTools }: CompletionsParams): Promise<void> {
@@ -249,17 +252,20 @@ export default class OpenAIProvider extends BaseProvider {
 
     const userMessages: ChatCompletionMessageParam[] = []
 
-    const _messages = filterUserRoleStartMessages(filterContextMessages(takeRight(messages, contextCount + 1)))
+    const _messages = filterUserRoleStartMessages(
+      filterContextMessages(filterEmptyMessages(takeRight(messages, contextCount + 1)))
+    )
+
     onFilterMessages(_messages)
 
     for (const message of _messages) {
       userMessages.push(await this.getMessageParam(message, model))
     }
 
-    const isOpenAIo1 = this.isOpenAIo1(model)
+    const isOpenAIReasoning = this.isOpenAIReasoning(model)
 
     const isSupportStreamOutput = () => {
-      if (isOpenAIo1) {
+      if (isOpenAIReasoning) {
         return false
       }
       return streamOutput
@@ -386,30 +392,19 @@ export default class OpenAIProvider extends BaseProvider {
               continue
             }
 
-            upsertMCPToolResponse(
-              toolResponses,
-              {
-                tool: mcpTool,
-                status: 'invoking'
-              },
-              onChunk
-            )
+            upsertMCPToolResponse(toolResponses, { tool: mcpTool, status: 'invoking' }, onChunk)
+
             const toolCallResponse = await callMCPTool(mcpTool)
-            console.log(toolCallResponse)
+
+            console.log('[OpenAIProvider] toolCallResponse', toolCallResponse)
+
             reqMessages.push({
               role: 'tool',
               content: toolCallResponse.content,
               tool_call_id: toolCall.id
             } as ChatCompletionToolMessageParam)
-            upsertMCPToolResponse(
-              toolResponses,
-              {
-                tool: mcpTool,
-                status: 'done',
-                response: toolCallResponse
-              },
-              onChunk
-            )
+
+            upsertMCPToolResponse(toolResponses, { tool: mcpTool, status: 'done', response: toolCallResponse }, onChunk)
           }
 
           const newStream = await this.sdk.chat.completions
@@ -433,7 +428,6 @@ export default class OpenAIProvider extends BaseProvider {
                 signal
               }
             )
-            .finally(cleanup)
           await processStream(newStream)
         }
 
@@ -474,9 +468,8 @@ export default class OpenAIProvider extends BaseProvider {
           signal
         }
       )
-      .finally(cleanup)
 
-    await processStream(stream)
+    await processStream(stream).finally(cleanup)
   }
 
   async translate(message: Message, assistant: Assistant, onResponse?: (text: string) => void) {
@@ -489,13 +482,13 @@ export default class OpenAIProvider extends BaseProvider {
         ]
       : [{ role: 'user', content: assistant.prompt }]
 
-    const isOpenAIo1 = this.isOpenAIo1(model)
+    const isOpenAIReasoning = this.isOpenAIReasoning(model)
 
     const isSupportedStreamOutput = () => {
       if (!onResponse) {
         return false
       }
-      if (isOpenAIo1) {
+      if (isOpenAIReasoning) {
         return false
       }
       return true
@@ -587,7 +580,7 @@ export default class OpenAIProvider extends BaseProvider {
     let content = response.choices[0].message?.content || ''
     content = content.replace(/^<think>(.*?)<\/think>/s, '')
 
-    return removeSpecialCharacters(content.substring(0, 50))
+    return removeSpecialCharactersForTopicName(content.substring(0, 50))
   }
 
   public async generateText({ prompt, content }: { prompt: string; content: string }): Promise<string> {
@@ -659,34 +652,26 @@ export default class OpenAIProvider extends BaseProvider {
 
       if (this.provider.id === 'github') {
         // @ts-ignore key is not typed
-        const githubModels = safeMap(response.body, (model: any) => ({
-          id: model.name,
-          description: model.summary,
-          object: 'model' as const, // 使用const断言确保类型为"model"
-          owned_by: model.publisher,
-          created: Date.now(), // 添加required created属性
-          provider: 'github', // 添加Model所需的provider属性
-          name: model.name, // 添加Model所需的name属性
-          group: 'github' // 添加Model所需的group属性
-        }))
-        // 转换为Model类型
-        return githubModels.filter((model) => !NOT_SUPPORTED_REGEX.test(model.id)) as unknown as OpenAI.Models.Model[]
+        return response.body
+          .map((model) => ({
+            id: model.name,
+            description: model.summary,
+            object: 'model',
+            owned_by: model.publisher
+          }))
+          .filter(isSupportedModel)
       }
 
       if (this.provider.id === 'together') {
         // @ts-ignore key is not typed
-        const togetherModels = safeMap(response?.body, (model: any) => ({
-          id: model.id,
-          description: model.display_name,
-          object: 'model' as const, // 使用const断言确保类型为"model"
-          owned_by: model.organization,
-          created: Date.now(), // 添加required created属性
-          provider: 'together', // 添加Model所需的provider属性
-          name: model.display_name || model.id, // 添加Model所需的name属性
-          group: 'together' // 添加Model所需的group属性
-        }))
-        // 转换为Model类型
-        return togetherModels.filter((model) => !NOT_SUPPORTED_REGEX.test(model.id)) as unknown as OpenAI.Models.Model[]
+        return response?.body
+          .map((model: any) => ({
+            id: model.id,
+            description: model.display_name,
+            object: 'model',
+            owned_by: model.organization
+          }))
+          .filter(isSupportedModel)
       }
 
       const models = response?.data || []
