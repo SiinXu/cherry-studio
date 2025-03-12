@@ -1,8 +1,12 @@
+import { isLinux, isMac, isWin } from '@main/constant'
+import type { Client } from '@modelcontextprotocol/sdk/client/index.js'
+import type { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js'
+import type { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
+import { MCPServer, MCPTool } from '@types'
 import log from 'electron-log'
 import { EventEmitter } from 'events'
 import { v4 as uuidv4 } from 'uuid'
 
-import { MCPServer, MCPTool } from '../../renderer/src/types'
 import { windowService } from './WindowService'
 
 /**
@@ -12,9 +16,9 @@ export default class MCPService extends EventEmitter {
   private servers: MCPServer[] = []
   private activeServers: Map<string, any> = new Map()
   private clients: { [key: string]: any } = {}
-  private Client: any
-  private stoioTransport: any
-  private sseTransport: any
+  private Client: typeof Client | undefined
+  private stdioTransport: typeof StdioClientTransport | undefined
+  private sseTransport: typeof SSEClientTransport | undefined
   private initialized = false
   private initPromise: Promise<void> | null = null
 
@@ -90,7 +94,7 @@ export default class MCPService extends EventEmitter {
             ])
 
             this.Client = Client
-            this.stoioTransport = StdioTransport
+            this.stdioTransport = StdioTransport
             this.sseTransport = SSETransport
             break // 如果加载成功，跳出循环
           } catch (loadErr) {
@@ -102,8 +106,6 @@ export default class MCPService extends EventEmitter {
             await new Promise((resolve) => setTimeout(resolve, 500 * retries)) // 等待后重试
           }
         }
-
-        // 这部分已在上面的重试机制中实现
 
         // Mark as initialized before loading servers
         this.initialized = true
@@ -214,15 +216,14 @@ export default class MCPService extends EventEmitter {
       throw new Error(`Server with name ${server.name} already exists`)
     }
 
-    // Add to servers list
-    const updatedServers = [...this.servers, server]
-    this.servers = updatedServers
-    this.notifyReduxServersChanged(updatedServers)
-
     // Activate if needed
     if (server.isActive) {
-      await this.activate(server).catch(this.logError(`Failed to activate server ${server.name}`))
+      await this.activate(server)
     }
+
+    // Add to servers list
+    this.servers = [...this.servers, server]
+    this.notifyReduxServersChanged(this.servers)
   }
 
   /**
@@ -286,10 +287,10 @@ export default class MCPService extends EventEmitter {
       server.isActive = isActive
       this.notifyReduxServersChanged([...this.servers])
 
-      // 添加重试逻辑
+      // 添加重试逆辑
       let attempts = 0
       const maxAttempts = 3
-      
+
       while (attempts < maxAttempts) {
         try {
           // 激活或停用服务器
@@ -302,17 +303,19 @@ export default class MCPService extends EventEmitter {
         } catch (error) {
           attempts++
           const errorMessage = error instanceof Error ? error.message : String(error)
-          log.warn(`[MCP] Attempt ${attempts}/${maxAttempts} failed to ${isActive ? 'activate' : 'deactivate'} server ${name}: ${errorMessage}`)
-          
+          log.warn(
+            `[MCP] Attempt ${attempts}/${maxAttempts} failed to ${isActive ? 'activate' : 'deactivate'} server ${name}: ${errorMessage}`
+          )
+
           if (attempts >= maxAttempts) {
             // 重置服务器状态并重新通知
             server.isActive = !isActive // 回滚状态
             this.notifyReduxServersChanged([...this.servers])
             throw error // 抛出错误给调用者
           }
-          
+
           // 等待一段时间后重试
-          await new Promise(resolve => setTimeout(resolve, 500 * attempts))
+          await new Promise((resolve) => setTimeout(resolve, 500 * attempts))
         }
       }
     } catch (error) {
@@ -320,6 +323,10 @@ export default class MCPService extends EventEmitter {
       log.error(`[MCP] Failed to set server ${params.name} active state to ${params.isActive}:`, errorMessage)
       throw error
     }
+
+    // Update server status
+    server.isActive = isActive
+    this.notifyReduxServersChanged([...this.servers])
   }
 
   /**
@@ -346,35 +353,33 @@ export default class MCPService extends EventEmitter {
       return
     }
 
-    let transport: any = null
+    let transport: StdioClientTransport | SSEClientTransport
 
     try {
       // Create appropriate transport based on configuration
       if (baseUrl) {
-        transport = new this.sseTransport(new URL(baseUrl))
+        transport = new this.sseTransport!(new URL(baseUrl))
       } else if (command) {
         let cmd: string = command
         if (command === 'npx') {
           cmd = process.platform === 'win32' ? `${command}.cmd` : command
         }
 
-        const mergedEnv = {
-          ...env,
-          PATH: process.env.PATH
-        }
-
-        transport = new this.stoioTransport({
+        transport = new this.stdioTransport!({
           command: cmd,
           args,
-          stderr: process.platform === 'win32' ? 'pipe' : 'inherit',
-          env: mergedEnv
+          stderr: 'pipe',
+          env: {
+            PATH: this.getEnhancedPath(process.env.PATH || ''),
+            ...env
+          }
         })
       } else {
         throw new Error('Either baseUrl or command must be provided')
       }
 
       // Create and connect client
-      const client = new this.Client({ name, version: '1.0.0' }, { capabilities: {} })
+      const client = new this.Client!({ name, version: '1.0.0' }, { capabilities: {} })
 
       await client.connect(transport)
 
@@ -386,6 +391,7 @@ export default class MCPService extends EventEmitter {
       this.emit('server-started', { name })
     } catch (error) {
       log.error(`[MCP] Error activating server ${name}:`, error)
+      server.isActive = false
       throw error
     }
   }
@@ -540,5 +546,62 @@ export default class MCPService extends EventEmitter {
     )
 
     log.info(`[MCP] Loaded and activated ${Object.keys(this.clients).length} servers`)
+  }
+
+  /**
+   * Get enhanced PATH including common tool locations
+   */
+  private getEnhancedPath(originalPath: string): string {
+    // 将原始 PATH 按分隔符分割成数组
+    const pathSeparator = process.platform === 'win32' ? ';' : ':'
+    const existingPaths = new Set(originalPath.split(pathSeparator).filter(Boolean))
+    const homeDir = process.env.HOME || process.env.USERPROFILE || ''
+
+    // 定义要添加的新路径
+    const newPaths: string[] = []
+
+    if (isMac) {
+      newPaths.push(
+        '/bin',
+        '/usr/bin',
+        '/usr/local/bin',
+        '/usr/local/sbin',
+        '/opt/homebrew/bin',
+        '/opt/homebrew/sbin',
+        '/usr/local/opt/node/bin',
+        `${homeDir}/.nvm/current/bin`,
+        `${homeDir}/.npm-global/bin`,
+        `${homeDir}/.yarn/bin`,
+        `${homeDir}/.cargo/bin`,
+        '/opt/local/bin'
+      )
+    }
+
+    if (isLinux) {
+      newPaths.push(
+        '/bin',
+        '/usr/bin',
+        '/usr/local/bin',
+        `${homeDir}/.nvm/current/bin`,
+        `${homeDir}/.npm-global/bin`,
+        `${homeDir}/.yarn/bin`,
+        `${homeDir}/.cargo/bin`,
+        '/snap/bin'
+      )
+    }
+
+    if (isWin) {
+      newPaths.push(`${process.env.APPDATA}\\npm`, `${homeDir}\\AppData\\Local\\Yarn\\bin`, `${homeDir}\\.cargo\\bin`)
+    }
+
+    // 只添加不存在的路径
+    newPaths.forEach((path) => {
+      if (path && !existingPaths.has(path)) {
+        existingPaths.add(path)
+      }
+    })
+
+    // 转换回字符串
+    return Array.from(existingPaths).join(pathSeparator)
   }
 }

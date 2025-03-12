@@ -1,4 +1,5 @@
 import { DownOutlined, UpOutlined } from '@ant-design/icons'
+import { useSettings } from '@renderer/hooks/useSettings'
 import { Button, Tooltip } from 'antd'
 import { FC, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -12,6 +13,9 @@ const ChatNavigation: FC<ChatNavigationProps> = ({ containerId }) => {
   const { t } = useTranslation()
   const [isVisible, setIsVisible] = useState(false)
   const [hideTimer, setHideTimer] = useState<NodeJS.Timeout | null>(null)
+  const { topicPosition, showTopics } = useSettings()
+  const showRightTopics = topicPosition === 'right' && showTopics
+  const right = showRightTopics ? 'calc(var(--topic-list-width) + 16px)' : '16px'
 
   const resetHideTimer = useCallback(() => {
     if (hideTimer) {
@@ -171,8 +175,8 @@ const ChatNavigation: FC<ChatNavigationProps> = ({ containerId }) => {
 
   return (
     <>
-      <TriggerArea onMouseEnter={() => setIsVisible(true)} onMouseLeave={() => resetHideTimer()} />
-      <NavigationContainer $isVisible={isVisible}>
+      <TriggerArea $right={right} onMouseEnter={() => setIsVisible(true)} onMouseLeave={() => resetHideTimer()} />
+      <NavigationContainer $isVisible={isVisible} $right={right}>
         <ButtonGroup>
           <Tooltip title={t('chat.navigation.prev')} placement="left">
             <NavigationButton
@@ -199,23 +203,23 @@ const ChatNavigation: FC<ChatNavigationProps> = ({ containerId }) => {
   )
 }
 
-const TriggerArea = styled.div`
+const TriggerArea = styled.div<{ $right: string }>`
   position: fixed;
-  right: 0;
+  right: ${(props) => props.$right};
   top: 40%;
   width: 20px;
   height: 20%;
   z-index: 998;
-  background: transparent;
 `
 
 interface NavigationContainerProps {
   $isVisible: boolean
+  $right: string
 }
 
 const NavigationContainer = styled.div<NavigationContainerProps>`
   position: fixed;
-  right: 16px;
+  right: ${(props) => props.$right};
   top: 50%;
   transform: translateY(-50%) translateX(${(props) => (props.$isVisible ? 0 : '100%')});
   z-index: 999;
