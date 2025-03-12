@@ -286,24 +286,53 @@ export default class MCPService extends EventEmitter {
    * Set a server's active state
    */
   public async setServerActive(params: { name: string; isActive: boolean }): Promise<void> {
-    await this.ensureInitialized()
+    try {
+      await this.ensureInitialized()
 
-    const { name, isActive } = params
-    const server = this.servers.find((s) => s.name === name)
+      const { name, isActive } = params
+      const server = this.servers.find((s) => s.name === name)
 
-    if (!server) {
-      throw new Error(`Server ${name} not found`)
-    }
+      if (!server) {
+        throw new Error(`Server ${name} not found`)
+      }
 
-    // Update server status
-    server.isActive = isActive
-    this.notifyReduxServersChanged([...this.servers])
+      // 更新服务器状态前先通知Redux，避免UI卡住
+      server.isActive = isActive
+      this.notifyReduxServersChanged([...this.servers])
 
-    // Activate or deactivate as needed
-    if (isActive) {
-      await this.activate(server)
-    } else {
-      await this.deactivate(name)
+      // 添加重试逻辑
+      let attempts = 0
+      const maxAttempts = 3
+      
+      while (attempts < maxAttempts) {
+        try {
+          // 激活或停用服务器
+          if (isActive) {
+            await this.activate(server)
+          } else {
+            await this.deactivate(name)
+          }
+          return // 成功，退出函数
+        } catch (error) {
+          attempts++
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          log.warn(`[MCP] Attempt ${attempts}/${maxAttempts} failed to ${isActive ? 'activate' : 'deactivate'} server ${name}: ${errorMessage}`)
+          
+          if (attempts >= maxAttempts) {
+            // 重置服务器状态并重新通知
+            server.isActive = !isActive // 回滚状态
+            this.notifyReduxServersChanged([...this.servers])
+            throw error // 抛出错误给调用者
+          }
+          
+          // 等待一段时间后重试
+          await new Promise(resolve => setTimeout(resolve, 500 * attempts))
+        }
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      log.error(`[MCP] Failed to set server ${params.name} active state to ${params.isActive}:`, errorMessage)
+      throw error
     }
   }
 
