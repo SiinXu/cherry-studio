@@ -164,7 +164,7 @@ const assistantsSlice = createSlice({
         assistant && assistant.id === action.payload.assistantId
           ? {
               ...assistant,
-              topics: safeMap(assistant.topics, (topic) => (topic.id === newTopic.id ? newTopic : topic))
+              topics: assistant.topics.map((topic) => (topic.id === newTopic.id ? newTopic : topic))
             }
           : assistant
       )
@@ -179,7 +179,9 @@ const assistantsSlice = createSlice({
         assistant && assistant.id === action.payload.assistantId
           ? {
               ...assistant,
-              topics: action.payload.topics
+              topics: action.payload.topics.map((topic) =>
+                isEmpty(topic.messages) ? topic : { ...topic, messages: [] }
+              )
             }
           : assistant
       )

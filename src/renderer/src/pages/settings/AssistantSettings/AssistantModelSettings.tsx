@@ -186,7 +186,12 @@ const AssistantModelSettings: FC<Props> = ({ assistant, updateAssistant, updateA
 
   useEffect(() => {
     return () => updateAssistantSettings({ customParameters: customParametersRef.current })
-  }, [updateAssistantSettings])
+  }, [])
+
+  const formatSliderTooltip = (value?: number) => {
+    if (value === undefined) return ''
+    return value === 20 ? '∞' : value.toString()
+  }
 
   return (
     <Container>
@@ -301,7 +306,7 @@ const AssistantModelSettings: FC<Props> = ({ assistant, updateAssistant, updateA
             onChangeComplete={onContextCountChange}
             value={typeof contextCount === 'number' ? contextCount : 0}
             marks={{ 0: '0', 5: '5', 10: '10', 15: '15', 20: t('chat.settings.max') }}
-            ste$p={1}
+            step={1}
           />
         </Col>
         <Col span={4}>

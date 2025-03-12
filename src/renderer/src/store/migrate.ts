@@ -10,6 +10,7 @@ import { isEmpty } from 'lodash'
 import { createMigrate } from 'redux-persist'
 
 import { RootState } from '.'
+import { moveProvider } from './llm'
 import { DEFAULT_SIDEBAR_ICONS } from './settings'
 
 // remove logo base64 data to reduce the size of the state
@@ -874,7 +875,6 @@ const migrateConfig = {
         state.minapps.enabled.push(flowith)
       }
     }
-    removeMiniAppIconsFromState(state)
     return state
   },
   '60': (state: RootState) => {
@@ -1242,30 +1242,6 @@ const migrateConfig = {
       })
     }
 
-    return state
-  },
-  '78': (state: RootState) => {
-    // 修复从老版本升级时，assistants.groups 和 topicGroups 为 undefined 的问题
-    if (state.assistants) {
-      if (!state.assistants.groups) {
-        state.assistants.groups = []
-      }
-      if (!state.assistants.topicGroups) {
-        state.assistants.topicGroups = []
-      }
-    }
-    return state
-  },
-  '79': (state: RootState) => {
-    // 初始化助手分组和话题分组设置
-    if (state.settings) {
-      if (state.settings.enableAssistantGroup === undefined) {
-        state.settings.enableAssistantGroup = false
-      }
-      if (state.settings.enableTopicsGroup === undefined) {
-        state.settings.enableTopicsGroup = false
-      }
-    }
     return state
   }
 }

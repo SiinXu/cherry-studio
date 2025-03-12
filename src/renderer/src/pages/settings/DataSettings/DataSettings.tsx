@@ -1,41 +1,29 @@
-import { FileSearchOutlined, FolderOpenOutlined, InfoCircleOutlined, SaveOutlined } from '@ant-design/icons'
-import { Client } from '@notionhq/client'
+import {
+  CloudSyncOutlined,
+  DatabaseOutlined,
+  FileMarkdownOutlined,
+  FileSearchOutlined,
+  FolderOpenOutlined,
+  SaveOutlined,
+  YuqueOutlined
+} from '@ant-design/icons'
 import { HStack } from '@renderer/components/Layout'
-import MinApp from '@renderer/components/MinApp'
+import ListItem from '@renderer/components/ListItem'
 import BackupPopup from '@renderer/components/Popups/BackupPopup'
 import RestorePopup from '@renderer/components/Popups/RestorePopup'
 import { useTheme } from '@renderer/context/ThemeProvider'
 import { useKnowledgeFiles } from '@renderer/hooks/useKnowledgeFiles'
 import { reset } from '@renderer/services/BackupService'
-import { RootState, useAppDispatch } from '@renderer/store'
-import {
-  setNotionApiKey,
-  setNotionAutoSplit,
-  setNotionDatabaseID,
-  setNotionPageNameKey,
-  setNotionSplitSize,
-  setYuqueRepoId,
-  setYuqueToken,
-  setYuqueUrl
-} from '@renderer/store/settings'
 import { AppInfo } from '@renderer/types'
 import { formatFileSize } from '@renderer/utils'
-import { Button, InputNumber, Modal, Switch, Tooltip, Typography } from 'antd'
-import Input from 'antd/es/input/Input'
+import { Button, Typography } from 'antd'
 import { FC, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 
-import {
-  SettingContainer,
-  SettingDivider,
-  SettingGroup,
-  SettingHelpText,
-  SettingRow,
-  SettingRowTitle,
-  SettingTitle
-} from '..'
+import { SettingContainer, SettingDivider, SettingGroup, SettingRow, SettingRowTitle, SettingTitle } from '..'
+import MarkdownExportSettings from './MarkdownExportSettings'
+import NotionSettings from './NotionSettings'
 import WebDavSettings from './WebDavSettings'
 
 // 新增的 NotionSettings 组件
@@ -302,6 +290,19 @@ const DataSettings: FC = () => {
   const [appInfo, setAppInfo] = useState<AppInfo>()
   const { size, removeAllFiles } = useKnowledgeFiles()
   const { theme } = useTheme()
+  const [menu, setMenu] = useState<string>('data')
+
+  const menuItems = [
+    { key: 'data', title: 'settings.data.data.title', icon: <DatabaseOutlined style={{ fontSize: 16 }} /> },
+    { key: 'webdav', title: 'settings.data.webdav.title', icon: <CloudSyncOutlined style={{ fontSize: 16 }} /> },
+    {
+      key: 'markdown_export',
+      title: 'settings.data.markdown_export.title',
+      icon: <FileMarkdownOutlined style={{ fontSize: 16 }} />
+    },
+    { key: 'notion', title: 'settings.data.notion.title', icon: <i className="iconfont icon-notion" /> },
+    { key: 'yuque', title: 'settings.data.yuque.title', icon: <YuqueOutlined style={{ fontSize: 16 }} /> }
+  ]
 
   useEffect(() => {
     window.api.getAppInfo().then(setAppInfo)
@@ -318,7 +319,7 @@ const DataSettings: FC = () => {
   }
 
   const handleClearCache = () => {
-    Modal.confirm({
+    window.modal.confirm({
       title: t('settings.data.clear_cache.title'),
       content: t('settings.data.clear_cache.confirm'),
       okText: t('settings.data.clear_cache.button'),
@@ -338,7 +339,7 @@ const DataSettings: FC = () => {
   }
 
   const handleRemoveAllFiles = () => {
-    Modal.confirm({
+    window.modal.confirm({
       centered: true,
       title: t('settings.data.app_knowledge.remove_all') + ` (${formatFileSize(size)}) `,
       content: t('settings.data.app_knowledge.remove_all_confirm'),
@@ -360,7 +361,7 @@ const DataSettings: FC = () => {
         <SettingDivider />
         <SettingRow>
           <SettingRowTitle>{t('settings.general.backup.title')}</SettingRowTitle>
-          <HStack $$ga$p="5px" $justifyContent="space-between">
+          <HStack gap="5px" justifyContent="space-between">
             <Button onClick={BackupPopup.show} icon={<SaveOutlined />}>
               {t('settings.general.backup.button')}
             </Button>
@@ -372,7 +373,7 @@ const DataSettings: FC = () => {
         <SettingDivider />
         <SettingRow>
           <SettingRowTitle>{t('settings.general.reset.title')}</SettingRowTitle>
-          <HStack $$ga$p="5px">
+          <HStack gap="5px">
             <Button onClick={reset} danger>
               {t('settings.general.reset.button')}
             </Button>
@@ -389,7 +390,7 @@ const DataSettings: FC = () => {
         <SettingDivider />
         <SettingRow>
           <SettingRowTitle>{t('settings.data.app_data')}</SettingRowTitle>
-          <HStack $$alignItems="center" $$ga$p="5px">
+          <HStack alignItems="center" gap="5px">
             <Typography.Text style={{ color: 'var(--color-text-3)' }}>{appInfo?.appDataPath}</Typography.Text>
             <StyledIcon onClick={() => handleOpenPath(appInfo?.appDataPath)} />
           </HStack>
@@ -397,7 +398,7 @@ const DataSettings: FC = () => {
         <SettingDivider />
         <SettingRow>
           <SettingRowTitle>{t('settings.data.app_logs')}</SettingRowTitle>
-          <HStack $$alignItems="center" $$ga$p="5px">
+          <HStack alignItems="center" gap="5px">
             <Typography.Text style={{ color: 'var(--color-text-3)' }}>{appInfo?.logsPath}</Typography.Text>
             <StyledIcon onClick={() => handleOpenPath(appInfo?.logsPath)} />
           </HStack>
@@ -405,7 +406,7 @@ const DataSettings: FC = () => {
         <SettingDivider />
         <SettingRow>
           <SettingRowTitle>{t('settings.data.app_knowledge')}</SettingRowTitle>
-          <HStack $$alignItems="center" $$ga$p="5px">
+          <HStack alignItems="center" gap="5px">
             <Button onClick={handleRemoveAllFiles} danger>
               {t('settings.data.app_knowledge.button.delete')}
             </Button>
@@ -414,7 +415,7 @@ const DataSettings: FC = () => {
         <SettingDivider />
         <SettingRow>
           <SettingRowTitle>{t('settings.data.clear_cache.title')}</SettingRowTitle>
-          <HStack $$ga$p="5px">
+          <HStack gap="5px">
             <Button onClick={handleClearCache} danger>
               {t('settings.data.clear_cache.button')}
             </Button>
@@ -425,6 +426,10 @@ const DataSettings: FC = () => {
   )
 }
 
+const Container = styled(HStack)`
+  flex: 1;
+`
+
 const StyledIcon = styled(FileSearchOutlined)`
   color: var(--color-text-2);
   cursor: pointer;
@@ -433,6 +438,16 @@ const StyledIcon = styled(FileSearchOutlined)`
   &:hover {
     color: var(--color-text-1);
   }
+`
+
+const MenuList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: var(--settings-width);
+  padding: 12px;
+  border-right: 0.5px solid var(--color-border);
+  height: 100%;
 `
 
 export default DataSettings
