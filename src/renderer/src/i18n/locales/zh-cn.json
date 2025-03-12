@@ -466,16 +466,16 @@
       "restore.success": "恢复成功",
       "save.success.title": "保存成功",
       "searching": "正在联网搜索...",
-      "success.markdown.export.preconf": "成功导出Markdown文件到预先设定的路径",
-      "success.markdown.export.specified": "成功导出Markdown文件",
-      "success.notion.export": "成功导出到Notion",
+      "success.markdown.export.preconf": "成功导出 Markdown 文件到预先设定的路径",
+      "success.markdown.export.specified": "成功导出 Markdown 文件",
+      "success.notion.export": "成功导出到 Notion",
       "success.yuque.export": "成功导出到语雀",
       "switch.disabled": "请等待当前回复完成后操作",
       "topic.added": "话题添加成功",
       "upgrade.success.button": "重启",
       "upgrade.success.content": "重启用以完成升级",
       "upgrade.success.title": "升级成功",
-      "warn.notion.exporting": "正在导出到Notion, 请勿重复请求导出!"
+      "warn.notion.exporting": "正在导出到 Notion, 请勿重复请求导出!"
     },
     "minapp": {
       "sidebar.add.title": "添加到侧边栏",
@@ -527,13 +527,14 @@
       "reasoning": "推理",
       "search": "搜索模型...",
       "stream_output": "流式输出",
-      "tool_calling": "工具调用",
+      "function_calling": "函数调用",
       "type": {
         "embedding": "嵌入",
         "reasoning": "推理",
         "select": "选择模型类型",
         "text": "文本",
-        "vision": "图像"
+        "vision": "图像",
+        "function_calling": "函数调用"
       },
       "vision": "视觉",
       "websearch": "联网"
@@ -833,7 +834,8 @@
         "title": "MCP 服务器",
         "type": "类型",
         "updateSuccess": "服务器更新成功",
-        "url": "URL"
+        "url": "URL",
+        "toggleError": "切换失败"
       },
       "messages.divider": "消息分割线",
       "messages.grid_columns": "消息网格展示列数",

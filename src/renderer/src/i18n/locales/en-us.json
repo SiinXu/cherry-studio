@@ -538,13 +538,14 @@
       "reasoning": "Reasoning",
       "search": "Search models...",
       "stream_output": "Stream output",
-      "tool_calling": "Tool Calling",
+      "function_calling": "Function Calling",
       "type": {
         "embedding": "Embedding",
         "reasoning": "Reasoning",
         "select": "Select Model Types",
         "text": "Text",
-        "vision": "Vision"
+        "vision": "Vision",
+        "function_calling": "Function Calling"
       },
       "vision": "Vision",
       "websearch": "WebSearch"
@@ -838,7 +839,8 @@
         "title": "MCP Servers",
         "type": "Type",
         "updateSuccess": "Server updated successfully",
-        "url": "URL"
+        "url": "URL",
+        "toggleError": "Toggle failed"
       },
       "messages.divider": "Show divider between messages",
       "messages.grid_columns": "Message grid display columns",
