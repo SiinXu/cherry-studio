@@ -4,6 +4,7 @@ import { getEmbeddingMaxContext } from '@renderer/config/embedings'
 import AiProvider from '@renderer/providers/AiProvider'
 import store from '@renderer/store'
 import { FileType, KnowledgeBase, KnowledgeBaseParams, KnowledgeReference, Message } from '@renderer/types'
+import { safeFilter } from '@renderer/utils/safeArrayUtils'
 import { isEmpty, take } from 'lodash'
 
 import { getProviderByModel } from './AssistantService'
@@ -86,7 +87,7 @@ export const getKnowledgeBaseReference = async (base: KnowledgeBase, message: Me
       base: getKnowledgeBaseParams(base)
     })
     .then((results) =>
-      results.filter((item) => {
+      safeFilter(results, (item) => {
         const threshold = base.threshold || DEFAULT_KNOWLEDGE_THRESHOLD
         return item.score >= threshold
       })
@@ -121,7 +122,7 @@ export const getKnowledgeBaseReferences = async (message: Message) => {
     return []
   }
 
-  const bases = store.getState().knowledge.bases.filter((kb) => message.knowledgeBaseIds?.includes(kb.id))
+  const bases = safeFilter(store.getState().knowledge.bases, (kb) => message.knowledgeBaseIds?.includes(kb.id))
 
   if (!bases || bases.length === 0) {
     return []
@@ -129,7 +130,7 @@ export const getKnowledgeBaseReferences = async (message: Message) => {
 
   const referencesPromises = bases.map(async (base) => await getKnowledgeBaseReference(base, message))
 
-  const references = (await Promise.all(referencesPromises)).filter((result) => !isEmpty(result)).flat()
+  const references = safeFilter(await Promise.all(referencesPromises), (result) => !isEmpty(result)).flat()
 
   return references
 }

@@ -1,22 +1,27 @@
 import {
   ApiOutlined,
-  BulbOutlined,
   CheckOutlined,
   CodeOutlined,
   DatabaseOutlined,
   FileImageOutlined,
+  FileOutlined,
   GlobalOutlined,
   LeftOutlined,
+  PlayCircleOutlined,
   RightOutlined,
   RocketOutlined,
   SearchOutlined,
   SendOutlined,
+  SoundOutlined,
+  TableOutlined,
+  TeamOutlined,
   ThunderboltOutlined
 } from '@ant-design/icons'
 import { useSettings } from '@renderer/hooks/useSettings'
 import owlService, { OwlMessage, OwlToolkit, QualityEvaluationResult } from '@renderer/services/OwlService'
 import { safeGet } from '@renderer/utils/safeObjectUtils'
 import { Button, Divider, Input, notification, Radio, Spin, Tag, Tooltip, Typography } from 'antd'
+import { TFunction } from 'i18next'
 import { FC, ReactNode, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
@@ -28,16 +33,19 @@ import SandboxBrowser from './SandboxBrowser'
 const toolkitIcons: Record<string, ReactNode> = {
   web_browser: <GlobalOutlined />,
   code_interpreter: <CodeOutlined />,
-  image_generation: <FileImageOutlined />,
+  image_analysis: <FileImageOutlined />,
+  video_analysis: <PlayCircleOutlined />,
+  audio_analysis: <SoundOutlined />,
   data_analysis: <DatabaseOutlined />,
   web_search: <SearchOutlined />,
-  file_manager: <BulbOutlined />,
+  document_processing: <FileOutlined />,
+  excel_toolkit: <TableOutlined />,
   quality_evaluation: <CheckOutlined />,
+  gaia_role_playing: <TeamOutlined />,
   autonomous_agent: <ThunderboltOutlined />
 }
 
 // 工具箱名称映射，通过翻译获取
-import { TFunction } from 'i18next'
 const getToolkitName = (toolkit: string, t: TFunction): string => {
   const key = `owl.toolkit.${toolkit}`
   return t(key) || toolkit
@@ -528,7 +536,7 @@ const OwlAgent: FC<OwlAgentProps> = ({ visible }): ReactNode => {
                       <Text>{autonomousGoal}</Text>
                     </div>
                     <Button danger size="small" icon={<ApiOutlined />} onClick={handleStopAutonomousTask}>
-                      {t('owl.stop')}
+                      {t('owl.stop') || '停止'}
                     </Button>
                   </div>
                 )}
@@ -552,7 +560,9 @@ const OwlAgent: FC<OwlAgentProps> = ({ visible }): ReactNode => {
                 <TextArea
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
-                  placeholder={isAutonomousMode ? t('owl.enter_new_task') : t('owl.input_placeholder')}
+                  placeholder={
+                    isAutonomousMode ? t('owl.enter_new_task') || '输入新任务...' : t('owl.input_placeholder')
+                  }
                   autoSize={{ minRows: 2, maxRows: 6 }}
                   disabled={isProcessing || !isConfigComplete}
                 />
@@ -571,7 +581,7 @@ const OwlAgent: FC<OwlAgentProps> = ({ visible }): ReactNode => {
                       icon={<ThunderboltOutlined />}
                       onClick={handleStartAutonomousTask}
                       disabled={isProcessing || !isConfigComplete || !userInput.trim()}>
-                      {t('owl.autonomous')}
+                      {t('owl.autonomous') || '自主模式'}
                     </Button>
                   )}
                   <SendButton

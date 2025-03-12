@@ -92,6 +92,12 @@ export interface SettingsState {
   owlModelProvider: 'openai' | 'anthropic' | 'google' | 'local'
   owlToolkits: string[]
   owlLogLevel: 'debug' | 'info' | 'warning' | 'error'
+  // OWL工具和服务API密钥
+  owlGoogleApiKey: string
+  owlSearchEngineId: string
+  owlHfToken: string
+  owlChunkrApiKey: string
+  owlFirecrawlApiKey: string
 }
 
 export type MultiModelMessageStyle = 'horizontal' | 'vertical' | 'fold' | 'grid'
@@ -166,7 +172,20 @@ const initialState: SettingsState = {
   owlExternalResourcesApiKey: '',
   owlSandboxBrowserMode: 'iframe',
   owlModelProvider: 'openai',
-  owlToolkits: ['web_search', 'web_browser', 'code_interpreter', 'file_manager', 'image_generation', 'data_analysis'],
+  owlToolkits: [
+    'web_search',
+    'web_browser',
+    'code_interpreter',
+    'document_processing',
+    'image_analysis',
+    'data_analysis'
+  ],
+  // OWL工具和服务API密钥
+  owlGoogleApiKey: '',
+  owlSearchEngineId: '',
+  owlHfToken: '',
+  owlChunkrApiKey: '',
+  owlFirecrawlApiKey: '',
   owlLogLevel: 'info'
 }
 
@@ -389,6 +408,22 @@ const settingsSlice = createSlice({
     },
     setOwlLogLevel: (state, action: PayloadAction<'debug' | 'info' | 'warning' | 'error'>) => {
       state.owlLogLevel = action.payload
+    },
+    // 工具和服务API密钥设置
+    setOwlGoogleApiKey: (state, action: PayloadAction<string>) => {
+      state.owlGoogleApiKey = action.payload
+    },
+    setOwlSearchEngineId: (state, action: PayloadAction<string>) => {
+      state.owlSearchEngineId = action.payload
+    },
+    setOwlHfToken: (state, action: PayloadAction<string>) => {
+      state.owlHfToken = action.payload
+    },
+    setOwlChunkrApiKey: (state, action: PayloadAction<string>) => {
+      state.owlChunkrApiKey = action.payload
+    },
+    setOwlFirecrawlApiKey: (state, action: PayloadAction<string>) => {
+      state.owlFirecrawlApiKey = action.payload
     }
   }
 })
@@ -445,6 +480,11 @@ export const {
   setOwlModelProvider,
   setOwlToolkits,
   setOwlLogLevel,
+  setOwlGoogleApiKey,
+  setOwlSearchEngineId,
+  setOwlHfToken,
+  setOwlChunkrApiKey,
+  setOwlFirecrawlApiKey,
   setEnableTopicNaming,
   setPasteLongTextThreshold,
   setCustomCss,

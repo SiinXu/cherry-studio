@@ -1,5 +1,6 @@
 import store from '@renderer/store'
 import { Model } from '@renderer/types'
+import { safeFilter } from '@renderer/utils/safeArrayUtils'
 import { t } from 'i18next'
 import { pick } from 'lodash'
 
@@ -8,9 +9,7 @@ export const getModelUniqId = (m?: Model) => {
 }
 
 export const hasModel = (m?: Model) => {
-  const allModels = store
-    .getState()
-    .llm.providers.filter((p) => p.enabled)
+  const allModels = safeFilter(store.getState().llm.providers, (p) => p.enabled)
     .map((p) => p.models)
     .flat()
 

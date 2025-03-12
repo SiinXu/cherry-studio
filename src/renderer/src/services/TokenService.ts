@@ -1,4 +1,5 @@
 import { Assistant, FileType, FileTypes, Message } from '@renderer/types'
+import { safeFilter } from '@renderer/utils/safeArrayUtils'
 import { flatten, takeRight } from 'lodash'
 import { CompletionUsage } from 'openai/resources'
 import { approximateTokenSize } from 'tokenx'
@@ -56,7 +57,7 @@ export async function estimateMessageUsage(message: Message): Promise<Completion
   let imageTokens = 0
 
   if (message.files) {
-    const images = message.files.filter((f) => f.type === FileTypes.IMAGE)
+    const images = safeFilter(message.files, (f) => f.type === FileTypes.IMAGE)
     if (images.length > 0) {
       for (const image of images) {
         imageTokens = estimateImageTokens(image) + imageTokens
@@ -64,7 +65,7 @@ export async function estimateMessageUsage(message: Message): Promise<Completion
     }
   }
 
-  const combinedContent = [message.content, message.reasoning_content].filter((s) => s !== undefined).join(' ')
+  const combinedContent = safeFilter([message.content, message.reasoning_content], (s) => s !== undefined).join(' ')
   const tokens = estimateTextTokens(combinedContent)
 
   return {
@@ -98,18 +99,16 @@ export async function estimateHistoryTokens(assistant: Assistant, msgs: Message[
   const messages = filterMessages(filterContextMessages(takeRight(msgs, contextCount)))
 
   // 有 usage 数据的消息，快速计算总数
-  const uasageTokens = messages
-    .filter((m) => m.usage)
-    .reduce((acc, message) => {
-      const inputTokens = message.usage?.total_tokens ?? 0
-      const outputTokens = message.usage!.completion_tokens ?? 0
-      return acc + (message.role === 'user' ? inputTokens : outputTokens)
-    }, 0)
+  const uasageTokens = safeFilter(messages, (m) => Boolean(m.usage)).reduce((acc, message) => {
+    const inputTokens = message.usage?.total_tokens ?? 0
+    const outputTokens = message.usage!.completion_tokens ?? 0
+    return acc + (message.role === 'user' ? inputTokens : outputTokens)
+  }, 0)
 
   // 没有 usage 数据的消息，需要计算每条消息的 token
   let allMessages: MessageItem[][] = []
 
-  for (const message of messages.filter((m) => !m.usage)) {
+  for (const message of safeFilter(messages, (m) => !m.usage)) {
     const items = await getMessageParam(message)
     allMessages = allMessages.concat(items)
   }

@@ -6,12 +6,17 @@ import {
   CopyOutlined,
   DatabaseOutlined,
   ExpandOutlined,
+  ExperimentOutlined,
   FileImageOutlined,
   GlobalOutlined,
   LoadingOutlined,
   MenuOutlined,
+  PlayCircleOutlined,
   ReloadOutlined,
-  SearchOutlined
+  SearchOutlined,
+  SoundOutlined,
+  TableOutlined,
+  TeamOutlined
 } from '@ant-design/icons'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { OwlToolResult } from '@renderer/services/OwlService'
@@ -112,12 +117,24 @@ const SandboxBrowser: FC<SandboxBrowserProps> = ({
         return <GlobalOutlined />
       case 'code_interpreter':
         return <CodeOutlined />
-      case 'file_manager':
+      case 'document_processing':
         return <DatabaseOutlined />
-      case 'image_generation':
+      case 'image_analysis':
         return <FileImageOutlined />
+      case 'video_analysis':
+        return <PlayCircleOutlined />
+      case 'audio_analysis':
+        return <SoundOutlined />
       case 'data_analysis':
         return <BulbOutlined />
+      case 'excel_toolkit':
+        return <TableOutlined />
+      case 'quality_evaluation':
+        return <CheckCircleOutlined />
+      case 'gaia_role_playing':
+        return <TeamOutlined />
+      case 'autonomous_agent':
+        return <ExperimentOutlined />
       default:
         return <GlobalOutlined />
     }
@@ -138,11 +155,23 @@ const SandboxBrowser: FC<SandboxBrowserProps> = ({
         return 'https://example.com'
       case 'code_interpreter':
         return 'about:blank'
-      case 'file_manager':
+      case 'document_processing':
         return 'about:blank'
-      case 'image_generation':
+      case 'image_analysis':
+        return 'about:blank'
+      case 'video_analysis':
+        return 'about:blank'
+      case 'audio_analysis':
         return 'about:blank'
       case 'data_analysis':
+        return 'about:blank'
+      case 'excel_toolkit':
+        return 'about:blank'
+      case 'quality_evaluation':
+        return 'about:blank'
+      case 'gaia_role_playing':
+        return 'about:blank'
+      case 'autonomous_agent':
         return 'about:blank'
       default:
         return 'about:blank'

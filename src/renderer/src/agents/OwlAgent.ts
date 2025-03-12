@@ -56,11 +56,15 @@ export const createOwlAgent = (): Agent => {
           value: [
             'web_browser',
             'code_interpreter',
-            'image_generation',
+            'image_analysis',
+            'video_analysis',
+            'audio_analysis',
             'data_analysis',
             'web_search',
-            'file_manager',
+            'document_processing',
+            'excel_toolkit',
             'quality_evaluation',
+            'gaia_role_playing',
             'autonomous_agent'
           ],
           type: 'json'

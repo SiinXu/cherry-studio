@@ -1,36 +1,57 @@
 import { InfoCircleOutlined } from '@ant-design/icons'
 import { useSettings } from '@renderer/hooks/useSettings'
-import { useAppDispatch } from '@renderer/store'
+import { RootState, useAppDispatch } from '@renderer/store'
 import {
   setEnableOWL,
-  setOwlExternalResourcesApiKey,
-  setOwlLanguageModelApiKey,
+  setOwlChunkrApiKey,
+  setOwlFirecrawlApiKey,
+  setOwlGoogleApiKey,
+  setOwlHfToken,
   setOwlLogLevel,
   setOwlModelProvider,
   setOwlSandboxBrowserMode,
+  setOwlSearchEngineId,
   setOwlToolkits
 } from '@renderer/store/settings'
-import { Checkbox, Collapse, Divider, Input, Radio, Select, Space, Switch, Tooltip } from 'antd'
-import { FC } from 'react'
+import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
+import { Checkbox, Collapse, Divider, Input, Select, Switch, Tooltip } from 'antd'
+import { FC, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 
 import { SettingContainer, SettingDivider, SettingGroup, SettingRow, SettingRowTitle, SettingTitle } from '..'
 
 const OwlSettings: FC = () => {
+  const { t } = useTranslation()
+  const dispatch = useAppDispatch()
+
+  // 获取所有模型提供商和模型列表
+  const providers = useSelector((state: RootState) => state.llm.providers)
+  const allModels = useMemo(() => {
+    return safeFilter(providers, (provider) => provider.enabled).flatMap((provider) =>
+      safeMap(provider.models, (model) => ({
+        ...model,
+        providerName: provider.name,
+        providerId: provider.id
+      }))
+    )
+  }, [providers])
+
   const {
     theme,
     advancedFeatures,
     enableOWL,
-    owlLanguageModelApiKey,
-    owlExternalResourcesApiKey,
     owlSandboxBrowserMode,
     owlModelProvider,
     owlToolkits,
-    owlLogLevel
+    owlLogLevel,
+    owlGoogleApiKey,
+    owlSearchEngineId,
+    owlHfToken,
+    owlChunkrApiKey,
+    owlFirecrawlApiKey
   } = useSettings()
-  const { t } = useTranslation()
-  const dispatch = useAppDispatch()
 
   // 如果高级功能未启用，则不显示OWL设置
   if (!advancedFeatures) {
@@ -49,38 +70,6 @@ const OwlSettings: FC = () => {
         <SettingRow>
           <SettingRowTitle>{t('owl.enable')}</SettingRowTitle>
           <Switch checked={enableOWL} onChange={(checked) => dispatch(setEnableOWL(checked))} />
-        </SettingRow>
-        <SettingDivider />
-        <SettingRow>
-          <SettingRowTitle>
-            {t('owl.language_model_api_key')}
-            <Tooltip title={t('owl.language_model_api_key_hint')}>
-              <InfoCircleOutlined style={{ marginLeft: 8, color: 'var(--color-text-3)' }} />
-            </Tooltip>
-          </SettingRowTitle>
-          <Input.Password
-            placeholder={t('owl.api_key_placeholder')}
-            value={owlLanguageModelApiKey}
-            onChange={(e) => dispatch(setOwlLanguageModelApiKey(e.target.value))}
-            style={{ width: '300px' }}
-            disabled={!enableOWL}
-          />
-        </SettingRow>
-        <SettingDivider />
-        <SettingRow>
-          <SettingRowTitle>
-            {t('owl.external_resources_api_key')}
-            <Tooltip title={t('owl.external_resources_api_key_hint')}>
-              <InfoCircleOutlined style={{ marginLeft: 8, color: 'var(--color-text-3)' }} />
-            </Tooltip>
-          </SettingRowTitle>
-          <Input.Password
-            placeholder={t('owl.api_key_placeholder')}
-            value={owlExternalResourcesApiKey}
-            onChange={(e) => dispatch(setOwlExternalResourcesApiKey(e.target.value))}
-            style={{ width: '300px' }}
-            disabled={!enableOWL}
-          />
         </SettingRow>
         <SettingDivider />
         <SettingRow>
@@ -123,17 +112,65 @@ const OwlSettings: FC = () => {
               <InfoCircleOutlined style={{ marginLeft: 8, color: 'var(--color-text-3)' }} />
             </Tooltip>
           </SettingRowTitle>
-          <Radio.Group
+          <Select
+            placeholder={t('owl.select_model')}
             value={owlModelProvider}
-            onChange={(e) => dispatch(setOwlModelProvider(e.target.value))}
-            disabled={!enableOWL}>
-            <Space direction="vertical">
-              <Radio value="openai">OpenAI (GPT-4)</Radio>
-              <Radio value="anthropic">Anthropic (Claude)</Radio>
-              <Radio value="google">Google (Gemini)</Radio>
-              <Radio value="local">{t('owl.local_model')}</Radio>
-            </Space>
-          </Radio.Group>
+            onChange={(value) => dispatch(setOwlModelProvider(value))}
+            style={{ width: '250px' }}
+            disabled={!enableOWL}
+            options={[
+              {
+                label: t('owl.model_provider_groups.openai'),
+                options: allModels
+                  .filter((model) => model.providerId === 'openai' || model.providerId === 'azure-openai')
+                  .map((model) => ({
+                    label: `${model.name} (${model.providerName})`,
+                    value: model.id
+                  }))
+              },
+              {
+                label: t('owl.model_provider_groups.anthropic'),
+                options: allModels
+                  .filter((model) => model.providerId === 'anthropic')
+                  .map((model) => ({
+                    label: `${model.name} (${model.providerName})`,
+                    value: model.id
+                  }))
+              },
+              {
+                label: t('owl.model_provider_groups.google'),
+                options: allModels
+                  .filter((model) => model.providerId === 'gemini')
+                  .map((model) => ({
+                    label: `${model.name} (${model.providerName})`,
+                    value: model.id
+                  }))
+              },
+              {
+                label: t('owl.model_provider_groups.local'),
+                options: allModels
+                  .filter((model) => ['ollama', 'lmstudio'].includes(model.providerId))
+                  .map((model) => ({
+                    label: `${model.name} (${model.providerName})`,
+                    value: model.id
+                  }))
+              },
+              {
+                label: t('owl.model_provider_groups.other'),
+                options: allModels
+                  .filter(
+                    (model) =>
+                      !['openai', 'azure-openai', 'anthropic', 'gemini', 'ollama', 'lmstudio'].includes(
+                        model.providerId
+                      )
+                  )
+                  .map((model) => ({
+                    label: `${model.name} (${model.providerName})`,
+                    value: model.id
+                  }))
+              }
+            ]}
+          />
         </SettingRow>
       </SettingGroup>
 
@@ -156,9 +193,15 @@ const OwlSettings: FC = () => {
                 <Checkbox value="web_search">{t('owl.toolkit.web_search')}</Checkbox>
                 <Checkbox value="web_browser">{t('owl.toolkit.web_browser')}</Checkbox>
                 <Checkbox value="code_interpreter">{t('owl.toolkit.code_interpreter')}</Checkbox>
-                <Checkbox value="file_manager">{t('owl.toolkit.file_manager')}</Checkbox>
-                <Checkbox value="image_generation">{t('owl.toolkit.image_generation')}</Checkbox>
+                <Checkbox value="document_processing">{t('owl.toolkit.document_processing')}</Checkbox>
+                <Checkbox value="image_analysis">{t('owl.toolkit.image_analysis')}</Checkbox>
+                <Checkbox value="video_analysis">{t('owl.toolkit.video_analysis')}</Checkbox>
+                <Checkbox value="audio_analysis">{t('owl.toolkit.audio_analysis')}</Checkbox>
                 <Checkbox value="data_analysis">{t('owl.toolkit.data_analysis')}</Checkbox>
+                <Checkbox value="excel_toolkit">{t('owl.toolkit.excel_toolkit')}</Checkbox>
+                <Checkbox value="quality_evaluation">{t('owl.toolkit.quality_evaluation')}</Checkbox>
+                <Checkbox value="gaia_role_playing">{t('owl.toolkit.gaia_role_playing')}</Checkbox>
+                <Checkbox value="autonomous_agent">{t('owl.toolkit.autonomous_agent')}</Checkbox>
               </ToolkitOptions>
             </Checkbox.Group>
           </div>
@@ -182,6 +225,90 @@ const OwlSettings: FC = () => {
               { value: 'warning', label: 'Warning' },
               { value: 'error', label: 'Error' }
             ]}
+          />
+        </SettingRow>
+      </SettingGroup>
+
+      <SettingGroup theme={theme}>
+        <SettingTitle>{t('owl.service_api_keys')}</SettingTitle>
+        <SettingDivider />
+        <SettingRow>
+          <SettingRowTitle>
+            {t('owl.google_api_key')}
+            <Tooltip title={t('owl.google_api_key_hint')}>
+              <InfoCircleOutlined style={{ marginLeft: 8, color: 'var(--color-text-3)' }} />
+            </Tooltip>
+          </SettingRowTitle>
+          <Input.Password
+            placeholder={t('owl.api_key_placeholder')}
+            value={owlGoogleApiKey}
+            onChange={(e) => dispatch(setOwlGoogleApiKey(e.target.value))}
+            style={{ width: '300px' }}
+            disabled={!enableOWL}
+          />
+        </SettingRow>
+        <SettingDivider />
+        <SettingRow>
+          <SettingRowTitle>
+            {t('owl.search_engine_id')}
+            <Tooltip title={t('owl.search_engine_id_hint')}>
+              <InfoCircleOutlined style={{ marginLeft: 8, color: 'var(--color-text-3)' }} />
+            </Tooltip>
+          </SettingRowTitle>
+          <Input
+            placeholder={t('owl.search_engine_id_placeholder')}
+            value={owlSearchEngineId}
+            onChange={(e) => dispatch(setOwlSearchEngineId(e.target.value))}
+            style={{ width: '300px' }}
+            disabled={!enableOWL}
+          />
+        </SettingRow>
+        <SettingDivider />
+        <SettingRow>
+          <SettingRowTitle>
+            {t('owl.huggingface_token')}
+            <Tooltip title={t('owl.huggingface_token_hint')}>
+              <InfoCircleOutlined style={{ marginLeft: 8, color: 'var(--color-text-3)' }} />
+            </Tooltip>
+          </SettingRowTitle>
+          <Input.Password
+            placeholder={t('owl.api_key_placeholder')}
+            value={owlHfToken}
+            onChange={(e) => dispatch(setOwlHfToken(e.target.value))}
+            style={{ width: '300px' }}
+            disabled={!enableOWL}
+          />
+        </SettingRow>
+        <SettingDivider />
+        <SettingRow>
+          <SettingRowTitle>
+            {t('owl.chunkr_api_key')}
+            <Tooltip title={t('owl.chunkr_api_key_hint')}>
+              <InfoCircleOutlined style={{ marginLeft: 8, color: 'var(--color-text-3)' }} />
+            </Tooltip>
+          </SettingRowTitle>
+          <Input.Password
+            placeholder={t('owl.api_key_placeholder')}
+            value={owlChunkrApiKey}
+            onChange={(e) => dispatch(setOwlChunkrApiKey(e.target.value))}
+            style={{ width: '300px' }}
+            disabled={!enableOWL}
+          />
+        </SettingRow>
+        <SettingDivider />
+        <SettingRow>
+          <SettingRowTitle>
+            {t('owl.firecrawl_api_key')}
+            <Tooltip title={t('owl.firecrawl_api_key_hint')}>
+              <InfoCircleOutlined style={{ marginLeft: 8, color: 'var(--color-text-3)' }} />
+            </Tooltip>
+          </SettingRowTitle>
+          <Input.Password
+            placeholder={t('owl.api_key_placeholder')}
+            value={owlFirecrawlApiKey}
+            onChange={(e) => dispatch(setOwlFirecrawlApiKey(e.target.value))}
+            style={{ width: '300px' }}
+            disabled={!enableOWL}
           />
         </SettingRow>
       </SettingGroup>

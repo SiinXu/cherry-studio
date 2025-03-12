@@ -5,6 +5,7 @@ import i18n from '@renderer/i18n'
 import store from '@renderer/store'
 import { Assistant, Message, Model, Topic } from '@renderer/types'
 import { getTitleFromString, uuid } from '@renderer/utils'
+import { safeFilter } from '@renderer/utils/safeArrayUtils'
 import dayjs from 'dayjs'
 import { isEmpty, remove, takeRight } from 'lodash'
 import { NavigateFunction } from 'react-router'
@@ -14,9 +15,10 @@ import { EVENT_NAMES, EventEmitter } from './EventService'
 import FileManager from './FileManager'
 
 export const filterMessages = (messages: Message[]) => {
-  return messages
-    .filter((message) => !['@', 'clear'].includes(message.type!))
-    .filter((message) => !isEmpty(message.content.trim()))
+  return safeFilter(
+    safeFilter(messages, (message) => !['@', 'clear'].includes(message.type!)),
+    (message) => !isEmpty(message.content.trim())
+  )
 }
 
 export function filterContextMessages(messages: Message[]): Message[] {
