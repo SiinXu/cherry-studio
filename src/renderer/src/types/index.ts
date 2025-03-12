@@ -141,7 +141,7 @@ export type Provider = {
 
 export type ProviderType = 'openai' | 'anthropic' | 'gemini' | 'qwenlm' | 'azure-openai'
 
-export type ModelType = 'text' | 'vision' | 'embedding' | 'reasoning'
+export type ModelType = 'text' | 'vision' | 'embedding' | 'reasoning' | 'function_calling'
 
 export type Model = {
   id: string
@@ -190,7 +190,7 @@ export interface FileType {
   size: number
   ext: string
   type: FileTypes
-  created_at: Date
+  created_at: string
   count: number
   tokens?: number
 }

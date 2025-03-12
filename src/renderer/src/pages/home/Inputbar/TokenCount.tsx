@@ -9,7 +9,7 @@ import styled from 'styled-components'
 type Props = {
   estimateTokenCount: number
   inputTokenCount: number
-  contextCount: number
+  contextCount: { current: number; max: number }
   ToolbarButton: any
 } & React.HTMLAttributes<HTMLDivElement>
 
@@ -21,12 +21,35 @@ const TokenCount: FC<Props> = ({ estimateTokenCount, inputTokenCount, contextCou
     return null
   }
 
+  const formatMaxCount = (max: number) => {
+    if (max == 20) {
+      return (
+        <span
+          style={{
+            fontSize: '16px',
+            position: 'relative',
+            top: '1px'
+          }}>
+          ∞
+        </span>
+      )
+    }
+    return max.toString()
+  }
+
   const PopoverContent = () => {
     return (
+<<<<<<< HEAD
       <VStack w="150px" background="100%">
         <HStack $justifyContent="space-between" w="100%">
+=======
+      <VStack w="185px" background="100%">
+        <HStack justifyContent="space-between" w="100%">
+>>>>>>> upstream/main
           <Text>{t('chat.input.context_count.tip')}</Text>
-          <Text>{contextCount}</Text>
+          <Text>
+            {contextCount.current} / {contextCount.max == 20 ? '∞' : contextCount.max}
+          </Text>
         </HStack>
         <Divider style={{ margin: '5px 0' }} />
         <HStack $justifyContent="space-between" w="100%">
@@ -40,7 +63,7 @@ const TokenCount: FC<Props> = ({ estimateTokenCount, inputTokenCount, contextCou
   return (
     <Container>
       <Popover content={PopoverContent}>
-        <MenuOutlined /> {contextCount}
+        <MenuOutlined /> {contextCount.current} / {formatMaxCount(contextCount.max)}
         <Divider type="vertical" style={{ marginTop: 0, marginLeft: 5, marginRight: 5 }} />
         <ArrowUpOutlined />
         {inputTokenCount} / {estimateTokenCount}
@@ -66,7 +89,7 @@ const Container = styled.div`
     font-size: 10px;
     margin-right: 3px;
   }
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
     display: none;
   }
 `

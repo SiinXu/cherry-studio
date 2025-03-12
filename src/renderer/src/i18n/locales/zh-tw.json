@@ -55,6 +55,12 @@
       "copy.title": "複製助手",
       "delete.content": "刣掉助手會刣掉所有彼个助手下跤的話題佮檔案，確定欲繼續無？",
       "delete.title": "刣掉助手",
+      "clear.content": "清空話題會刪除助手下所有主題和檔案，確定要繼續嗎？",
+      "clear.title": "清空話題",
+      "copy.title": "複製助手",
+      "delete.content": "刪除助手會刪除所有該助手下的話題和檔案，確定要繼續嗎？",
+      "delete.title": "刪除助手",
+
       "edit.title": "編輯助手",
       "ungrouped": "未分組",
       "group": {
@@ -97,10 +103,28 @@
       "login": "登入",
       "oauth_button": "使用{{provider}}登入"
     },
+    "backup": {
+      "confirm": "確定要備份資料嗎？",
+      "confirm.button": "選擇備份位置",
+      "content": "備份全部資料，包括聊天記錄、設定、知識庫等全部資料。請注意，備份過程可能需要一些時間，感謝您的耐心等待。",
+      "progress": {
+        "completed": "備份完成",
+        "compressing": "壓縮檔案...",
+        "copying_files": "複製檔案... {{progress}}%",
+        "preparing": "準備備份...",
+        "title": "備份進度",
+        "writing_data": "寫入資料..."
+      },
+      "title": "資料備份"
+    },
     "button": {
       "add": "增加",
       "added": "已增加",
       "collapse": "收起來",
+      "add": "新增",
+      "added": "已新增",
+      "collapse": "折疊",
+
       "manage": "管理",
       "select_model": "選擇模型",
       "show.all": "顯示全部",
@@ -127,6 +151,18 @@
       "input.file_not_supported": "模型無支援這款檔案類型",
       "input.knowledge_base": "智識庫",
       "input.new.context": "清掉頂下文 {{Command}}",
+      "input.auto_resize": "自動調整高度",
+      "input.clear": "清除 {{Command}}",
+      "input.clear.content": "您想要清除目前話題的所有訊息嗎？",
+      "input.clear.title": "清除所有訊息？",
+      "input.collapse": "折疊",
+      "input.context_count.tip": "上下文數 / 最大上下文數",
+      "input.estimated_tokens.tip": "預估 Token 數",
+      "input.expand": "展開",
+      "input.file_not_supported": "模型不支援此檔案類型",
+      "input.knowledge_base": "知識庫",
+      "input.new.context": "清除上下文 {{Command}}",
+
       "input.new_topic": "新話題 {{Command}}",
       "input.pause": "暫停",
       "input.placeholder": "佇遮拍入訊息...",
@@ -158,6 +194,26 @@
       "settings.max_tokens.confirm": "拍開訊息長度限制",
       "settings.max_tokens.confirm_content": "拍開訊息長度限制了後，單擺互動所用的上濟 Token 數，會影響返回結果的長度。愛根據模型頂下文限制來設定，無會錯誤",
       "settings.max_tokens.tip": "單擺互動所用的上濟 Token 數，會影響返回結果的長度。愛根據模型頂下文限制來設定，無會錯誤",
+      "input.web_search.enable": "開啟網路搜尋",
+      "input.web_search.enable_content": "需要先在設定中開啟網路搜尋",
+      "message.new.branch": "分支",
+      "message.new.branch.created": "新分支已建立",
+      "message.new.context": "新上下文",
+      "message.quote": "引用",
+      "message.regenerate.model": "切換模型",
+      "message.useful": "有用",
+      "resend": "重新傳送",
+      "save": "儲存",
+      "settings.code_collapsible": "程式碼區塊可折疊",
+      "settings.code_wrappable": "程式碼區塊可自動換行",
+      "settings.context_count": "上下文",
+      "settings.context_count.tip": "在上下文中保留的前幾則訊息。",
+      "settings.max": "最大",
+      "settings.max_tokens": "啟用最大 Token 限制",
+      "settings.max_tokens.confirm": "啟用訊息長度限制",
+      "settings.max_tokens.confirm_content": "啟用訊息長度限制後，單次互動所用的最大 Token 數，會影響返回結果的長度。要根據模型上下文限制來設定，否則會發生錯誤。",
+      "settings.max_tokens.tip": "模型可以生成的最大 Token 數。要根據模型上下文限制來設定，否則會發生錯誤。",
+
       "settings.reset": "重設",
       "settings.set_as_default": "應用到預設助手",
       "settings.show_line_numbers": "程式碼顯示逝數",
@@ -192,7 +248,20 @@
       "topics.title": "話題",
       "topics.unpinned": "取消固定",
       "translate": "翻譯",
-      "topics.duplicate_to": "複製到"
+      "topics.duplicate_to": "複製到",
+      "navigation": {
+        "prev": "上一條訊息",
+        "next": "下一條訊息",
+        "first": "已經是第一條訊息",
+        "last": "已經是最後一條訊息"
+      }
+    },
+    "code_block": {
+      "collapse": "折疊",
+      "disable_wrap": "停用自動換行",
+      "enable_wrap": "自動換行",
+      "expand": "展開"
+
     },
     "common": {
       "add": "增加",
@@ -233,7 +302,10 @@
       "select": "選擇",
       "topics": "話題",
       "warning": "警告",
-      "you": "使用者"
+      "you": "使用者",
+      "you": "您",
+      "more": "更多"
+
     },
     "docs": {
       "title": "說明文件"
@@ -305,6 +377,10 @@
       "add_directory": "增加目錄",
       "add_file": "增加檔案",
       "add_note": "增加筆記",
+      "add_directory": "新增目錄",
+      "add_file": "新增檔案",
+      "add_note": "新增筆記",
+
       "add_sitemap": "網站地圖",
       "add_url": "增加網址",
       "cancel_index": "取消索引",
@@ -325,6 +401,9 @@
       "document_count_default": "預設",
       "document_count_help": "請求文件分段數量愈濟，附帶的訊息愈濟，毋過需要開銷的 Token 也愈濟",
       "drag_file": "拖檔案來遮",
+      "document_count_help": "請求文件分段數量越多，附帶的資訊越多，但需要消耗的 Token 也越多",
+      "drag_file": "拖拽檔案到這裡",
+
       "edit_remark": "修改備註",
       "edit_remark_placeholder": "請拍入備註內容",
       "empty": "這馬無智識庫",
@@ -361,6 +440,12 @@
       "title": "智識庫",
       "url_added": "網址已增加",
       "url_placeholder": "請拍入網址，濟个網址用倒退隔開",
+      "threshold_too_large_or_small": "閾值不能大於 1 或小於 0",
+      "threshold_tooltip": "用於衡量使用者問題與知識庫內容之間的相關性（0-1）",
+      "title": "知識庫",
+      "url_added": "網址已新增",
+      "url_placeholder": "請輸入網址，多個網址用換行符號分隔",
+
       "urls": "網址"
     },
     "languages": {
@@ -417,10 +502,21 @@
       "error.enter.name": "請拍入智識庫名稱",
       "error.get_embedding_dimensions": "掠取嵌入維度失敗",
       "error.invalid.api.host": "無效的 API 地址",
+      "error.chunk_overlap_too_large": "分段重疊不能大於分段大小",
+      "error.dimension_too_large": "內容尺寸過大",
+      "error.enter.api.host": "請先輸入您的 API 主機地址",
+      "error.enter.api.key": "請先輸入您的 API 金鑰",
+      "error.enter.model": "請先選擇一個模型",
+      "error.enter.name": "請先輸入知識庫名稱",
+      "error.get_embedding_dimensions": "取得嵌入維度失敗",
+      "error.invalid.api.host": "無效的 API 位址",
+
       "error.invalid.api.key": "無效的 API 金鑰",
       "error.invalid.enter.model": "請選擇一个模型",
       "error.invalid.proxy.url": "無效的代理地址",
       "error.invalid.webdav": "無效的 WebDAV 設定",
+      "error.markdown.export.preconf": "導出 Markdown 文件到預先設定的路徑失敗",
+      "error.markdown.export.specified": "導出 Markdown 文件失敗",
       "error.notion.export": "匯出 Notion 錯誤，請檢查連接狀態並對照文件檢查設定",
       "error.notion.no_api_key": "未設定 Notion API Key 抑是 Notion Database ID",
       "error.yuque.export": "匯出語雀錯誤，請檢查連接狀態並對照文件檢查設定",
@@ -430,6 +526,12 @@
       "group.delete.title": "刣掉分組訊息",
       "ignore.knowledge.base": "聯網模式拍開，忽略智識庫",
       "info.notion.block_reach_limit": "對話傷長，這馬分頁匯出到Notion",
+      "error.yuque.no_config": "未設定語雀 Token 或知識庫 Url",
+      "group.delete.content": "刪除分組訊息會刪除使用者提問和所有助手的回答",
+      "group.delete.title": "刪除分組訊息",
+      "ignore.knowledge.base": "網路模式開啟，忽略知識庫",
+      "info.notion.block_reach_limit": "對話過長，自動分頁匯出到 Notion",
+
       "mention.title": "切換模型回答",
       "message.code_style": "程式碼風格",
       "message.delete.content": "確定欲刣掉這則訊息無？",
@@ -437,6 +539,10 @@
       "message.multi_model_style": "濟模型回答樣式",
       "message.multi_model_style.fold": "標籤模式",
       "message.multi_model_style.grid": "卡片佈局",
+      "message.multi_model_style.fold.compress": "切換到緊湊排列",
+      "message.multi_model_style.fold.expand": "切換到展開排列",
+      "message.multi_model_style.grid": "卡片設定",
+
       "message.multi_model_style.horizontal": "橫向排列",
       "message.multi_model_style.vertical": "直向疊",
       "message.style": "訊息樣式",
@@ -451,11 +557,26 @@
       "save.success.title": "保存成功",
       "searching": "這馬聯網搜尋...",
       "success.notion.export": "成功匯出到Notion",
+      "message.style.plain": "簡潔",
+      "regenerate.confirm": "重新生成會覆蓋目前訊息",
+      "reset.confirm.content": "確定要清除所有資料嗎？",
+      "reset.double.confirm.content": "所有資料將會被清除，您確定要繼續嗎？",
+      "reset.double.confirm.title": "資料將會遺失！！！",
+      "restore.failed": "恢復失敗",
+      "restore.success": "恢復成功",
+      "save.success.title": "儲存成功",
+      "searching": "正在網路上搜尋...",
+      "success.markdown.export.preconf": "成功導出 Markdown 文件到預先設定的路徑",
+      "success.markdown.export.specified": "成功導出 Markdown 文件",
+      "success.notion.export": "成功匯出到 Notion",
+
       "success.yuque.export": "成功匯出到語雀",
       "switch.disabled": "請等這馬回覆完成了後操作",
       "topic.added": "話題增加成功",
       "upgrade.success.button": "重新啟動",
       "upgrade.success.content": "重新啟動來完成升級",
+      "upgrade.success.content": "請重新啟動程式以完成升級",
+
       "upgrade.success.title": "升級成功",
       "warn.notion.exporting": "這馬匯出到Notion，請毋通重複請求匯出！"
     },
@@ -492,10 +613,15 @@
       "all": "全部",
       "custom_parameters": "自訂參數",
       "dimensions": "{{dimensions}} 維",
+      "edit": "編輯模型",
       "embedding": "嵌入",
       "embedding_model": "嵌入模型",
       "embedding_model_tooltip": "佇設定->模型服務內底點擊管理按鈕增加",
       "free": "免錢",
+      "embedding_model_tooltip": "在設定->模型服務中點選管理按鈕新增",
+      "free": "免費",
+      "no_matches": "無可用模型",
+
       "parameter_name": "參數名稱",
       "parameter_type": {
         "boolean": "布林值",
@@ -507,6 +633,7 @@
       "reasoning": "推理",
       "search": "搜尋模型...",
       "stream_output": "串流輸出",
+      "function_calling": "函數調用",
       "type": {
         "embedding": "嵌入",
         "reasoning": "推理",
@@ -522,7 +649,18 @@
     "navbar": {
       "expand": "伸勼對話框",
       "show_sidebar": "顯示側邊欄",
-      "hide_sidebar": "隱藏側邊欄"
+      "hide_sidebar": "隱藏側邊欄",
+        "vision": "影像",
+        "function_calling": "函數調用"
+      },
+      "vision": "視覺",
+      "websearch": "網路搜尋"
+    },
+    "navbar": {
+      "expand": "伸縮對話框",
+      "hide_sidebar": "隱藏側邊欄",
+      "show_sidebar": "顯示側邊欄"
+
     },
     "ollama": {
       "keep_alive_time.description": "對話了後模型佇記憶體內底保持的時間（預設：5分鐘）",
@@ -569,7 +707,6 @@
       "title": "你是一个誠𠢕對話的助理，你需要將使用者的對話總結做 10 字以內的標題，標題語言佮使用者的主要語言仝款，毋通使用標點符號佮其他特殊符號"
     },
     "provider": {
-      "o3": "O3",
       "aihubmix": "AiHubMix",
       "anthropic": "Anthropic",
       "azure-openai": "Azure OpenAI",
@@ -596,6 +733,7 @@
       "modelscope": "ModelScope 魔搭",
       "moonshot": "月之暗面",
       "nvidia": "輝達",
+      "o3": "O3",
       "ocoolai": "ocoolAI",
       "ollama": "Ollama",
       "openai": "OpenAI",
@@ -605,12 +743,34 @@
       "qwenlm": "QwenLM",
       "silicon": "矽基流動",
       "stepfun": "階躍星辰",
+      "silicon": "SiliconFlow",
+      "stepfun": "StepFun",
+      "tencent-cloud-ti": "騰訊雲 TI",
+
       "together": "Together",
+      "xirang": "天翼雲息壤",
       "yi": "零一萬物",
       "zhinao": "360智腦",
       "zhipu": "智譜AI",
       "xirang": "天翼雲息壤",
-      "tencent-cloud-ti": "騰訊雲TI"
+      "tencent-cloud-ti": "騰訊雲TI",
+      "zhinao": "360 智腦",
+      "zhipu": "智譜 AI"
+    },
+    "restore": {
+      "confirm": "確定要復原資料嗎？",
+      "confirm.button": "選擇備份檔案",
+      "content": "復原操作將使用備份資料覆蓋目前所有應用程式資料。請注意，復原過程可能需要一些時間，感謝您的耐心等待。",
+      "progress": {
+        "completed": "復原完成",
+        "copying_files": "複製檔案... {{progress}}%",
+        "extracting": "解開備份...",
+        "preparing": "準備復原...",
+        "reading_data": "讀取資料...",
+        "title": "復原進度"
+      },
+      "title": "資料復原"
+
     },
     "settings": {
       "about": "關於咱",
@@ -626,6 +786,17 @@
       "about.license.button": "查看",
       "about.license.title": "許可證",
       "about.releases.button": "查看",
+      "about.checkUpdate.available": "立即更新",
+      "about.contact.button": "電子郵件",
+      "about.contact.title": "聯絡方式",
+      "about.description": "一款為創作者而生的強大 AI 助手",
+      "about.downloading": "正在下載...",
+      "about.feedback.button": "回饋",
+      "about.feedback.title": "回饋",
+      "about.license.button": "檢視",
+      "about.license.title": "授權",
+      "about.releases.button": "檢視",
+
       "about.releases.title": "更新日誌",
       "about.social.title": "社交帳號",
       "about.title": "關於咱",
@@ -645,6 +816,7 @@
       "owl.title": "OWL 代理設定",
       "assistant": "預設助手",
       "assistant.model_params": "模型參數",
+      "assistant.show.icon": "顯示模型圖示",
       "assistant.title": "預設助手",
       "data": {
         "app_data": "應用程式資料",
@@ -654,6 +826,13 @@
         "app_knowledge.remove_all": "刣掉智識庫檔案",
         "app_knowledge.remove_all_confirm": "刣掉智識庫檔案會使減少佔用的空間，毋過袂刣掉智識庫向量化資料，刣掉了後將無法度拍開來源檔案，是毋是欲刣掉？",
         "app_knowledge.remove_all_success": "檔案刣掉成功",
+        "app_knowledge": "知識庫文件",
+        "app_knowledge.button.delete": "刪除檔案",
+        "app_knowledge.remove_all": "刪除知識庫檔案",
+        "app_knowledge.remove_all_confirm": "刪除知識庫文件可以減少儲存空間佔用，但不會刪除知識庫向量化資料，刪除之後將無法開啟原始檔，是否刪除？",
+        "app_knowledge.remove_all_success": "檔案刪除成功",
+        "app_logs": "應用程式日誌",
+
         "clear_cache": {
           "button": "清掉快取",
           "confirm": "清掉快取將刣掉應用程式快取的資料，包含小程式資料。這个操作無法度恢復，是毋是欲繼續？",
@@ -666,6 +845,11 @@
         "hour_interval_other": "{{count}} 點鐘",
         "minute_interval_one": "{{count}} 分鐘",
         "minute_interval_other": "{{count}} 分鐘",
+        "markdown_export.title": "Markdown 匯出",
+        "markdown_export.path": "預設匯出路徑",
+        "markdown_export.path_placeholder": "匯出路徑",
+        "markdown_export.select": "選擇",
+        "markdown_export.help": "若填入，每次匯出時將自動儲存至該路徑；否則，將彈出儲存對話框。",
         "notion.api_key": "Notion 金鑰",
         "notion.api_key_placeholder": "請拍入Notion 金鑰",
         "notion.auto_split": "匯出對話時自動分頁",
@@ -686,6 +870,11 @@
         "notion.split_size": "自動分頁大細",
         "notion.split_size_help": "Notion免錢版使用者建議設定做90，高級版使用者建議設定做24990，預設值是90",
         "notion.split_size_placeholder": "請拍入每頁區塊數限制(預設90)",
+        "notion.page_name_key_placeholder": "請輸入頁面標題欄位名稱，預設為 Name",
+        "notion.split_size": "自動分頁大小",
+        "notion.split_size_help": "Notion 免費版使用者建議設定為 90，進階版使用者建議設定為 24990，預設值為 90",
+        "notion.split_size_placeholder": "請輸入每頁塊數限制 (預設 90)",
+
         "notion.title": "Notion 設定",
         "title": "資料設定",
         "webdav": {
@@ -727,6 +916,7 @@
           "token_placeholder": "請拍入語雀Token"
         }
       },
+      "display.assistant.title": "助手設定",
       "display.custom.css": "自訂 CSS",
       "display.custom.css.placeholder": "/* 這爿寫自訂CSS */",
       "display.custom.css.cherrycss": "對 cherrycss.com 掠取",
@@ -741,6 +931,20 @@
       "display.sidebar.knowledge.icon": "顯示智識圖示",
       "display.sidebar.minapp.icon": "顯示小程式圖示",
       "display.sidebar.painting.icon": "顯示畫圖圖示",
+      "display.custom.css.cherrycss": "從 cherrycss.com 取得",
+      "display.custom.css.placeholder": "/* 這裡寫自訂 CSS */",
+      "display.minApp.disabled": "隱藏的小工具",
+      "display.minApp.empty": "把要隱藏的小工具從左側拖拽到這裡",
+      "display.minApp.title": "小工具顯示設定",
+      "display.minApp.visible": "顯示的小工具",
+      "display.sidebar.chat.hiddenMessage": "助手是基礎功能，不支援隱藏",
+      "display.sidebar.disabled": "隱藏的圖示",
+      "display.sidebar.empty": "把要隱藏的功能從左側拖拽到這裡",
+      "display.sidebar.files.icon": "顯示檔案圖示",
+      "display.sidebar.knowledge.icon": "顯示知識圖示",
+      "display.sidebar.minapp.icon": "顯示小工具圖示",
+      "display.sidebar.painting.icon": "顯示繪圖圖示",
+
       "display.sidebar.title": "側邊欄設定",
       "display.sidebar.translate.icon": "顯示翻譯圖示",
       "display.sidebar.visible": "顯示的圖示",
@@ -751,9 +955,12 @@
       "display.advanced.title": "進階顯示設定",
       "font_size.title": "訊息字體大細",
       "general": "一般設定",
+      "general.avatar.reset": "重設頭像",
       "general.backup.button": "備份",
       "general.backup.title": "資料備份佮恢復",
       "general.display.title": "顯示設定",
+      "general.emoji_picker": "表情選擇器",
+      "general.image_upload": "圖片上傳",
       "general.manually_check_update.title": "關閉更新檢查",
       "general.reset.button": "重設",
       "general.reset.title": "重設資料",
@@ -766,6 +973,10 @@
       "general.avatar.reset": "重設頭像",
       "general.view_webdav_settings": "查看 WebDAV 設定",
       "input.auto_translate_with_space": "快速敲3擺空白翻譯",
+      "general.user_name.placeholder": "輸入您的名稱",
+      "general.view_webdav_settings": "檢視 WebDAV 設定",
+      "input.auto_translate_with_space": "快速敲擊 3 次空格翻譯",
+
       "input.target_language": "目標語言",
       "input.target_language.chinese": "簡體中文",
       "input.target_language.chinese-traditional": "繁體中文",
@@ -785,6 +996,49 @@
       "messages.markdown_rendering_input_message": "Markdown 排版拍入訊息",
       "messages.math_engine": "數學公式引擎",
       "messages.metrics": "頭字延遲 {{time_first_token_millsec}}ms | 每秒 {{token_speed}} tokens",
+      "mcp": {
+        "actions": "操作",
+        "active": "啟用",
+        "addServer": "新增伺服器",
+        "addSuccess": "伺服器新增成功",
+        "args": "參數",
+        "argsTooltip": "每個參數佔一行",
+        "command": "指令",
+        "commandRequired": "請輸入指令",
+        "config_description": "設定模型上下文協議伺服器",
+        "confirmDelete": "刪除伺服器",
+        "confirmDeleteMessage": "您確定要刪除該伺服器嗎？",
+        "deleteSuccess": "伺服器刪除成功",
+        "description": "描述",
+        "duplicateName": "已存在相同名稱的伺服器",
+        "editServer": "編輯伺服器",
+        "env": "環境變數",
+        "envTooltip": "格式：KEY=value，每行一個",
+        "name": "名稱",
+        "nameRequired": "請輸入伺服器名稱",
+        "noServers": "未設定伺服器",
+        "serverPlural": "伺服器",
+        "serverSingular": "伺服器",
+        "title": "MCP 伺服器",
+        "type": "類型",
+        "updateSuccess": "伺服器更新成功",
+        "url": "URL",
+        "toggleError": "切換失敗"
+      },
+      "messages.divider": "訊息間顯示分隔線",
+      "messages.grid_columns": "訊息網格展示列數",
+      "messages.grid_popover_trigger": "網格詳細資訊觸發",
+      "messages.grid_popover_trigger.click": "點選顯示",
+      "messages.grid_popover_trigger.hover": "停留顯示",
+      "messages.input.paste_long_text_as_file": "將長文字貼上為檔案",
+      "messages.input.paste_long_text_threshold": "長文字長度",
+      "messages.input.send_shortcuts": "傳送快捷鍵",
+      "messages.input.show_estimated_tokens": "顯示預估 Token 數",
+      "messages.input.title": "輸入設定",
+      "messages.markdown_rendering_input_message": "Markdown 渲染輸入訊息",
+      "messages.math_engine": "Markdown 渲染輸入訊息",
+      "messages.metrics": "首字延遲 {{time_first_token_millsec}}ms | 每秒 {{token_speed}} tokens",
+
       "messages.model.title": "模型設定",
       "messages.title": "訊息設定",
       "messages.use_serif_font": "使用襯線字體",
@@ -793,6 +1047,11 @@
       "models.add.group_name": "分組名稱",
       "models.add.group_name.placeholder": "例如 ChatGPT",
       "models.add.group_name.tooltip": "例如 ChatGPT",
+      "models.add.add_model": "新增模型",
+      "models.add.group_name": "群組名稱",
+      "models.add.group_name.placeholder": "選填，例如 ChatGPT",
+      "models.add.group_name.tooltip": "選填，例如 ChatGPT",
+
       "models.add.model_id": "模型 ID",
       "models.add.model_id.placeholder": "愛填 例如 gpt-3.5-turbo",
       "models.add.model_id.tooltip": "例如 gpt-3.5-turbo",
@@ -804,6 +1063,30 @@
       "models.default_assistant_model_description": "建立新助手時使用的模型，若助手無設定模型，就使用這个模型",
       "models.empty": "無模型",
       "models.enable_topic_naming": "話題自動改名",
+      "models.add.model_name.placeholder": "選填，例如 GPT-4",
+      "models.check.all": "所有",
+      "models.check.all_models_passed": "所有模型檢查通過",
+      "models.check.button_caption": "健康檢查",
+      "models.check.disabled": "關閉",
+      "models.check.enable_concurrent": "並行檢查",
+      "models.check.enabled": "開啟",
+      "models.check.failed": "失敗",
+      "models.check.keys_status_count": "通過：{{count_passed}}個密鑰，失敗：{{count_failed}}個密鑰",
+      "models.check.model_status_summary": "{{provider}}: {{count_passed}}個模型通過所有密鑰，{{count_failed}}個模型未通過所有密鑰，{{count_partial}}個模型未通過某些密鑰",
+      "models.check.no_api_keys": "未找到API密鑰，請先添加API密鑰。",
+      "models.check.passed": "通過",
+      "models.check.select_api_key": "選擇要使用的API密鑰：",
+      "models.check.single": "單個",
+      "models.check.start": "開始",
+      "models.check.title": "模型健康檢查",
+      "models.check.use_all_keys": "使用密鑰",
+      "models.default_assistant_model": "預設助手模型",
+      "models.default_assistant_model_description": "建立新助手時使用的模型，如果助手未設定模型，則使用此模型",
+      "models.empty": "找不到模型",
+      "models.enable_topic_naming": "話題自動重新命名",
+      "models.manage.add_whole_group": "新增整個分組",
+      "models.manage.remove_whole_group": "移除整個分組",
+
       "models.topic_naming_model": "話題命名模型",
       "models.topic_naming_model_description": "自動命名新話題時使用的模型",
       "models.topic_naming_model_setting_title": "話題命名模型設定",
@@ -816,6 +1099,11 @@
       "moresetting.warn": "風險警告",
       "moresetting.check.warn": "請斟酌共這个選項拍勾，拍勾錯誤會造成模型無法度正常使用！！！",
       "moresetting.check.confirm": "確認拍勾",
+      "moresetting": "更多設定",
+      "moresetting.check.confirm": "確認勾選",
+      "moresetting.check.warn": "請謹慎勾選此選項，勾選錯誤會導致模型無法正常使用！！！",
+      "moresetting.warn": "風險警告",
+
       "provider": {
         "add.name": "提供者名稱",
         "add.name.placeholder": "例如 OpenAI",
@@ -843,7 +1131,13 @@
         "remove_invalid_keys": "刣掉無效金鑰",
         "search_placeholder": "搜尋模型 ID 抑是名稱",
         "title": "模型服務",
-        "search": "搜尋模型平台..."
+        "search": "搜尋模型平台...",
+        "remove_duplicate_keys": "移除重複金鑰",
+        "remove_invalid_keys": "刪除無效金鑰",
+        "search": "搜尋模型平臺...",
+        "search_placeholder": "搜尋模型 ID 或名稱",
+        "title": "模型提供者"
+
       },
       "proxy": {
         "mode": {
@@ -906,6 +1200,19 @@
         "blacklist_tooltip": "請使用以下格式(換行分隔)\nexample.com\nhttps://www.example.com\nhttps://example.com\n*://*.example.com",
         "get_api_key": "點擊這爿掠取金鑰",
         "search_max_result": "搜尋結果數量",
+      "tray.title": "啟用系統工具列圖示",
+      "websearch": {
+        "blacklist": "黑名單",
+        "blacklist_description": "以下網站不會出現在搜尋結果中",
+        "blacklist_tooltip": "請使用以下格式 (換行符號分隔)\nexample.com\nhttps://www.example.com\nhttps://example.com\n*://*.example.com",
+        "check": "檢查",
+        "check_failed": "驗證失敗",
+        "get_api_key": "點選這裡取得金鑰",
+        "no_provider_selected": "請選擇搜尋服務商後再檢查",
+        "search_max_result": "搜尋結果個數",
+        "search_provider": "搜尋服務商",
+        "search_provider_placeholder": "選擇一個搜尋服務商",
+
         "search_result_default": "預設",
         "search_with_time": "搜尋包含日期",
         "search_provider": "搜尋服務商",
@@ -945,7 +1252,8 @@
         "deleteSuccess": "伺服器刣掉成功",
         "duplicateName": "已存在仝名的伺服器",
         "serverSingular": "伺服器",
-        "serverPlural": "伺服器"
+        "serverPlural": "伺服器",
+
       }
     },
     "owl": {
@@ -1047,6 +1355,8 @@
       "input.placeholder": "拍入文字進行翻譯",
       "output.placeholder": "翻譯",
       "processing": "翻譯中...",
+      "scroll_sync.disable": "關閉滾動同步",
+      "scroll_sync.enable": "開啟滾動同步",
       "title": "翻譯",
       "tooltip.newline": "換逝"
     },
@@ -1095,6 +1405,8 @@
             "copying_files": "複製檔案...{{progress}}%",
             "completed": "恢復完成"
         }
-      }
+      },
+    }
+
   }
     

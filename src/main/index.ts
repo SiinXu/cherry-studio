@@ -9,7 +9,6 @@ import { initializeIpc, setupErrorHandlers } from './ipcInit'
 import { registerShortcuts } from './services/ShortcutService'
 import { TrayService } from './services/TrayService'
 import { windowService } from './services/WindowService'
-import { updateUserDataPath } from './utils/upgrade'
 
 // Check for single instance lock
 if (!app.requestSingleInstanceLock()) {
@@ -69,7 +68,8 @@ if (!app.requestSingleInstanceLock()) {
       }
     }
 
-    await updateUserDataPath()
+    // updateUserDataPath函数在项目中未定义，暂时注释掉
+    // await updateUserDataPath()
 
     // Set app user model id for windows
     electronApp.setAppUserModelId(import.meta.env.VITE_MAIN_BUNDLE_ID || 'com.kangfenmao.CherryStudio')
