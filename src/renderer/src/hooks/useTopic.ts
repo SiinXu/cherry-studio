@@ -4,7 +4,7 @@ import { deleteMessageFiles } from '@renderer/services/MessagesService'
 import store from '@renderer/store'
 import { updateTopic } from '@renderer/store/assistants'
 import { prepareTopicMessages } from '@renderer/store/messages'
-import { Assistant, Topic } from '@renderer/types'
+import { Assistant, Message, Topic } from '@renderer/types'
 import { find, isEmpty } from 'lodash'
 import { useEffect, useState } from 'react'
 
@@ -72,18 +72,85 @@ export const autoRenameTopic = async (assistant: Assistant, topicId: string) => 
   }
 
   if (topic && topic.name === i18n.t('chat.default.topic.name') && topic.messages.length >= 2) {
-    const { fetchMessagesSummary } = await import('@renderer/services/ApiService')
-    const summaryText = await fetchMessagesSummary({ messages: topic.messages, assistant })
-    if (summaryText) {
-      const data = { ...topic, name: summaryText }
-      _setActiveTopic(data)
-      store.dispatch(updateTopic({ assistantId: assistant.id, topic: data }))
+    try {
+      // 使用自定义方法生成标题
+      const topicContent = topic.messages.map((m) => `${m.role}: ${m.content}`).join('\n')
+      const summaryPrompt = `请给以下对话生成一个简短的主题名称（不超过20个字符）：\n${topicContent}`
+
+      // 创建一个符合Message类型的对象
+      const userMessage: Message = {
+        id: `summary-${Date.now()}`,
+        assistantId: assistant.id,
+        topicId: topic.id,
+        role: 'user',
+        content: summaryPrompt,
+        createdAt: new Date().toISOString(),
+        status: 'success',
+        type: 'text'
+      }
+
+      // 调用API获取标题
+      const response = await fetch('/api/generate-title', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [userMessage], assistant })
+      })
+
+      if (response.ok) {
+        const summaryText = await response.text()
+        if (summaryText && summaryText.length > 0) {
+          const data = { ...topic, name: summaryText }
+          _setActiveTopic(data)
+          store.dispatch(updateTopic({ assistantId: assistant.id, topic: data }))
+        }
+      }
+    } catch (error) {
+      console.error('Error generating topic name:', error)
     }
   }
 }
 
+// 定义TopicGroup接口
+interface TopicGroup {
+  tag: string
+  topics: Topic[]
+}
+
 // Convert class to object with functions since class only has static methods
 // 只有静态方法,没必要用class，可以export {}
+export function useTopicGroups(assistant: Assistant) {
+  // 按标签对主题进行分组
+  const groups: Record<string, Topic[]> = {}
+
+  if (assistant?.topics && assistant?.topics.length > 0) {
+    assistant.topics.forEach((topic) => {
+      // 使用groupId替代tag，因为Topic类型没有tag属性
+      const tag = topic.groupId || 'default'
+      if (!groups[tag]) {
+        groups[tag] = []
+      }
+      groups[tag].push(topic)
+    })
+  }
+
+  // 将分组转换为TopicGroup数组
+  const topicGroups: TopicGroup[] = Object.entries(groups).map(([tag, topics]) => ({
+    tag,
+    topics: topics.sort((a, b) => {
+      const bTime = b.updatedAt ? new Date(b.updatedAt).getTime() : 0
+      const aTime = a.updatedAt ? new Date(a.updatedAt).getTime() : 0
+      return bTime - aTime
+    })
+  }))
+
+  // 按降序排列组（默认组总是在最前面）
+  return topicGroups.sort((a, b) => {
+    if (a.tag === 'default') return -1
+    if (b.tag === 'default') return 1
+    return a.tag.localeCompare(b.tag)
+  })
+}
+
 export const TopicManager = {
   async getTopicLimit(limit: number) {
     return await db.topics

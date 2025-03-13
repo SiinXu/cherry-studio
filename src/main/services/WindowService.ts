@@ -61,9 +61,9 @@ export class WindowService {
       webPreferences: {
         preload: join(__dirname, '../preload/index.js'),
         sandbox: false,
-        webSecurity: app.isPackaged, // 打包时启用webSecurity，开发时禁用以方便调试
+        webSecurity: true, // 始终启用webSecurity以增强安全性
         webviewTag: true,
-        allowRunningInsecureContent: !app.isPackaged, // 只在开发环境允许不安全内容
+        allowRunningInsecureContent: false, // 禁用不安全内容以增强安全性
         contextIsolation: true, // 启用上下文隔离
         nodeIntegration: false // 禁用节点集成
       }
@@ -96,7 +96,9 @@ export class WindowService {
       webPreferences: {
         preload: join(__dirname, '../preload/minapp.js'),
         sandbox: false,
-        contextIsolation: false
+        webSecurity: true, // 启用webSecurity以增强安全性
+        allowRunningInsecureContent: false, // 禁用不安全内容
+        contextIsolation: false // 注意: 建议将此项改为true以进一步提高安全性
       }
     })
 
@@ -338,9 +340,9 @@ export class WindowService {
       webPreferences: {
         preload: join(__dirname, '../preload/index.js'),
         sandbox: false,
-        webSecurity: app.isPackaged, // 打包时启用webSecurity
+        webSecurity: true, // 始终启用webSecurity以增强安全性
         webviewTag: true,
-        allowRunningInsecureContent: !app.isPackaged, // 只在开发环境允许不安全内容
+        allowRunningInsecureContent: false, // 禁用不安全内容以增强安全性
         contextIsolation: true, // 启用上下文隔离
         nodeIntegration: false // 禁用节点集成
       }
@@ -418,8 +420,8 @@ export class WindowService {
       webPreferences: {
         preload: join(__dirname, '../preload/index.js'),
         sandbox: false,
-        webSecurity: app.isPackaged, // 打包时启用webSecurity
-        allowRunningInsecureContent: !app.isPackaged, // 只在开发环境允许不安全内容
+        webSecurity: true, // 始终启用webSecurity以增强安全性
+        allowRunningInsecureContent: false, // 禁用不安全内容以增强安全性
         contextIsolation: true, // 启用上下文隔离
         nodeIntegration: false // 禁用节点集成
       }

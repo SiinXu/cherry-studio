@@ -132,12 +132,17 @@ export function getUserMessage({
   const defaultModel = getDefaultModel()
   const model = assistant.model || defaultModel
 
+  // 确保assistant和topic存在并有有效的id
+  if (!assistant || !assistant.id || !topic || !topic.id) {
+    console.error('获取用户消息失败：assistant或topic未定义或缺少id')
+  }
+
   return {
     id: uuid(),
     role: 'user',
     content: content || '',
-    assistantId: assistant.id,
-    topicId: topic.id,
+    assistantId: assistant?.id || '',
+    topicId: topic?.id || '',
     model,
     createdAt: new Date().toISOString(),
     type,

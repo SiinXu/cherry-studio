@@ -42,6 +42,12 @@ export default abstract class BaseProvider {
   abstract generateImage(params: GenerateImageParams): Promise<string[]>
   abstract getEmbeddingDimensions(model: Model): Promise<number>
 
+  // 根据内容生成标题
+  nameByContent?(content: string): Promise<string>
+
+  // 验证模板
+  validateTemplate?(template: string): Promise<{ valid: boolean; error: string | null }>
+
   public getBaseURL(): string {
     const host = this.provider.apiHost
     return formatApiHost(host)

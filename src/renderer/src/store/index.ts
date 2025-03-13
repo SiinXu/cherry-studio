@@ -8,6 +8,7 @@ import assistants from './assistants'
 import knowledge from './knowledge'
 import llm from './llm'
 import mcp from './mcp'
+import messages from './messages'
 import migrate from './migrate'
 import minapps from './minapps'
 import paintings from './paintings'
@@ -27,7 +28,8 @@ const rootReducer = combineReducers({
   knowledge,
   minapps,
   websearch,
-  mcp
+  mcp,
+  messages
 })
 
 const persistConfig = {

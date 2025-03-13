@@ -130,6 +130,7 @@ export type Model = {
   owned_by?: string
   description?: string
   type?: ModelType[]
+  contextSize?: number // 添加上下文大小属性
 }
 
 export type Suggestion = {

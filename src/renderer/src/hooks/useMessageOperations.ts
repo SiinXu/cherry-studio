@@ -1,10 +1,11 @@
-import db from '@renderer/databases'
+import { db } from '@renderer/databases'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import store, { useAppDispatch, useAppSelector } from '@renderer/store'
 import {
   clearStreamMessage,
   clearTopicMessages,
   commitStreamMessage,
+  MessagesState,
   resendMessage,
   selectDisplayCount,
   selectTopicLoading,
@@ -23,9 +24,12 @@ import { useCallback } from 'react'
  * @param topic 当前主题
  * @returns 一组消息操作方法
  */
-export function useMessageOperations(topic: Topic) {
+export function useMessageOperations(topic: Topic | null | undefined) {
   const dispatch = useAppDispatch()
-  const messages = useAppSelector((state) => selectTopicMessages(state, topic.id))
+  const messages = useAppSelector((state) => {
+    const topicId = topic?.id || ''
+    return selectTopicMessages(state, topicId)
+  })
 
   /**
    * 删除单个消息
@@ -54,18 +58,21 @@ export function useMessageOperations(topic: Topic) {
    */
   const editMessage = useCallback(
     async (messageId: string, updates: Partial<Message>) => {
+      const topicId = topic?.id || ''
+      if (!topicId) return
+
       await dispatch(
         updateMessage({
-          topicId: topic.id,
+          topicId,
           messageId,
           updates
         })
       )
-      db.topics.update(topic.id, {
+      db.topics.update(topicId, {
         messages: messages.map((m) => (m.id === messageId ? { ...m, ...updates } : m))
       })
     },
-    [dispatch, messages, topic.id]
+    [dispatch, messages, topic?.id]
   )
 
   /**
@@ -96,9 +103,12 @@ export function useMessageOperations(topic: Topic) {
    */
   const setStreamMessageAction = useCallback(
     (message: Message | null) => {
-      dispatch(setStreamMessage({ topicId: topic.id, message }))
+      const topicId = topic?.id || ''
+      if (!topicId) return
+
+      dispatch(setStreamMessage({ topicId, message }))
     },
-    [dispatch, topic.id]
+    [dispatch, topic?.id]
   )
 
   /**
@@ -106,9 +116,12 @@ export function useMessageOperations(topic: Topic) {
    */
   const commitStreamMessageAction = useCallback(
     (messageId: string) => {
-      dispatch(commitStreamMessage({ topicId: topic.id, messageId }))
+      const topicId = topic?.id || ''
+      if (!topicId) return
+
+      dispatch(commitStreamMessage({ topicId, messageId }))
     },
-    [dispatch, topic.id]
+    [dispatch, topic?.id]
   )
 
   /**
@@ -116,9 +129,12 @@ export function useMessageOperations(topic: Topic) {
    */
   const clearStreamMessageAction = useCallback(
     (messageId: string) => {
-      dispatch(clearStreamMessage({ topicId: topic.id, messageId }))
+      const topicId = topic?.id || ''
+      if (!topicId) return
+
+      dispatch(clearStreamMessage({ topicId, messageId }))
     },
-    [dispatch, topic.id]
+    [dispatch, topic?.id]
   )
 
   /**
@@ -126,9 +142,12 @@ export function useMessageOperations(topic: Topic) {
    */
   const clearTopicMessagesAction = useCallback(
     async (_topicId?: string) => {
-      await dispatch(clearTopicMessages(_topicId || topic.id))
+      const topicId = _topicId || topic?.id || ''
+      if (!topicId) return
+
+      await dispatch(clearTopicMessages(topicId))
     },
-    [dispatch, topic.id]
+    [dispatch, topic?.id]
   )
 
   /**
@@ -148,7 +167,7 @@ export function useMessageOperations(topic: Topic) {
     EventEmitter.emit(EVENT_NAMES.NEW_CONTEXT)
   }, [])
 
-  const loading = useAppSelector((state) => selectTopicLoading(state, topic.id))
+  const loading = useAppSelector((state) => selectTopicLoading(state, topic?.id || ''))
   const displayCount = useAppSelector(selectDisplayCount)
   // /**
   //  * 获取当前消息列表
@@ -177,15 +196,25 @@ export function useMessageOperations(topic: Topic) {
   )
 
   const pauseMessages = useCallback(async () => {
-    const streamMessages = store.getState().messages.streamMessagesByTopic[topic.id]
+    const topicId = topic?.id || ''
+    if (!topicId) return
+
+    // 使用类型断言获取messages状态
+    const state = store.getState() as any
+    if (!state || !state.messages) return
+    const messagesState = state.messages as MessagesState
+    const streamMessages = messagesState.streamMessagesByTopic[topicId]
 
     if (streamMessages) {
-      const streamMessagesList = Object.values(streamMessages).filter((msg) => msg?.askId && msg?.id)
+      // 使用类型断言确保类型安全
+      const streamMessagesList = Object.values(streamMessages).filter((msg): msg is Message => {
+        return msg !== null && msg !== undefined && typeof msg === 'object' && 'askId' in msg && 'id' in msg
+      })
       for (const message of streamMessagesList) {
-        message && (await pauseMessage(message))
+        await pauseMessage(message)
       }
     }
-  }, [pauseMessage, topic.id])
+  }, [pauseMessage, topic?.id])
 
   /**
    * 恢复/重发消息

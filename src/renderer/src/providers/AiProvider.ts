@@ -65,4 +65,14 @@ export default class AiProvider {
   public getBaseURL(): string {
     return this.sdk.getBaseURL()
   }
+
+  // 根据内容生成标题
+  public async nameByContent(content: string): Promise<string> {
+    return this.sdk.nameByContent ? this.sdk.nameByContent(content) : content.slice(0, 20) + '...'
+  }
+
+  // 验证模板
+  public async validateTemplate(template: string): Promise<{ valid: boolean; error: string | null }> {
+    return this.sdk.validateTemplate ? this.sdk.validateTemplate(template) : { valid: true, error: null }
+  }
 }

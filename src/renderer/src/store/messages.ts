@@ -1,4 +1,6 @@
 import { createAsyncThunk, createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { throttle } from 'lodash'
+
 import db from '@renderer/databases'
 import { autoRenameTopic, TopicManager } from '@renderer/hooks/useTopic'
 import { fetchChatCompletion } from '@renderer/services/ApiService'
@@ -6,8 +8,7 @@ import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import { getAssistantMessage, resetAssistantMessage } from '@renderer/services/MessagesService'
 import type { AppDispatch, RootState } from '@renderer/store'
 import type { Assistant, Message, Topic } from '@renderer/types'
-import { clearTopicQueue, getTopicQueue, waitForTopicQueue } from '@renderer/utils/queue'
-import { throttle } from 'lodash'
+import { clearTopicQueue, getTopicQueue, waitForTopicQueue } from '../utils/queue'
 
 export interface MessagesState {
   messagesByTopic: Record<string, Message[]>
@@ -473,34 +474,43 @@ export const updateMessages = (topic: Topic, messages: Message[]) => async (disp
 
 // Selectors
 export const selectCurrentTopicId = (state: RootState): string | null => {
-  const messagesState = state.messages
+  const messagesState = state.messages || { currentTopic: null }
   return messagesState.currentTopic?.id ?? null
 }
 
 export const selectTopicMessages = createSelector(
-  [(state: RootState) => state.messages.messagesByTopic, (_, topicId: string) => topicId],
-  (messagesByTopic, topicId) => (topicId ? (messagesByTopic[topicId] ?? []) : [])
+  [
+    (state: RootState) => {
+      // 确保messages存在并且messagesByTopic存在
+      return state.messages?.messagesByTopic || {}
+    },
+    (_, topicId: string) => topicId
+  ],
+  (messagesByTopic, topicId) => {
+    // 确保topicId有效并且messagesByTopic[topicId]存在
+    return topicId && messagesByTopic ? (messagesByTopic[topicId] ?? []) : []
+  }
 )
 
 // 获取特定话题的loading状态
 export const selectTopicLoading = (state: RootState, topicId?: string): boolean => {
-  const messagesState = state.messages as MessagesState
+  const messagesState = state.messages || ({ currentTopic: null, loadingByTopic: {} } as MessagesState)
   const currentTopicId = topicId || messagesState.currentTopic?.id || ''
   return currentTopicId ? (messagesState.loadingByTopic[currentTopicId] ?? false) : false
 }
 
 export const selectDisplayCount = (state: RootState): number => {
-  const messagesState = state.messages as MessagesState
-  return messagesState?.displayCount || 20
+  const messagesState = state.messages || ({ displayCount: 20 } as MessagesState)
+  return messagesState.displayCount
 }
 
 export const selectError = (state: RootState): string | null => {
-  const messagesState = state.messages as MessagesState
-  return messagesState?.error || null
+  const messagesState = state.messages || ({ error: null } as MessagesState)
+  return messagesState.error
 }
 
 export const selectStreamMessage = (state: RootState, topicId: string, messageId: string): Message | null => {
-  const messagesState = state.messages as MessagesState
+  const messagesState = state.messages || ({ streamMessagesByTopic: {} } as MessagesState)
   return messagesState.streamMessagesByTopic[topicId]?.[messageId] || null
 }
 

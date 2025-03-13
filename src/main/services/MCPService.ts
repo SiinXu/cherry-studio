@@ -324,9 +324,7 @@ export default class MCPService extends EventEmitter {
       throw error
     }
 
-    // Update server status
-    server.isActive = isActive
-    this.notifyReduxServersChanged([...this.servers])
+    // 服务器状态已在try块中更新，这里不需要重复操作
   }
 
   /**
