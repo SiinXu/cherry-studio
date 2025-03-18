@@ -17,6 +17,7 @@ import {
 import type { DropResult } from '@hello-pangea/dnd'
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
 import CopyIcon from '@renderer/components/Icons/CopyIcon'
+import ObsidianExportPopup from '@renderer/components/Popups/ObsidianExportPopup'
 import PromptPopup from '@renderer/components/Popups/PromptPopup'
 import Scrollbar from '@renderer/components/Scrollbar'
 import { isMac } from '@renderer/config/constant'
@@ -27,13 +28,13 @@ import { useTopicGroups } from '@renderer/hooks/useTopic'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import store from '@renderer/store'
 import { setGenerating } from '@renderer/store/runtime'
-import { Assistant, Topic, TopicGroup } from '@renderer/types'
-import { droppableReorder } from '@renderer/utils'
+import { Assistant, Topic } from '@renderer/types'
+import { removeSpecialCharactersForFileName } from '@renderer/utils'
 import { copyTopicAsMarkdown } from '@renderer/utils/copy'
 import {
-  exportMarkdownToNotion,
   exportMarkdownToYuque,
   exportTopicAsMarkdown,
+  exportTopicToNotion,
   topicToMarkdown
 } from '@renderer/utils/export'
 import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
@@ -206,7 +207,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     deleteTimerRef.current = setTimeout(() => setDeletingTopicId(null), 2000)
   }, [])
   const onClearMessages = useCallback((topic: Topic) => {
-    window.keyv.set(EVENT_NAMES.CHAT_COMPLETION_PAUSED, true)
+    // window.keyv.set(EVENT_NAMES.CHAT_COMPLETION_PAUSED, true)
     store.dispatch(setGenerating(false))
     EventEmitter.emit(EVENT_NAMES.CLEAR_MESSAGES, topic)
   }, [])
@@ -237,11 +238,13 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   const onDeleteTopic = useCallback(
     async (topic: Topic) => {
       await modelGenerating()
-      const index = findIndex(assistant.topics, (t) => t.id === topic.id)
-      setActiveTopic(assistant.topics[index + 1 === assistant.topics.length ? index - 1 : index + 1])
+      if (topic.id === activeTopic?.id) {
+        const index = findIndex(assistant.topics, (t) => t.id === topic.id)
+        setActiveTopic(assistant.topics[index + 1 === assistant.topics.length ? index - 1 : index + 1])
+      }
       removeTopic(topic)
     },
-    [assistant.topics, removeTopic, setActiveTopic]
+    [assistant.topics, removeTopic, setActiveTopic, activeTopic]
   )
   const onDuplicateTopic = useCallback(
     async (topic: Topic, toAssistant: Assistant) => {
@@ -252,7 +255,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   )
   const onSwitchTopic = useCallback(
     async (topic: Topic) => {
-      await modelGenerating()
+      // await modelGenerating()
       setActiveTopic(topic)
     },
     [setActiveTopic]
@@ -490,15 +493,14 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
               key: 'word',
               onClick: async () => {
                 const markdown = await topicToMarkdown(topic)
-                window.api.export.toWord(markdown, topic.name)
+                window.api.export.toWord(markdown, removeSpecialCharactersForFileName(topic.name))
               }
             },
             {
               label: t('chat.topics.export.notion'),
               key: 'notion',
               onClick: async () => {
-                const markdown = await topicToMarkdown(topic)
-                exportMarkdownToNotion(topic.name, markdown)
+                exportTopicToNotion(topic)
               }
             },
             {
@@ -507,6 +509,14 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
               onClick: async () => {
                 const markdown = await topicToMarkdown(topic)
                 exportMarkdownToYuque(topic.name, markdown)
+              }
+            },
+            {
+              label: t('chat.topics.export.obsidian'),
+              key: 'obsidian',
+              onClick: async () => {
+                const markdown = await topicToMarkdown(topic)
+                await ObsidianExportPopup.show({ title: topic.name, markdown })
               }
             }
           ]

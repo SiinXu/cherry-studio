@@ -75,12 +75,15 @@ export interface SettingsState {
   notionDatabaseID: string | null
   notionApiKey: string | null
   notionPageNameKey: string | null
+  markdownExportPath: string | null
   thoughtAutoCollapse: boolean
   notionAutoSplit: boolean
   notionSplitSize: number
   yuqueToken: string | null
   yuqueUrl: string | null
   yuqueRepoId: string | null
+  obsidianApiKey: string | null
+  obsidianUrl: string | null
 }
 
 export type MultiModelMessageStyle = 'horizontal' | 'vertical' | 'fold' | 'grid'
@@ -141,12 +144,15 @@ const initialState: SettingsState = {
   notionDatabaseID: '',
   notionApiKey: '',
   notionPageNameKey: 'Name',
+  markdownExportPath: null,
   thoughtAutoCollapse: true,
   notionAutoSplit: false,
   notionSplitSize: 90,
   yuqueToken: '',
   yuqueUrl: '',
-  yuqueRepoId: ''
+  yuqueRepoId: '',
+  obsidianApiKey: '',
+  obsidianUrl: ''
 }
 
 const settingsSlice = createSlice({
@@ -315,6 +321,9 @@ const settingsSlice = createSlice({
     setNotionPageNameKey: (state, action: PayloadAction<string>) => {
       state.notionPageNameKey = action.payload
     },
+    setmarkdownExportPath: (state, action: PayloadAction<string | null>) => {
+      state.markdownExportPath = action.payload
+    },
     setThoughtAutoCollapse: (state, action: PayloadAction<boolean>) => {
       state.thoughtAutoCollapse = action.payload
     },
@@ -333,11 +342,11 @@ const settingsSlice = createSlice({
     setYuqueUrl: (state, action: PayloadAction<string>) => {
       state.yuqueUrl = action.payload
     },
-    setEnableAssistantGroup: (state, action: PayloadAction<boolean>) => {
-      state.enableAssistantGroup = action.payload
+    setObsidianApiKey: (state, action: PayloadAction<string>) => {
+      state.obsidianApiKey = action.payload
     },
-    setEnableTopicsGroup: (state, action: PayloadAction<boolean>) => {
-      state.enableTopicsGroup = action.payload
+    setObsidianUrl: (state, action: PayloadAction<string>) => {
+      state.obsidianUrl = action.payload
     }
   }
 })
@@ -397,12 +406,15 @@ export const {
   setNotionDatabaseID,
   setNotionApiKey,
   setNotionPageNameKey,
+  setmarkdownExportPath,
   setThoughtAutoCollapse,
   setNotionAutoSplit,
   setNotionSplitSize,
   setYuqueToken,
   setYuqueRepoId,
-  setYuqueUrl
+  setYuqueUrl,
+  setObsidianApiKey,
+  setObsidianUrl
 } = settingsSlice.actions
 
 export default settingsSlice.reducer

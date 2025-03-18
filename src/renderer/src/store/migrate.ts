@@ -10,6 +10,7 @@ import { isEmpty } from 'lodash'
 import { createMigrate } from 'redux-persist'
 
 import { RootState } from '.'
+import { moveProvider } from './llm'
 import { DEFAULT_SIDEBAR_ICONS } from './settings'
 
 // remove logo base64 data to reduce the size of the state
@@ -834,8 +835,7 @@ const migrateConfig = {
       })
     }
 
-    removeMiniAppIconsFromState(state)
-    ;(state.llm.providers as any[])?.forEach((provider) => {
+    state.llm.providers.forEach((provider) => {
       if (provider.id === 'qwenlm') {
         provider.type = 'qwenlm'
       }
@@ -874,7 +874,6 @@ const migrateConfig = {
         state.minapps.enabled.push(flowith)
       }
     }
-    removeMiniAppIconsFromState(state)
     return state
   },
   '60': (state: RootState) => {
@@ -1245,27 +1244,36 @@ const migrateConfig = {
     return state
   },
   '78': (state: RootState) => {
-    // 修复从老版本升级时，assistants.groups 和 topicGroups 为 undefined 的问题
-    if (state.assistants) {
-      if (!state.assistants.groups) {
-        state.assistants.groups = []
-      }
-      if (!state.assistants.topicGroups) {
-        state.assistants.topicGroups = []
-      }
-    }
+    state.llm.providers = moveProvider(state.llm.providers, 'ppio', 9)
+    state.llm.providers = moveProvider(state.llm.providers, 'infini', 10)
+    removeMiniAppIconsFromState(state)
     return state
   },
   '79': (state: RootState) => {
-    // 初始化助手分组和话题分组设置
-    if (state.settings) {
-      if (state.settings.enableAssistantGroup === undefined) {
-        state.settings.enableAssistantGroup = false
-      }
-      if (state.settings.enableTopicsGroup === undefined) {
-        state.settings.enableTopicsGroup = false
-      }
-    }
+    state.llm.providers.push({
+      id: 'gpustack',
+      name: 'GPUStack',
+      type: 'openai',
+      apiKey: '',
+      apiHost: '',
+      models: SYSTEM_MODELS.gpustack,
+      isSystem: true,
+      enabled: false
+    })
+    return state
+  },
+  '80': (state: RootState) => {
+    state.llm.providers.push({
+      id: 'alayanew',
+      name: 'AlayaNew',
+      type: 'openai',
+      apiKey: '',
+      apiHost: 'https://deepseek.alayanew.com',
+      models: SYSTEM_MODELS.alayanew,
+      isSystem: true,
+      enabled: false
+    })
+    state.llm.providers = moveProvider(state.llm.providers, 'alayanew', 10)
     return state
   }
 }

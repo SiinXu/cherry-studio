@@ -125,14 +125,6 @@ const DisplaySettings: FC = () => {
         )}
       </SettingGroup>
       <SettingGroup theme={theme}>
-        <SettingTitle>{t('settings.display.assistant.title')}</SettingTitle>
-        <SettingDivider />
-        <SettingRow>
-          <SettingRowTitle>{t('settings.assistant.show.icon')}</SettingRowTitle>
-          <Switch checked={showAssistantIcon} onChange={(checked) => setShowAssistantIcon(checked)} />
-        </SettingRow>
-      </SettingGroup>
-      <SettingGroup theme={theme}>
         <SettingTitle>{t('settings.display.topic.title')}</SettingTitle>
         <SettingDivider />
         <SettingRow>
@@ -166,16 +158,11 @@ const DisplaySettings: FC = () => {
         </SettingRow>
       </SettingGroup>
       <SettingGroup theme={theme}>
-        <SettingTitle>{t('settings.display.group.title')}</SettingTitle>
+        <SettingTitle>{t('settings.display.assistant.title')}</SettingTitle>
         <SettingDivider />
         <SettingRow>
-          <SettingRowTitle>{t('settings.advanced.assistantGroup')}</SettingRowTitle>
-          <Switch checked={enableAssistantGroup} onChange={(checked) => setEnableAssistantGroup(checked)} />
-        </SettingRow>
-        <SettingDivider />
-        <SettingRow>
-          <SettingRowTitle>{t('settings.advanced.topicsGroup')}</SettingRowTitle>
-          <Switch checked={enableTopicsGroup} onChange={(checked) => setEnableTopicsGroup(checked)} />
+          <SettingRowTitle>{t('settings.assistant.show.icon')}</SettingRowTitle>
+          <Switch checked={showAssistantIcon} onChange={(checked) => setShowAssistantIcon(checked)} />
         </SettingRow>
       </SettingGroup>
       <SettingGroup theme={theme}>

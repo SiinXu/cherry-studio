@@ -3,9 +3,8 @@ import i18n from '@renderer/i18n'
 import store from '@renderer/store'
 import { setGenerating } from '@renderer/store/runtime'
 import { Assistant, Message, Model, Provider, Suggestion } from '@renderer/types'
-import { addAbortController } from '@renderer/utils/abortController'
-import { formatMessageError } from '@renderer/utils/error'
-import { findLast, isEmpty } from 'lodash'
+import { formatMessageError, isAbortError } from '@renderer/utils/error'
+import { cloneDeep, findLast, isEmpty } from 'lodash'
 
 import AiProvider from '../providers/AiProvider'
 import {
@@ -19,6 +18,7 @@ import { EVENT_NAMES, EventEmitter } from './EventService'
 import { filterMessages, filterUsefulMessages } from './MessagesService'
 import { estimateMessagesUsage } from './TokenService'
 import WebSearchService from './WebSearchService'
+
 export async function fetchChatCompletion({
   message,
   messages,
@@ -30,24 +30,9 @@ export async function fetchChatCompletion({
   assistant: Assistant
   onResponse: (message: Message) => void
 }) {
-  window.keyv.set(EVENT_NAMES.CHAT_COMPLETION_PAUSED, false)
-
   const provider = getAssistantProvider(assistant)
   const webSearchProvider = WebSearchService.getWebSearchProvider()
   const AI = new AiProvider(provider)
-
-  store.dispatch(setGenerating(true))
-
-  onResponse({ ...message })
-
-  const pauseFn = (message: Message) => {
-    message.status = 'paused'
-    EventEmitter.emit(EVENT_NAMES.RECEIVE_MESSAGE, message)
-    store.dispatch(setGenerating(false))
-    onResponse({ ...message, status: 'paused' })
-  }
-
-  addAbortController(message.askId ?? message.id, pauseFn.bind(null, message))
 
   try {
     let _messages: Message[] = []
@@ -98,7 +83,7 @@ export async function fetchChatCompletion({
         }
 
         if (mcpToolResponse) {
-          message.metadata = { ...message.metadata, mcpTools: mcpToolResponse }
+          message.metadata = { ...message.metadata, mcpTools: cloneDeep(mcpToolResponse) }
         }
 
         // Handle citations from Perplexity API
@@ -125,17 +110,24 @@ export async function fetchChatCompletion({
       // Set metrics.completion_tokens
       if (message.metrics && message?.usage?.completion_tokens) {
         if (!message.metrics?.completion_tokens) {
-          message.metrics.completion_tokens = message.usage.completion_tokens
+          message = {
+            ...message,
+            metrics: {
+              ...message.metrics,
+              completion_tokens: message.usage.completion_tokens
+            }
+          }
         }
       }
     }
   } catch (error: any) {
-    message.status = 'error'
-    message.error = formatMessageError(error)
+    if (isAbortError(error)) {
+      message.status = 'paused'
+    } else {
+      message.status = 'error'
+      message.error = formatMessageError(error)
+    }
   }
-
-  // Update message status
-  message.status = window.keyv.get(EVENT_NAMES.CHAT_COMPLETION_PAUSED) ? 'paused' : message.status
 
   // Emit chat completion event
   EventEmitter.emit(EVENT_NAMES.RECEIVE_MESSAGE, message)
@@ -157,13 +149,13 @@ export async function fetchTranslate({ message, assistant, onResponse }: FetchTr
   const model = getTranslateModel()
 
   if (!model) {
-    return ''
+    throw new Error(i18n.t('error.provider_disabled'))
   }
 
   const provider = getProviderByModel(model)
 
   if (!hasApiKey(provider)) {
-    return ''
+    throw new Error(i18n.t('error.no_api_key'))
   }
 
   const AI = new AiProvider(provider)
@@ -217,7 +209,6 @@ export async function fetchSuggestions({
   assistant: Assistant
 }): Promise<Suggestion[]> {
   const model = assistant.model
-
   if (!model) {
     return []
   }
@@ -240,7 +231,11 @@ export async function fetchSuggestions({
   }
 }
 
-export async function checkApi(provider: Provider, model: Model) {
+// Helper function to validate provider's basic settings such as API key, host, and model list
+export function checkApiProvider(provider: Provider): {
+  valid: boolean
+  error: Error | null
+} {
   const key = 'api-check'
   const style = { marginTop: '3vh' }
 
@@ -258,7 +253,7 @@ export async function checkApi(provider: Provider, model: Model) {
     window.message.error({ content: i18n.t('message.error.enter.api.host'), key, style })
     return {
       valid: false,
-      error: new Error('message.error.enter.api.host')
+      error: new Error(i18n.t('message.error.enter.api.host'))
     }
   }
 
@@ -266,7 +261,22 @@ export async function checkApi(provider: Provider, model: Model) {
     window.message.error({ content: i18n.t('message.error.enter.model'), key, style })
     return {
       valid: false,
-      error: new Error('message.error.enter.model')
+      error: new Error(i18n.t('message.error.enter.model'))
+    }
+  }
+
+  return {
+    valid: true,
+    error: null
+  }
+}
+
+export async function checkApi(provider: Provider, model: Model) {
+  const validation = checkApiProvider(provider)
+  if (!validation.valid) {
+    return {
+      valid: validation.valid,
+      error: validation.error
     }
   }
 
@@ -296,77 +306,11 @@ export async function fetchModels(provider: Provider) {
   }
 }
 
-export async function fetchEmojiSuggestion(prompt: string): Promise<string> {
-  if (!prompt || prompt.trim() === '') {
-    // 如果没有提示词，返回一些默认的 emoji
-    const defaultEmojis = ['🤖', '💡', '✨', '🧠', '📚']
-    return defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]
-  }
-
-  // 优先使用本地生成方法，避免模型不存在的错误
-  try {
-    const { generateEmojiFromPrompt } = await import('@renderer/utils')
-    return await generateEmojiFromPrompt(prompt)
-  } catch (localError) {
-    console.error('Error generating emoji locally:', localError)
-
-    // 本地生成失败后，尝试使用 AI 生成 emoji
-    try {
-      // 从 store 中获取所有提供商
-      const providers = store.getState().llm.providers
-
-      // 获取第一个可用的 AI 提供商
-      const provider = providers.find((p) => hasApiKey(p))
-
-      if (provider) {
-        const { EMOJI_GENERATOR_PROMPT } = await import('@renderer/config/prompts')
-        const AI = new AiProvider(provider)
-
-        // 使用 AI 生成 emoji
-        const systemPrompt = EMOJI_GENERATOR_PROMPT + '\n\n输入: ' + prompt
-        const completion = await AI.generateText({
-          prompt: systemPrompt,
-          content: ''
-        })
-
-        // 从返回结果中提取 emoji
-        // 首先尝试查找格式为 "Emoji: X" 的模式
-        const emojiFormatMatch = completion.match(/Emoji[\s:]+([p{Emoji}p{Emoji_Presentation}]+)/u)
-        if (emojiFormatMatch && emojiFormatMatch[1]) {
-          return emojiFormatMatch[1]
-        }
-
-        // 尝试查找第一个出现的 emoji
-        const match = completion.match(/[p{Emoji}p{Emoji_Presentation}]/u)
-        if (match && match[0]) {
-          return match[0]
-        }
-
-        // 尝试匹配常见的 emoji 符号名称
-        const emojiNameMap = {
-          ':robot:': '🤖',
-          ':bulb:': '💡',
-          ':sparkles:': '✨',
-          ':brain:': '🧠',
-          ':books:': '📚',
-          ':computer:': '💻',
-          ':star2:': '🌟',
-          ':jigsaw:': '🧩'
-        }
-
-        for (const [name, emoji] of Object.entries(emojiNameMap)) {
-          if (completion.includes(name)) {
-            return emoji
-          }
-        }
-      }
-
-      // 如果没有可用的AI提供商或AI提取失败，使用默认emoji
-      return '🤖'
-    } catch (aiError) {
-      console.error('Error generating emoji with AI:', aiError)
-      // 出错时返回一个默认 emoji
-      return '🤖'
-    }
-  }
+/**
+ * Format API keys
+ * @param value Raw key string
+ * @returns Formatted key string
+ */
+export const formatApiKeys = (value: string) => {
+  return value.replaceAll('，', ',').replaceAll(' ', ',').replaceAll(' ', '').replaceAll('\n', ',')
 }

@@ -8,14 +8,16 @@ import { useAgents } from '@renderer/hooks/useAgents'
 import { useSidebarIconShow } from '@renderer/hooks/useSidebarIcon'
 import { fetchEmojiSuggestion, fetchGenerate } from '@renderer/services/ApiService'
 import { getDefaultModel } from '@renderer/services/AssistantService'
+import { estimateTextTokens } from '@renderer/services/TokenService'
 import { useAppSelector } from '@renderer/store'
 import { Agent, KnowledgeBase } from '@renderer/types'
 import { getLeadingEmoji, uuid } from '@renderer/utils'
 import { Button, Form, FormInstance, Input, Modal, Popover, Select, SelectProps } from 'antd'
 import TextArea from 'antd/es/input/TextArea'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import stringWidth from 'string-width'
+import styled from 'styled-components'
 
 interface Props {
   resolve: (data: Agent | null) => void
@@ -36,7 +38,7 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
   const formRef = useRef<FormInstance>(null)
   const [emoji, setEmoji] = useState('')
   const [loading, setLoading] = useState(false)
-  const [emojiLoading, setEmojiLoading] = useState(false)
+  const [tokenCount, setTokenCount] = useState(0)
   const knowledgeState = useAppSelector((state) => state.knowledge)
   const showKnowledgeIcon = useSidebarIconShow('knowledge')
   const knowledgeOptions: SelectProps['options'] = []
@@ -48,23 +50,19 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
     })
   })
 
-  // 自动生成 emoji 的函数
-  const generateEmoji = async (promptText: string) => {
-    if (!promptText) return
-    setEmojiLoading(true)
-    try {
-      const generatedEmoji = await fetchEmojiSuggestion(promptText)
-      // 确保只使用第一个emoji字符
-      if (generatedEmoji) {
-        const firstCodePoint = [...generatedEmoji][0] // 正确处理emoji字符
-        setEmoji(firstCodePoint)
+  useEffect(() => {
+    const updateTokenCount = async () => {
+      const prompt = formRef.current?.getFieldValue('prompt')
+      if (prompt) {
+        const count = await estimateTextTokens(prompt)
+        setTokenCount(count)
+      } else {
+        setTokenCount(0)
       }
-    } catch (error) {
-      console.error('Error generating emoji:', error)
-    } finally {
-      setEmojiLoading(false)
     }
-  }
+    updateTokenCount()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.getFieldValue('prompt')])
 
   const onFinish = (values: FieldType) => {
     // 确保只使用单个emoji
@@ -158,7 +156,13 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
         labelAlign="left"
         colon={false}
         style={{ marginTop: 25 }}
-        onFinish={onFinish}>
+        onFinish={onFinish}
+        onValuesChange={async (changedValues) => {
+          if (changedValues.prompt) {
+            const count = await estimateTextTokens(changedValues.prompt)
+            setTokenCount(count)
+          }
+        }}>
         <Form.Item name="name" label="Emoji">
           <div style={{ display: 'flex', gap: 8 }}>
             <Popover content={<EmojiPicker onEmojiClick={setEmoji} />} arrow>
@@ -196,18 +200,10 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
             label={t('agents.add.prompt')}
             rules={[{ required: true }]}
             style={{ position: 'relative' }}>
-            <TextArea
-              placeholder={t('agents.add.prompt.placeholder')}
-              spellCheck={false}
-              rows={10}
-              onChange={(e) => {
-                // 当提示词输入超过 20 个字符并且没有设置 emoji 时自动生成
-                const value = e.target.value
-                if (value && value.length >= 20 && !emoji) {
-                  generateEmoji(value)
-                }
-              }}
-            />
+            <TextAreaContainer>
+              <TextArea placeholder={t('agents.add.prompt.placeholder')} spellCheck={false} rows={10} />
+              <TokenCount>Tokens: {tokenCount}</TokenCount>
+            </TextAreaContainer>
           </Form.Item>
           <Button
             icon={loading ? <LoadingOutlined /> : <ThunderboltOutlined />}
@@ -237,6 +233,23 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
     </Modal>
   )
 }
+
+const TextAreaContainer = styled.div`
+  position: relative;
+  width: 100%;
+`
+
+const TokenCount = styled.div`
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background-color: var(--color-background-soft);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--color-text-2);
+  user-select: none;
+`
 
 export default class AddAgentPopup {
   static topviewId = 0

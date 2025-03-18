@@ -7,7 +7,6 @@ import { registerIpc } from './ipc'
 import { registerShortcuts } from './services/ShortcutService'
 import { TrayService } from './services/TrayService'
 import { windowService } from './services/WindowService'
-import { updateUserDataPath } from './utils/upgrade'
 
 // Check for single instance lock
 if (!app.requestSingleInstanceLock()) {
@@ -32,40 +31,6 @@ if (!app.requestSingleInstanceLock()) {
   }
 
   app.whenReady().then(async () => {
-    // 设置内容安全策略，在所有环境中应用
-    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-      const csp = app.isPackaged
-        ? "default-src 'self'; script-src 'self';"
-        : "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline';"
-
-      callback({
-        responseHeaders: {
-          ...details.responseHeaders,
-          'Content-Security-Policy': [csp]
-        }
-      })
-    })
-
-    // 在应用准备好后清除样式相关缓存
-    if (app.isPackaged) {
-      try {
-        const sessions = [session.defaultSession, session.fromPartition('persist:webview')]
-        for (const sess of sessions) {
-          // 只清除缓存，不清除用户存储数据
-          await sess.clearCache()
-          // 只清除样式相关存储
-          await sess.clearStorageData({
-            storages: ['shadercache']
-          })
-        }
-        console.log('样式缓存已清除')
-      } catch (err) {
-        console.error('清除缓存失败', err)
-      }
-    }
-
-    await updateUserDataPath()
-
     // Set app user model id for windows
     electronApp.setAppUserModelId(import.meta.env.VITE_MAIN_BUNDLE_ID || 'com.kangfenmao.CherryStudio')
 

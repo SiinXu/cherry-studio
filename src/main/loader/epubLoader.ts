@@ -1,11 +1,10 @@
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
 import { BaseLoader } from '@llm-tools/embedjs-interfaces'
 import { cleanString } from '@llm-tools/embedjs-utils'
-import AdmZip from 'adm-zip'
+import { getTempDir } from '@main/utils/file'
 import Logger from 'electron-log'
 import * as fs from 'fs'
-import * as path from 'path'
-import * as xml2js from 'xml2js'
+import path from 'path'
 
 /**
  * epub 加载器的配置选项
@@ -246,7 +245,9 @@ export class EpubLoader extends BaseLoader<Record<string, string | number | bool
         throw new Error('No content found in epub file')
       }
 
-      const chapterTexts: string[] = []
+      // 使用临时文件而不是内存数组
+      const tempFilePath = path.join(getTempDir(), `epub-${Date.now()}.txt`)
+      const writeStream = fs.createWriteStream(tempFilePath)
 
       // 遍历所有章节
       for (const chapter of chapters) {
@@ -264,15 +265,31 @@ export class EpubLoader extends BaseLoader<Record<string, string | number | bool
             .trim() // 移除首尾空白
 
           if (text) {
-            chapterTexts.push(text)
+            // 直接写入文件
+            writeStream.write(text + '\n\n')
           }
         } catch (error) {
           Logger.error(`[EpubLoader] Error processing chapter ${chapter.id}:`, error)
         }
       }
 
-      // 使用双换行符连接所有章节文本
-      this.extractedText = chapterTexts.join('\n\n')
+      // 关闭写入流
+      writeStream.end()
+
+      // 等待写入完成
+      await new Promise<void>((resolve, reject) => {
+        writeStream.on('finish', resolve)
+        writeStream.on('error', reject)
+      })
+
+      // 从临时文件读取内容
+      this.extractedText = fs.readFileSync(tempFilePath, 'utf-8')
+
+      // 删除临时文件
+      fs.unlinkSync(tempFilePath)
+
+      // 只添加一条完成日志
+      Logger.info(`[EpubLoader] 电子书 ${this.metadata?.title || path.basename(this.filePath)} 处理完成`)
     } catch (error) {
       Logger.error('[EpubLoader] Error in extractTextFromEpub:', error)
       throw error
