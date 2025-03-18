@@ -2,8 +2,9 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { DEFAULT_CONTEXTCOUNT, DEFAULT_TEMPERATURE } from '@renderer/config/constant'
 import { TopicManager } from '@renderer/hooks/useTopic'
 import { getDefaultAssistant, getDefaultTopic } from '@renderer/services/AssistantService'
-import { Assistant, AssistantSettings, Model, Topic } from '@renderer/types'
-import { isEmpty, uniqBy } from 'lodash'
+import { Assistant, AssistantGroup, AssistantSettings, Model, Topic, TopicGroup } from '@renderer/types'
+import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
+import { uniqBy } from 'lodash'
 
 export interface AssistantsState {
   defaultAssistant: Assistant
@@ -163,11 +164,7 @@ const assistantsSlice = createSlice({
         assistant && assistant.id === action.payload.assistantId
           ? {
               ...assistant,
-              topics: assistant.topics.map((topic) => {
-                const _topic = topic.id === newTopic.id ? newTopic : topic
-                _topic.messages = []
-                return _topic
-              })
+              topics: safeMap(assistant.topics, (topic) => (topic.id === newTopic.id ? newTopic : topic))
             }
           : assistant
       )
@@ -182,9 +179,7 @@ const assistantsSlice = createSlice({
         assistant && assistant.id === action.payload.assistantId
           ? {
               ...assistant,
-              topics: action.payload.topics.map((topic) =>
-                isEmpty(topic.messages) ? topic : { ...topic, messages: [] }
-              )
+              topics: action.payload.topics
             }
           : assistant
       )
