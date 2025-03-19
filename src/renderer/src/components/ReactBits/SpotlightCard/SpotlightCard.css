@@ -1,13 +1,20 @@
 .card-spotlight {
   position: relative;
   border-radius: 1.5rem;
-  border: 1px solid #222;
-  background-color: #111;
+  border: 1px solid rgba(200, 200, 200, 0.1);
+  background-color: rgba(255, 255, 255, 0.03);
   padding: 2rem;
   overflow: hidden;
   --mouse-x: 50%;
   --mouse-y: 50%;
   --spotlight-color: rgba(255, 255, 255, 0.05);
+  --spotlight-size: 75%;
+  --ripple-x: 50%;
+  --ripple-y: 50%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform, box-shadow, background-color;
 }
 
 .card-spotlight::before {
@@ -17,13 +24,125 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), var(--spotlight-color), transparent 80%);
+  background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), var(--spotlight-color), transparent var(--spotlight-size));
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   pointer-events: none;
+  transform: scale(0.98);
+  z-index: 1;
+}
+
+.card-spotlight.hover-effect:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(200, 200, 200, 0.15);
 }
 
 .card-spotlight:hover::before,
 .card-spotlight:focus-within::before {
+  opacity: 0.8;
+  transform: scale(1);
+}
+
+/* 添加脉冲动画效果 */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(64, 121, 255, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 15px rgba(64, 121, 255, 0);
+    transform: scale(1.02);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(64, 121, 255, 0);
+    transform: scale(1);
+  }
+}
+
+/* 点击闪烁效果动画 */
+@keyframes clickFlash {
+  0% {
+    opacity: 0.8;
+    transform: scale(0.2) translate(-50%, -50%);
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2) translate(-50%, -50%);
+  }
+}
+
+.card-spotlight.pulse-effect {
+  animation: pulse 0.5s cubic-bezier(0.4, 0, 0.6, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 水波纹效果 */
+.card-spotlight::after {
+  content: '';
+  position: absolute;
+  top: var(--ripple-y, 50%);
+  left: var(--ripple-x, 50%);
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.6);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%, -50%);
+  transform-origin: 50% 50%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0) translate(-50%, -50%);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(50, 50) translate(-50%, -50%);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(100, 100) translate(-50%, -50%);
+    opacity: 0;
+  }
+}
+
+.card-spotlight.pulse-effect::after {
+  animation: ripple 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   opacity: 0.6;
+}
+
+/* 点击闪烁效果 */
+.click-flash {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+  transform-origin: 0 0;
+  pointer-events: none;
+  z-index: 10;
+  animation: clickFlash 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* 增强活动状态 */
+.card-spotlight:active::before {
+  opacity: 1;
+  transform: scale(0.95);
+  background: radial-gradient(circle at var(--ripple-x) var(--ripple-y), var(--spotlight-color), transparent calc(var(--spotlight-size) * 0.7));
+  transition: all 0.1s ease;
+}
+
+/* 添加触摸设备的支持 */
+@media (hover: none) {
+  .card-spotlight::before {
+    opacity: 0.5;
+    background: radial-gradient(circle at center, var(--spotlight-color), transparent var(--spotlight-size));
+  }
 }

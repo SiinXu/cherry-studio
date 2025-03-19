@@ -1,9 +1,8 @@
-import { TopView } from '@renderer/components/TopView'
 import { useAppSelector } from '@renderer/store'
 import { MCPServer } from '@renderer/types'
 import { Form, Input, Modal, Radio, Switch } from 'antd'
 import TextArea from 'antd/es/input/TextArea'
-import { useEffect, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 interface ShowParams {
@@ -13,6 +12,9 @@ interface ShowParams {
 
 interface Props extends ShowParams {
   resolve: (data: any) => void
+  visible: boolean
+  onCancel: () => void
+  onSubmit: (serverData: MCPServer) => void
 }
 
 interface MCPFormValues {
@@ -26,8 +28,8 @@ interface MCPFormValues {
   isActive: boolean
 }
 
-const PopupContainer: React.FC<Props> = ({ server, create, resolve }) => {
-  const [open, setOpen] = useState(true)
+const AddMcpServerPopup: FC<Props> = ({ server, create, resolve, visible, onCancel, onSubmit }) => {
+  const [open, setOpen] = useState(visible)
   const { t } = useTranslation()
   const [serverType, setServerType] = useState<'sse' | 'stdio'>('stdio')
   const mcpServers = useAppSelector((state) => state.mcp.servers)
@@ -35,15 +37,18 @@ const PopupContainer: React.FC<Props> = ({ server, create, resolve }) => {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+    setOpen(visible)
+  }, [visible])
+
+  useEffect(() => {
     if (server) {
-      // Determine server type based on server properties
-      const serverType = server.baseUrl ? 'sse' : 'stdio'
-      setServerType(serverType)
+      const type = server.baseUrl ? 'sse' : 'stdio'
+      setServerType(type)
 
       form.setFieldsValue({
         name: server.name,
         description: server.description,
-        serverType: serverType,
+        serverType: type,
         baseUrl: server.baseUrl || '',
         command: server.command || '',
         args: server.args ? server.args.join('\n') : '',
@@ -55,10 +60,8 @@ const PopupContainer: React.FC<Props> = ({ server, create, resolve }) => {
         isActive: server.isActive
       })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [server, form])
 
-  // Watch the serverType field to update the form layout dynamically
   useEffect(() => {
     const type = form.getFieldValue('serverType')
     type && setServerType(type)
@@ -102,6 +105,7 @@ const PopupContainer: React.FC<Props> = ({ server, create, resolve }) => {
           setLoading(false)
           setOpen(false)
           form.resetFields()
+          onSubmit(mcpServer)
         } catch (error: any) {
           window.message.error(`${t('settings.mcp.updateError')}: ${error.message}`)
           setLoading(false)
@@ -120,6 +124,7 @@ const PopupContainer: React.FC<Props> = ({ server, create, resolve }) => {
           setLoading(false)
           setOpen(false)
           form.resetFields()
+          onSubmit(mcpServer)
         } catch (error: any) {
           window.message.error(`${t('settings.mcp.addError')}: ${error.message}`)
           setLoading(false)
@@ -130,24 +135,21 @@ const PopupContainer: React.FC<Props> = ({ server, create, resolve }) => {
     }
   }
 
-  const onCancel = () => {
-    console.log('onCancel')
+  const handleCancel = () => {
     setOpen(false)
+    onCancel()
   }
 
   const onClose = () => {
-    console.log('onClose')
     resolve({})
   }
-
-  AddMcpServerPopup.hide = onCancel
 
   return (
     <Modal
       title={server ? t('settings.mcp.editServer') : t('settings.mcp.addServer')}
       open={open}
       onOk={onOK}
-      onCancel={onCancel}
+      onCancel={handleCancel}
       afterClose={onClose}
       confirmLoading={loading}
       maskClosable={false}
@@ -198,10 +200,6 @@ const PopupContainer: React.FC<Props> = ({ server, create, resolve }) => {
             <Form.Item name="args" label={t('settings.mcp.args')} tooltip={t('settings.mcp.argsTooltip')}>
               <TextArea rows={3} placeholder={`arg1\narg2`} style={{ fontFamily: 'monospace' }} />
             </Form.Item>
-
-            <Form.Item name="env" label={t('settings.mcp.env')} tooltip={t('settings.mcp.envTooltip')}>
-              <TextArea rows={3} placeholder={`KEY1=value1\nKEY2=value2`} style={{ fontFamily: 'monospace' }} />
-            </Form.Item>
           </>
         )}
 
@@ -213,25 +211,4 @@ const PopupContainer: React.FC<Props> = ({ server, create, resolve }) => {
   )
 }
 
-const TopViewKey = 'AddMcpServerPopup'
-
-export default class AddMcpServerPopup {
-  static topviewId = 0
-  static hide() {
-    TopView.hide(TopViewKey)
-  }
-  static show(props: ShowParams = {}) {
-    return new Promise<any>((resolve) => {
-      TopView.show(
-        <PopupContainer
-          {...props}
-          resolve={(v) => {
-            resolve(v)
-            TopView.hide(TopViewKey)
-          }}
-        />,
-        TopViewKey
-      )
-    })
-  }
-}
+export default AddMcpServerPopup
