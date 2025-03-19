@@ -2858,7 +2858,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/prop-types@npm:*":
+"@types/prop-types@npm:*, @types/prop-types@npm:^15.5.2":
   version: 15.7.14
   resolution: "@types/prop-types@npm:15.7.14"
   checksum: 10c0/1ec775160bfab90b67a782d735952158c7e702ca4502968aa82565bd8e452c2de8601c8dfe349733073c31179116cf7340710160d3836aa8a1ef76d1532893b1
@@ -2883,12 +2883,32 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-native@npm:^0.49.2":
+  version: 0.49.5
+  resolution: "@types/react-native@npm:0.49.5"
+  dependencies:
+    "@types/react": "npm:*"
+  checksum: 10c0/8545c301193e9355ab2cc11daa09f5648a8eea235b02a4c2346cbfbefa865f41c01de6139fc11966b562ae72fdb0e431b495ccad9bfc917d89a73006485c9f04
+  languageName: node
+  linkType: hard
+
 "@types/react@npm:*":
   version: 19.0.10
   resolution: "@types/react@npm:19.0.10"
   dependencies:
     csstype: "npm:^3.0.2"
   checksum: 10c0/41884cca21850c8b2d6578b172ca0ca4fff6021251a68532b19f2031ac23dc5a9222470208065f8d9985d367376047df2f49ece8d927f7d04cdc94922b1eb34b
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^16.0.10":
+  version: 16.14.62
+  resolution: "@types/react@npm:16.14.62"
+  dependencies:
+    "@types/prop-types": "npm:*"
+    "@types/scheduler": "npm:^0.16"
+    csstype: "npm:^3.0.2"
+  checksum: 10c0/3c913ae6c49b3ee8504e2e6f603db6440a0b99d737b607b2df8f39a50484b089c547f239294615de6b877f5db5217f23bc2610b232034612985afd4621ca8ace
   languageName: node
   linkType: hard
 
@@ -2915,6 +2935,13 @@ __metadata:
   version: 0.12.0
   resolution: "@types/retry@npm:0.12.0"
   checksum: 10c0/7c5c9086369826f569b83a4683661557cab1361bac0897a1cefa1a915ff739acd10ca0d62b01071046fe3f5a3f7f2aec80785fe283b75602dc6726781ea3e328
+  languageName: node
+  linkType: hard
+
+"@types/scheduler@npm:^0.16":
+  version: 0.16.8
+  resolution: "@types/scheduler@npm:0.16.8"
+  checksum: 10c0/f86de504945b8fc41b1f391f847444d542e2e4067cf7e5d9bfeb5d2d2393d3203b1161bc0ef3b1e104d828dabfb60baf06e8d2c27e27ff7e8258e6e618d8c4ec
   languageName: node
   linkType: hard
 
@@ -3227,6 +3254,7 @@ __metadata:
     eslint-plugin-simple-import-sort: "npm:^12.1.1"
     eslint-plugin-unused-imports: "npm:^4.0.0"
     fetch-socks: "npm:^1.3.2"
+    framer-motion: "npm:^12.5.0"
     fs-extra: "npm:^11.2.0"
     html-to-image: "npm:^1.11.13"
     husky: "npm:^9.1.7"
@@ -3241,10 +3269,12 @@ __metadata:
     p-queue: "npm:^8.1.0"
     prettier: "npm:^3.5.3"
     react: "npm:^18.2.0"
+    react-bits: "npm:^1.0.5"
     react-dom: "npm:^18.2.0"
     react-hotkeys-hook: "npm:^4.6.1"
     react-i18next: "npm:^14.1.2"
     react-infinite-scroll-component: "npm:^6.1.0"
+    react-intersection-observer: "npm:^9.16.0"
     react-markdown: "npm:^9.0.1"
     react-redux: "npm:^9.1.2"
     react-router: "npm:6"
@@ -3421,6 +3451,19 @@ __metadata:
     json-schema-traverse: "npm:^1.0.0"
     require-from-string: "npm:^2.0.2"
   checksum: 10c0/ec3ba10a573c6b60f94639ffc53526275917a2df6810e4ab5a6b959d87459f9ef3f00d5e7865b82677cb7d21590355b34da14d1d0b9c32d75f95a187e76fff35
+  languageName: node
+  linkType: hard
+
+"animated@npm:^0.2.0":
+  version: 0.2.2
+  resolution: "animated@npm:0.2.2"
+  dependencies:
+    invariant: "npm:^2.2.0"
+    normalize-css-color: "npm:^1.0.1"
+  peerDependencies:
+    react: "*"
+    react-dom: "*"
+  checksum: 10c0/24ab7b3e530ccd77563714e7976b5f7adca8405ade071c5a506032e428671c3fb3246f8741120cfea7e701d997b0fc0d8f7da4e1c6500af19e5edbde27467bda
   languageName: node
   linkType: hard
 
@@ -4932,6 +4975,16 @@ __metadata:
   dependencies:
     buffer: "npm:^5.1.0"
   checksum: 10c0/1a0da36e5f95b19cd2a7b2eab5306a08f1c47bdd22da6f761ab764e2222e8e90a877398907cea94108bd5e41a6d311ea84d7914eaca67da2baa4050bd6384b3d
+  languageName: node
+  linkType: hard
+
+"create-react-class@npm:^15.6.2":
+  version: 15.7.0
+  resolution: "create-react-class@npm:15.7.0"
+  dependencies:
+    loose-envify: "npm:^1.3.1"
+    object-assign: "npm:^4.1.1"
+  checksum: 10c0/bce4b46e6d85b424cb50ca8089266c7664fcecfd81abaafb829680fae2e2e60dc6999cac88f5a16a38473ed284859f2328935a42fc5cd1b7cc48888fdd8363c9
   languageName: node
   linkType: hard
 
@@ -6967,6 +7020,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"framer-motion@npm:^12.5.0":
+  version: 12.5.0
+  resolution: "framer-motion@npm:12.5.0"
+  dependencies:
+    motion-dom: "npm:^12.5.0"
+    motion-utils: "npm:^12.5.0"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    "@emotion/is-prop-valid": "*"
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    "@emotion/is-prop-valid":
+      optional: true
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10c0/ac632ea3a452e473abf9adad1d6777522b1dd2ed8cf567078a9997f07a388d7b9e68a3e9c102b1807e1e88af3d83eb2eb0d9476032059f4803a0c32bded9bf74
+  languageName: node
+  linkType: hard
+
 "fresh@npm:2.0.0":
   version: 2.0.0
   resolution: "fresh@npm:2.0.0"
@@ -8154,6 +8229,15 @@ __metadata:
     hasown: "npm:^2.0.2"
     side-channel: "npm:^1.1.0"
   checksum: 10c0/03966f5e259b009a9bf1a78d60da920df198af4318ec004f57b8aef1dd3fe377fbc8cce63a96e8c810010302654de89f9e19de1cd8ad0061d15be28a695465c7
+  languageName: node
+  linkType: hard
+
+"invariant@npm:^2.2.0":
+  version: 2.2.4
+  resolution: "invariant@npm:2.2.4"
+  dependencies:
+    loose-envify: "npm:^1.0.0"
+  checksum: 10c0/5af133a917c0bcf65e84e7f23e779e7abc1cd49cb7fdc62d00d1de74b0d8c1b5ee74ac7766099fb3be1b05b26dfc67bab76a17030d2fe7ea2eef867434362dfc
   languageName: node
   linkType: hard
 
@@ -9378,7 +9462,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loose-envify@npm:^1.1.0, loose-envify@npm:^1.4.0":
+"loose-envify@npm:^1.0.0, loose-envify@npm:^1.1.0, loose-envify@npm:^1.3.1, loose-envify@npm:^1.4.0":
   version: 1.4.0
   resolution: "loose-envify@npm:1.4.0"
   dependencies:
@@ -10810,6 +10894,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"motion-dom@npm:^12.5.0":
+  version: 12.5.0
+  resolution: "motion-dom@npm:12.5.0"
+  dependencies:
+    motion-utils: "npm:^12.5.0"
+  checksum: 10c0/32e6029a14c23a82392253ecd5349f3d7c603edac6e214357c6657560c90dff42163b40d7a9d93cd31c6eaded39765e115a1abf137496baec27942803f4bc56e
+  languageName: node
+  linkType: hard
+
+"motion-utils@npm:^12.5.0":
+  version: 12.5.0
+  resolution: "motion-utils@npm:12.5.0"
+  checksum: 10c0/f556240efda96a4bb86b13bb0e6cad689b2665ca688b2616585a7c7db182e3b8d93377ff1fb3782ca0088a4a8aa6dd5e47e81fda5c19ab334f01812eade639ef
+  languageName: node
+  linkType: hard
+
 "mri@npm:1.1.4":
   version: 1.1.4
   resolution: "mri@npm:1.1.4"
@@ -11086,6 +11186,13 @@ __metadata:
   bin:
     nopt: bin/nopt.js
   checksum: 10c0/62e9ea70c7a3eb91d162d2c706b6606c041e4e7b547cbbb48f8b3695af457dd6479904d7ace600856bf923dd8d1ed0696f06195c8c20f02ac87c1da0e1d315ef
+  languageName: node
+  linkType: hard
+
+"normalize-css-color@npm:^1.0.1":
+  version: 1.0.2
+  resolution: "normalize-css-color@npm:1.0.2"
+  checksum: 10c0/48655c9113d35c9e49d71e63ef636556b807692fdc536cfb3de2b51827ab9d75998c76d671576268e40dc3d89af91b750b2d1c889aa98856dd6181924add1712
   languageName: node
   linkType: hard
 
@@ -12192,7 +12299,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.8.1":
+"prop-types@npm:^15.6.0, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -12887,6 +12994,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-bits@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "react-bits@npm:1.0.5"
+  dependencies:
+    "@types/prop-types": "npm:^15.5.2"
+    "@types/react": "npm:^16.0.10"
+    "@types/react-native": "npm:^0.49.2"
+    animated: "npm:^0.2.0"
+    create-react-class: "npm:^15.6.2"
+    prop-types: "npm:^15.6.0"
+    react-timer-mixin: "npm:^0.13.3"
+  peerDependencies:
+    react: ">=16.0.0"
+  checksum: 10c0/0fe3444ddd6c53147890f10131e4944bdaafd31bfb90d5e705bfe3d4cb136e97565b8f7aa5aa3eee4b076e6b16a4defb60fba5729d99a97c89a39ec5bbbcb73a
+  languageName: node
+  linkType: hard
+
 "react-dom@npm:^18.2.0":
   version: 18.3.1
   resolution: "react-dom@npm:18.3.1"
@@ -12935,6 +13059,19 @@ __metadata:
   peerDependencies:
     react: ">=16.0.0"
   checksum: 10c0/8de02f178ae861880dddbd0c882dc70b55e21737b87fe428140d81a2c5d13c5eeba8a4fc260b1e86e4c556fdea333d6babaed55a9e5987a42b181b2d92f69cd8
+  languageName: node
+  linkType: hard
+
+"react-intersection-observer@npm:^9.16.0":
+  version: 9.16.0
+  resolution: "react-intersection-observer@npm:9.16.0"
+  peerDependencies:
+    react: ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^17.0.0 || ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    react-dom:
+      optional: true
+  checksum: 10c0/2aee5103fb460c6e5a3ab5a4fdc8c69a5215e23699a12d7857f25ba765fed48eacbed94ca835d79edf00c0edcc9c4fbb5bb057a373402d0551718546810e0e48
   languageName: node
   linkType: hard
 
@@ -13063,6 +13200,13 @@ __metadata:
     react: ^16.0.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0
   checksum: 10c0/5b3c101f789716331a0b6afad156293fb9aa05620e65494753001afcdb611788057f379b5979b34d570d527fa978003293266b59db505bf2d243ebab899ceeda
+  languageName: node
+  linkType: hard
+
+"react-timer-mixin@npm:^0.13.3":
+  version: 0.13.4
+  resolution: "react-timer-mixin@npm:0.13.4"
+  checksum: 10c0/fffc7eaa06b9c300183b495ef85d2e87edc051d58f4ea4297d8e77ae6df8ca96fb44764d8c19460f0f8ef9731dd9b67606f4becf611490785fa21b6d4207dec9
   languageName: node
   linkType: hard
 
@@ -15124,7 +15268,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.1.0, tslib@npm:^2.6.2, tslib@npm:^2.8.0":
+"tslib@npm:^2.1.0, tslib@npm:^2.4.0, tslib@npm:^2.6.2, tslib@npm:^2.8.0":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10c0/9c4759110a19c53f992d9aae23aac5ced636e99887b51b9e61def52611732872ff7668757d4e4c61f19691e36f4da981cd9485e869b4a7408d689f6bf1f14e62
