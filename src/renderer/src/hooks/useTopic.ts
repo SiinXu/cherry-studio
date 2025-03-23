@@ -15,14 +15,24 @@ import { getStoreSetting } from './useSettings'
 let _activeTopic: Topic
 let _setActiveTopic: (topic: Topic) => void
 
-export function useTopicGroups() {
+export function useTopicGroups(assistantId?: string) {
   const dispatch = useAppDispatch()
-  const { groups, isLoading, loadingError } = useAppSelector(
-    (state) => state.topics || { groups: [], isLoading: false, loadingError: null }
-  )
+  const topics = useAppSelector((state) => state.topics)
+
+  // 确保有默认值，防止null/undefined对象遍历错误
+  const groups = topics?.groups || []
+  const isLoading = topics?.isLoading || false
+  const loadingError = topics?.loadingError || null
+
+  const topicGroups = assistantId ? groups.filter((group) => group.assistantId === assistantId) : groups
 
   const addGroup = (group: TopicGroup) => {
-    dispatch({ type: 'topics/addGroup', payload: group })
+    // 确保新组有assistantId
+    const newGroup = {
+      ...group,
+      assistantId: group.assistantId || assistantId
+    }
+    dispatch({ type: 'topics/addGroup', payload: newGroup })
   }
 
   const updateGroup = (group: TopicGroup) => {
@@ -34,7 +44,7 @@ export function useTopicGroups() {
   }
 
   const updateTopicGroup = (topicId: string, groupId?: string) => {
-    dispatch({ type: 'topics/updateTopicGroup', payload: { topicId, groupId } })
+    dispatch({ type: 'topics/updateTopicGroup', payload: { topicId, groupId, assistantId } })
   }
 
   const updateGroupsOrder = (groups: TopicGroup[]) => {
@@ -42,7 +52,7 @@ export function useTopicGroups() {
   }
 
   return {
-    groups,
+    groups: topicGroups,
     isLoading,
     loadingError,
     addGroup,

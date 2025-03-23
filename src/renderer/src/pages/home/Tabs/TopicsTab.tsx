@@ -54,9 +54,14 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   const { assistant, removeTopic, updateTopic, addTopic, duplicateTopic } = useAssistant(_assistant.id)
   const { t } = useTranslation()
   const { showTopicTime, topicPosition, enableTopicsGroup } = useSettings()
-  const { topicGroups, addGroup, updateGroup, removeGroup, updateTopicGroup, updateGroupsOrder } = useTopicGroups(
-    _assistant.id
-  )
+  const {
+    groups: topicGroups,
+    addGroup,
+    updateGroup,
+    removeGroup,
+    updateTopicGroup,
+    updateGroupsOrder
+  } = useTopicGroups(_assistant.id)
   const [form] = Form.useForm()
   const borderRadius = showTopicTime ? 12 : 'var(--list-item-border-radius)'
   // 分组管理状态
@@ -73,7 +78,8 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     } catch (e) {
       console.error('Error loading topic group expanded state:', e)
     }
-    return new Set(safeMap(topicGroups, (g) => g.id)) // 默认展开所有分组
+    // 默认展开所有分组
+    return new Set((topicGroups || []).map((g) => g.id))
   })
   const [dragging, setDragging] = useState(false)
   const dropTargetRef = useRef<string | null>(null)
