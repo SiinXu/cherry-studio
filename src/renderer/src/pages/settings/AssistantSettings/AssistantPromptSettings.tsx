@@ -31,6 +31,20 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
   const emojiTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const { t } = useTranslation()
 
+  console.log('📍 组件初始化状态:', {
+    emoji,
+    name,
+    autoGenEnabled,
+    assistantName: assistant.name,
+    assistantEmoji: assistant.emoji
+  })
+
+  // 确保组件挂载时prevNameRef的值与初始name一致
+  useEffect(() => {
+    console.log('🔰 组件挂载初始化')
+    prevNameRef.current = name
+  }, [])
+
   useEffect(() => {
     const updateTokenCount = async () => {
       const count = await estimateTextTokens(prompt)
@@ -40,50 +54,74 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
   }, [prompt])
 
   const generateEmoji = useCallback(async () => {
-    if (!name) return
+    console.log('🔍generateEmoji被调用，参数:', { name, prompt })
+    if (!name) {
+      console.log('❌名称为空，中止生成')
+      return
+    }
 
-    console.log('开始生成emoji, 名称:', name)
+    console.log('✅开始生成emoji, 名称:', name)
     setEmojiLoading(true)
     try {
-      console.log('调用fetchEmojiSuggestion前')
+      console.log('🔄调用fetchEmojiSuggestion前')
       const suggestedEmoji = await fetchEmojiSuggestion(name)
-      console.log('获取到emoji结果:', suggestedEmoji)
+      console.log('✅获取到emoji结果:', suggestedEmoji)
+
+      // 立即设置emoji，不依赖其他状态更新
       setEmoji(suggestedEmoji)
-      const _assistant = { ...assistant, name: name.trim(), emoji: suggestedEmoji, prompt }
-      updateAssistant(_assistant)
-      console.log('生成的emoji:', suggestedEmoji)
+
+      // 等待一下确保设置生效
+      setTimeout(() => {
+        const _assistant = { ...assistant, name: name.trim(), emoji: suggestedEmoji, prompt }
+        console.log('📝更新智能体对象:', _assistant)
+        updateAssistant(_assistant)
+        console.log('✨生成的emoji:', suggestedEmoji)
+      }, 0)
     } catch (error) {
-      console.error('Error generating emoji:', error)
+      console.error('❌Error generating emoji:', error)
       const defaultEmojis = ['🤖', '💡', '✨', '🧠', '📚']
       const defaultEmoji = defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]
-      console.log('生成出错，使用默认emoji:', defaultEmoji)
+      console.log('⚠️生成出错，使用默认emoji:', defaultEmoji)
       setEmoji(defaultEmoji)
       const _assistant = { ...assistant, name: name.trim(), emoji: defaultEmoji, prompt }
       updateAssistant(_assistant)
     } finally {
       setEmojiLoading(false)
-      console.log('完成emoji生成流程')
+      console.log('🏁完成emoji生成流程')
     }
   }, [name, prompt, assistant, updateAssistant])
 
   useEffect(() => {
+    console.log('------name useEffect触发------', {
+      name,
+      prevName: prevNameRef.current,
+      autoGenEnabled
+    })
+
+    // 仅在名称有实际变化且不为空且启用自动生成时触发
     if (name && name !== prevNameRef.current && autoGenEnabled) {
+      console.log('🔥准备生成emoji，设置定时器🔥')
       prevNameRef.current = name
 
+      // 清除之前的定时器
       if (emojiTimeoutRef.current) {
         clearTimeout(emojiTimeoutRef.current)
       }
 
+      // 设置防抖延迟
       emojiTimeoutRef.current = setTimeout(() => {
+        console.log('⚡定时器触发，开始生成emoji⚡')
         generateEmoji()
-      }, 800)
+      }, 300) // 减少到300ms使反应更快
     }
 
+    // 组件卸载时清除定时器
     return () => {
       if (emojiTimeoutRef.current) {
         clearTimeout(emojiTimeoutRef.current)
       }
     }
+    // 确保依赖项顺序正确，先检查变量再检查函数
   }, [name, autoGenEnabled, generateEmoji])
 
   const onUpdate = () => {
@@ -106,8 +144,11 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value
+    console.log('📝handleNameChange触发📝', { oldName: name, newName, autoGenEnabled })
     setName(newName)
+    // 当用户开始输入时，重新启用自动生成
     if (newName && !autoGenEnabled) {
+      console.log('🔄重新启用自动生成🔄')
       setAutoGenEnabled(true)
     }
   }
