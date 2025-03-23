@@ -9,7 +9,7 @@ import { Assistant, AssistantSettings } from '@renderer/types'
 import { getLeadingEmoji } from '@renderer/utils'
 import { Button, Input, Popover, Space, Tooltip } from 'antd'
 import TextArea from 'antd/es/input/TextArea'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
@@ -26,6 +26,9 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
   const [prompt, setPrompt] = useState(assistant.prompt)
   const [tokenCount, setTokenCount] = useState(0)
   const [emojiLoading, setEmojiLoading] = useState(false)
+  const [autoGenEnabled, setAutoGenEnabled] = useState(true)
+  const prevNameRef = useRef(name)
+  const emojiTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const { t } = useTranslation()
 
   useEffect(() => {
@@ -36,6 +39,26 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
     updateTokenCount()
   }, [prompt])
 
+  useEffect(() => {
+    if (name && name !== prevNameRef.current && autoGenEnabled) {
+      prevNameRef.current = name
+
+      if (emojiTimeoutRef.current) {
+        clearTimeout(emojiTimeoutRef.current)
+      }
+
+      emojiTimeoutRef.current = setTimeout(() => {
+        generateEmoji()
+      }, 800)
+    }
+
+    return () => {
+      if (emojiTimeoutRef.current) {
+        clearTimeout(emojiTimeoutRef.current)
+      }
+    }
+  }, [name])
+
   const onUpdate = () => {
     const _assistant = { ...assistant, name: name.trim(), emoji, prompt }
     updateAssistant(_assistant)
@@ -45,6 +68,7 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
     setEmoji(selectedEmoji)
     const _assistant = { ...assistant, name: name.trim(), emoji: selectedEmoji, prompt }
     updateAssistant(_assistant)
+    setAutoGenEnabled(false)
   }
 
   const handleEmojiDelete = () => {
@@ -80,6 +104,14 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
     }
   }
 
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newName = e.target.value
+    setName(newName)
+    if (newName && !autoGenEnabled) {
+      setAutoGenEnabled(true)
+    }
+  }
+
   return (
     <Container>
       <Box mb={8} style={{ fontWeight: 'bold' }}>
@@ -110,11 +142,14 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
               )}
             </EmojiButtonWrapper>
           </Popover>
-          <Tooltip title="自动生成">
+          <Tooltip title="手动重新生成">
             <Button
               type="text"
               icon={emojiLoading ? <LoadingOutlined /> : <ThunderboltOutlined />}
-              onClick={generateEmoji}
+              onClick={() => {
+                setAutoGenEnabled(true)
+                generateEmoji()
+              }}
               loading={emojiLoading}
               disabled={!name}
             />
@@ -123,7 +158,7 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
         <Input
           placeholder={t('common.assistant') + t('common.name')}
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={handleNameChange}
           onBlur={onUpdate}
           style={{ flex: 1 }}
         />
