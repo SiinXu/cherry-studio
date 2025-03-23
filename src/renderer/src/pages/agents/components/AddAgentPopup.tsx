@@ -54,7 +54,12 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
 
   // 组件卸载时清除定时器
   useEffect(() => {
+    // 初始化时记录一下状态
+    console.log('AddAgentPopup初始化, emoji:', emoji)
+
+    // 返回清理函数
     return () => {
+      console.log('AddAgentPopup卸载，清除定时器')
       if (emojiTimeoutRef.current) {
         clearTimeout(emojiTimeoutRef.current)
       }

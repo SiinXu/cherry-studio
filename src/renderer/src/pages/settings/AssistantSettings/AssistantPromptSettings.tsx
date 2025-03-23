@@ -43,7 +43,7 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
   useEffect(() => {
     console.log('🔰 组件挂载初始化')
     prevNameRef.current = name
-  }, [])
+  }, [name])
 
   useEffect(() => {
     const updateTokenCount = async () => {
