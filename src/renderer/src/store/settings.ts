@@ -81,6 +81,7 @@ export interface SettingsState {
   yuqueToken: string | null
   yuqueUrl: string | null
   yuqueRepoId: string | null
+  messageNavigation: boolean
 }
 
 export type MultiModelMessageStyle = 'horizontal' | 'vertical' | 'fold' | 'grid'
@@ -146,7 +147,8 @@ const initialState: SettingsState = {
   notionSplitSize: 90,
   yuqueToken: '',
   yuqueUrl: '',
-  yuqueRepoId: ''
+  yuqueRepoId: '',
+  messageNavigation: false
 }
 
 const settingsSlice = createSlice({
@@ -338,6 +340,9 @@ const settingsSlice = createSlice({
     },
     setEnableTopicsGroup: (state, action: PayloadAction<boolean>) => {
       state.enableTopicsGroup = action.payload
+    },
+    setMessageNavigation: (state, action: PayloadAction<boolean>) => {
+      state.messageNavigation = action.payload
     }
   }
 })
@@ -402,7 +407,8 @@ export const {
   setNotionSplitSize,
   setYuqueToken,
   setYuqueRepoId,
-  setYuqueUrl
+  setYuqueUrl,
+  setMessageNavigation
 } = settingsSlice.actions
 
 export default settingsSlice.reducer
