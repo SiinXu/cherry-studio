@@ -8,6 +8,7 @@ import { prepareTopicMessages } from '@renderer/store/messages'
 import { Assistant, Topic, TopicGroup } from '@renderer/types'
 import { find, isEmpty } from 'lodash'
 import { useEffect, useState } from 'react'
+import { v4 as uuid } from 'uuid'
 
 import { useAssistant } from './useAssistant'
 import { getStoreSetting } from './useSettings'
@@ -26,13 +27,18 @@ export function useTopicGroups(assistantId?: string) {
 
   const topicGroups = assistantId ? groups.filter((group) => group.assistantId === assistantId) : groups
 
-  const addGroup = (group: TopicGroup) => {
-    // 确保新组有assistantId
-    const newGroup = {
-      ...group,
-      assistantId: group.assistantId || assistantId
+  const addGroup = (name: string, description?: string) => {
+    const newGroup: TopicGroup = {
+      id: uuid(),
+      name,
+      description,
+      assistantId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     }
+
     dispatch({ type: 'topics/addGroup', payload: newGroup })
+    return newGroup
   }
 
   const updateGroup = (group: TopicGroup) => {
