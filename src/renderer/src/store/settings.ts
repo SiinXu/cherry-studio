@@ -84,6 +84,7 @@ export interface SettingsState {
   messageNavigation: boolean
   joplinToken: string | null
   joplinUrl: string | null
+  forceDollarMathInMarkdown: boolean
 }
 
 export type MultiModelMessageStyle = 'horizontal' | 'vertical' | 'fold' | 'grid'
@@ -152,7 +153,8 @@ const initialState: SettingsState = {
   yuqueRepoId: '',
   messageNavigation: false,
   joplinToken: null,
-  joplinUrl: null
+  joplinUrl: null,
+  forceDollarMathInMarkdown: false
 }
 
 const settingsSlice = createSlice({
@@ -353,6 +355,9 @@ const settingsSlice = createSlice({
     },
     setJoplinUrl: (state, action: PayloadAction<string | null>) => {
       state.joplinUrl = action.payload
+    },
+    setForceDollarMathInMarkdown: (state, action: PayloadAction<boolean>) => {
+      state.forceDollarMathInMarkdown = action.payload
     }
   }
 })
@@ -420,7 +425,8 @@ export const {
   setYuqueUrl,
   setMessageNavigation,
   setJoplinToken,
-  setJoplinUrl
+  setJoplinUrl,
+  setForceDollarMathInMarkdown
 } = settingsSlice.actions
 
 export default settingsSlice.reducer
