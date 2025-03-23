@@ -297,150 +297,149 @@ const Assistants: FC<AssistantsTabProps> = ({
 
   return (
     <Container>
-      {isLoading ? (
-        <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
+      {loadingError ? (
+        <Alert
+          message={t('assistants.load.error')}
+          description={loadingError?.message || String(loadingError)}
+          type="error"
+          showIcon
+        />
+      ) : isLoading ? (
+        <div style={{ textAlign: 'center', padding: '20px' }}>
+          <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
+          <div style={{ marginTop: '10px' }}>{t('assistants.loading')}</div>
+        </div>
       ) : (
         <>
-          {loadingError ? (
-            <Alert
-              message={t('assistants.load.error')}
-              description={loadingError?.message || String(loadingError)}
-              type="error"
-              showIcon
-            />
-          ) : (
+          {enableAssistantGroup ? (
+            // 启用分组时的显示方式
             <>
-              {enableAssistantGroup ? (
-                // 启用分组时的显示方式
-                <>
-                  {/* 未分组的助手 */}
-                  <UngroupedSection
-                    onDragOver={(e) => handleAssistantDragOver(e, null)}
-                    onDragLeave={handleAssistantDragLeave}
-                    onDrop={(e) => handleAssistantDrop(e, null)}
-                    className={dropTargetRef.current === null ? 'drag-over' : ''}
-                    $enableGroup={true}>
-                    <p className="section-title">{t('assistants.ungrouped')}</p>
-                    {safeMap(ungroupedAssistants, (assistant) => (
-                      <div
-                        key={assistant.id}
-                        draggable
-                        onDragStart={(e) => handleAssistantDragStart(e, assistant.id)}
-                        onDragEnd={handleAssistantDragEnd}>
-                        <AssistantItem
-                          assistant={assistant}
-                          isActive={assistant.id === activeAssistant.id}
-                          onSwitch={setActiveAssistant}
-                          onDelete={(assistant) => {
-                            const remaining = assistants.filter((a) => a.id !== assistant.id)
-                            if (assistant.id === activeAssistant?.id) {
-                              const newActive = remaining[remaining.length - 1]
-                              newActive ? setActiveAssistant(newActive) : onCreateDefaultAssistant()
-                            }
-                            removeAssistant(assistant.id)
-                          }}
-                          addAgent={addAgent}
-                          addAssistant={addAssistant}
-                          onCreateDefaultAssistant={onCreateDefaultAssistant}
-                        />
-                      </div>
-                    ))}
-                  </UngroupedSection>
+              {/* 未分组的助手 */}
+              <UngroupedSection
+                onDragOver={(e) => handleAssistantDragOver(e, null)}
+                onDragLeave={handleAssistantDragLeave}
+                onDrop={(e) => handleAssistantDrop(e, null)}
+                className={dropTargetRef.current === null ? 'drag-over' : ''}
+                $enableGroup={true}>
+                <p className="section-title">{t('assistants.ungrouped')}</p>
+                {safeMap(ungroupedAssistants, (assistant) => (
+                  <div
+                    key={assistant.id}
+                    draggable
+                    onDragStart={(e) => handleAssistantDragStart(e, assistant.id)}
+                    onDragEnd={handleAssistantDragEnd}>
+                    <AssistantItem
+                      assistant={assistant}
+                      isActive={assistant.id === activeAssistant.id}
+                      onSwitch={setActiveAssistant}
+                      onDelete={(assistant) => {
+                        const remaining = assistants.filter((a) => a.id !== assistant.id)
+                        if (assistant.id === activeAssistant?.id) {
+                          const newActive = remaining[remaining.length - 1]
+                          newActive ? setActiveAssistant(newActive) : onCreateDefaultAssistant()
+                        }
+                        removeAssistant(assistant.id)
+                      }}
+                      addAgent={addAgent}
+                      addAssistant={addAssistant}
+                      onCreateDefaultAssistant={onCreateDefaultAssistant}
+                    />
+                  </div>
+                ))}
+              </UngroupedSection>
 
-                  {/* 分割线 - 当分组展示时 */}
-                  {ungroupedAssistants.length > 0 && groups.length > 0 && <SectionDivider />}
+              {/* 分割线 - 当分组展示时 */}
+              {ungroupedAssistants.length > 0 && groups.length > 0 && <SectionDivider />}
 
-                  {/* 分组区域 - 可拖拽排序 */}
-                  <DragDropContext onDragEnd={handleGroupDragEnd}>
-                    <Droppable droppableId="groups-droppable">
-                      {(provided) => (
-                        <GroupsContainer {...provided.droppableProps} ref={provided.innerRef}>
-                          {safeMap(groups, (group, index) => renderGroup(group, index))}
-                          {provided.placeholder}
-                        </GroupsContainer>
-                      )}
-                    </Droppable>
-                  </DragDropContext>
-                </>
-              ) : (
-                // 未启用分组时的原始显示方式
-                <UngroupedSection $enableGroup={false}>
-                  {safeMap(assistants, (assistant) => (
-                    <div key={assistant.id} className="assistant-item-wrapper">
-                      <AssistantItem
-                        assistant={assistant}
-                        isActive={assistant.id === activeAssistant.id}
-                        onSwitch={setActiveAssistant}
-                        onDelete={(assistant) => {
-                          const remaining = assistants.filter((a) => a.id !== assistant.id)
-                          if (assistant.id === activeAssistant?.id) {
-                            const newActive = remaining[remaining.length - 1]
-                            newActive ? setActiveAssistant(newActive) : onCreateDefaultAssistant()
-                          }
-                          removeAssistant(assistant.id)
-                        }}
-                        addAgent={addAgent}
-                        addAssistant={addAssistant}
-                        onCreateDefaultAssistant={onCreateDefaultAssistant}
-                      />
-                    </div>
-                  ))}
-                </UngroupedSection>
-              )}
-
-              {/* 添加按钮 */}
-              <ActionButtons>
-                {!dragging && (
-                  <>
-                    {enableAssistantGroup ? (
-                      <>
-                        <CreateButton type="button" className="add-assistant-btn" onClick={onCreateAssistant}>
-                          <PlusOutlined />
-                          {t('chat.add.assistant.title')}
-                        </CreateButton>
-                        <GroupCreateButton type="button" className="add-group-btn" onClick={handleCreateGroup}>
-                          <FolderAddOutlined />
-                          {t('assistants.group.add')}
-                        </GroupCreateButton>
-                      </>
-                    ) : (
-                      <AssistantAddItem onClick={onCreateAssistant} style={{ width: '100%' }}>
-                        <AssistantName>
-                          <PlusOutlined style={{ color: 'var(--color-text-2)', marginRight: 4 }} />
-                          {t('chat.add.assistant.title')}
-                        </AssistantName>
-                      </AssistantAddItem>
-                    )}
-                  </>
-                )}
-              </ActionButtons>
-
-              {/* 创建/编辑分组模态框 */}
-              <Modal
-                title={currentGroup ? t('assistants.group.edit') : t('assistants.group.add')}
-                open={groupModalVisible}
-                onOk={handleGroupSubmit}
-                onCancel={() => setGroupModalVisible(false)}
-                destroyOnClose>
-                <Form form={form} layout="vertical">
-                  <Form.Item
-                    name="name"
-                    label={t('assistants.group.name')}
-                    rules={[
-                      {
-                        required: true,
-                        message: t('assistants.group.name.required')
-                      }
-                    ]}>
-                    <Input placeholder={t('assistants.group.name.placeholder')} />
-                  </Form.Item>
-                  <Form.Item name="description" label={t('assistants.group.description')}>
-                    <Input.TextArea placeholder={t('assistants.group.description.placeholder')} rows={3} />
-                  </Form.Item>
-                </Form>
-              </Modal>
+              {/* 分组区域 - 可拖拽排序 */}
+              <DragDropContext onDragEnd={handleGroupDragEnd}>
+                <Droppable droppableId="groups-droppable">
+                  {(provided) => (
+                    <GroupsContainer {...provided.droppableProps} ref={provided.innerRef}>
+                      {safeMap(groups, (group, index) => renderGroup(group, index))}
+                      {provided.placeholder}
+                    </GroupsContainer>
+                  )}
+                </Droppable>
+              </DragDropContext>
             </>
+          ) : (
+            // 未启用分组时的原始显示方式
+            <UngroupedSection $enableGroup={false}>
+              {safeMap(assistants, (assistant) => (
+                <div key={assistant.id} className="assistant-item-wrapper">
+                  <AssistantItem
+                    assistant={assistant}
+                    isActive={assistant.id === activeAssistant.id}
+                    onSwitch={setActiveAssistant}
+                    onDelete={(assistant) => {
+                      const remaining = assistants.filter((a) => a.id !== assistant.id)
+                      if (assistant.id === activeAssistant?.id) {
+                        const newActive = remaining[remaining.length - 1]
+                        newActive ? setActiveAssistant(newActive) : onCreateDefaultAssistant()
+                      }
+                      removeAssistant(assistant.id)
+                    }}
+                    addAgent={addAgent}
+                    addAssistant={addAssistant}
+                    onCreateDefaultAssistant={onCreateDefaultAssistant}
+                  />
+                </div>
+              ))}
+            </UngroupedSection>
           )}
+
+          {/* 添加按钮 */}
+          <ActionButtons>
+            {!dragging && (
+              <>
+                {enableAssistantGroup ? (
+                  <>
+                    <CreateButton type="button" className="add-assistant-btn" onClick={onCreateAssistant}>
+                      <PlusOutlined />
+                      {t('chat.add.assistant.title')}
+                    </CreateButton>
+                    <GroupCreateButton type="button" className="add-group-btn" onClick={handleCreateGroup}>
+                      <FolderAddOutlined />
+                      {t('assistants.group.add')}
+                    </GroupCreateButton>
+                  </>
+                ) : (
+                  <AssistantAddItem onClick={onCreateAssistant} style={{ width: '100%' }}>
+                    <AssistantName>
+                      <PlusOutlined style={{ color: 'var(--color-text-2)', marginRight: 4 }} />
+                      {t('chat.add.assistant.title')}
+                    </AssistantName>
+                  </AssistantAddItem>
+                )}
+              </>
+            )}
+          </ActionButtons>
+
+          {/* 创建/编辑分组模态框 */}
+          <Modal
+            title={currentGroup ? t('assistants.group.edit') : t('assistants.group.add')}
+            open={groupModalVisible}
+            onOk={handleGroupSubmit}
+            onCancel={() => setGroupModalVisible(false)}
+            destroyOnClose>
+            <Form form={form} layout="vertical">
+              <Form.Item
+                name="name"
+                label={t('assistants.group.name')}
+                rules={[
+                  {
+                    required: true,
+                    message: t('assistants.group.name.required')
+                  }
+                ]}>
+                <Input placeholder={t('assistants.group.name.placeholder')} />
+              </Form.Item>
+              <Form.Item name="description" label={t('assistants.group.description')}>
+                <Input.TextArea placeholder={t('assistants.group.description.placeholder')} rows={3} />
+              </Form.Item>
+            </Form>
+          </Modal>
         </>
       )}
     </Container>
@@ -471,41 +470,23 @@ const Container = styled.div`
   }
 `
 
-const UngroupedSection = styled.div<{ $enableGroup?: boolean }>`
-  padding: 8px;
-  border-radius: 8px;
-  min-height: 60px;
-  overflow-y: auto;
-  max-height: ${(props) => (props.$enableGroup ? '300px' : 'none')};
-
-  .section-title {
-    font-size: 13px;
-    color: var(--color-text-3);
-    margin: 5px 8px;
-    padding-left: 8px;
-  }
-
-  &.drag-over {
-    background-color: var(--color-bg-3);
-  }
-
-  .assistant-item-wrapper[draggable='true'] {
-    cursor: grab;
-    &:active {
-      cursor: grabbing;
-    }
-  }
+const UngroupedSection = styled.div<{ $enableGroup: boolean }>`
+  display: flex;
+  flex-direction: column;
+  padding-bottom: ${(props) => (props.$enableGroup ? '0' : '10px')};
 `
 
 const SectionDivider = styled.div`
   height: 1px;
   background-color: var(--color-border);
-  margin: 8px 0;
+  margin: 10px 10px;
+  opacity: 0.5;
 `
 
 const GroupsContainer = styled.div`
-  flex: 1;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 `
 
 const GroupContainer = styled.div`
