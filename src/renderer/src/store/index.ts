@@ -17,6 +17,7 @@ import paintings from './paintings'
 import runtime from './runtime'
 import settings from './settings'
 import shortcuts from './shortcuts'
+import topics from './topics'
 import websearch from './websearch'
 
 const rootReducer = combineReducers({
@@ -33,6 +34,7 @@ const rootReducer = combineReducers({
   websearch,
   mcp,
   copilot,
+  topics,
   messages: messagesReducer
 })
 

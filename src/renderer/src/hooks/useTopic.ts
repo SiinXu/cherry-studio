@@ -2,9 +2,10 @@ import db from '@renderer/databases'
 import i18n from '@renderer/i18n'
 import { deleteMessageFiles } from '@renderer/services/MessagesService'
 import store from '@renderer/store'
+import { useAppDispatch, useAppSelector } from '@renderer/store'
 import { updateTopic } from '@renderer/store/assistants'
 import { prepareTopicMessages } from '@renderer/store/messages'
-import { Assistant, Topic } from '@renderer/types'
+import { Assistant, Topic, TopicGroup } from '@renderer/types'
 import { find, isEmpty } from 'lodash'
 import { useEffect, useState } from 'react'
 
@@ -13,6 +14,44 @@ import { getStoreSetting } from './useSettings'
 
 let _activeTopic: Topic
 let _setActiveTopic: (topic: Topic) => void
+
+export function useTopicGroups() {
+  const dispatch = useAppDispatch()
+  const { groups, isLoading, loadingError } = useAppSelector(
+    (state) => state.topics || { groups: [], isLoading: false, loadingError: null }
+  )
+
+  const addGroup = (group: TopicGroup) => {
+    dispatch({ type: 'topics/addGroup', payload: group })
+  }
+
+  const updateGroup = (group: TopicGroup) => {
+    dispatch({ type: 'topics/updateGroup', payload: group })
+  }
+
+  const removeGroup = (groupId: string) => {
+    dispatch({ type: 'topics/removeGroup', payload: { id: groupId } })
+  }
+
+  const updateTopicGroup = (topicId: string, groupId?: string) => {
+    dispatch({ type: 'topics/updateTopicGroup', payload: { topicId, groupId } })
+  }
+
+  const updateGroupsOrder = (groups: TopicGroup[]) => {
+    dispatch({ type: 'topics/updateGroupsOrder', payload: groups })
+  }
+
+  return {
+    groups,
+    isLoading,
+    loadingError,
+    addGroup,
+    updateGroup,
+    removeGroup,
+    updateTopicGroup,
+    updateGroupsOrder
+  }
+}
 
 export function useActiveTopic(_assistant: Assistant, topic?: Topic) {
   const { assistant } = useAssistant(_assistant.id)
