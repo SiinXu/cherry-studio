@@ -1,5 +1,5 @@
 import { getOpenAIWebSearchParams } from '@renderer/config/models'
-import { SEARCH_SUMMARY_PROMPT } from '@renderer/config/prompts'
+import { EMOJI_GENERATOR_PROMPT, SEARCH_SUMMARY_PROMPT } from '@renderer/config/prompts'
 import i18n from '@renderer/i18n'
 import store from '@renderer/store'
 import { setGenerating } from '@renderer/store/runtime'
@@ -282,22 +282,42 @@ export async function fetchEmojiSuggestion(prompt: string): Promise<string> {
   }
 
   try {
-    const { generateEmojiFromPrompt } = await import('@renderer/utils')
-    const emoji = await generateEmojiFromPrompt(prompt)
-    
-    // 确保函数返回单个emoji，而不是带有格式的字符串
-    // 如果返回格式为 "Emoji: 🐱"，则提取出emoji部分
-    if (emoji.includes('Emoji:')) {
-      const match = emoji.match(/Emoji:\s*([^\s]+)/)
-      return match ? match[1] : emoji
+    // 尝试使用AI生成emoji
+    const model = getDefaultModel()
+    const provider = getProviderByModel(model)
+
+    if (!hasApiKey(provider)) {
+      // 如果没有API密钥，回退到本地生成方式
+      const { generateEmojiFromPrompt } = await import('@renderer/utils')
+      return await generateEmojiFromPrompt(prompt)
+    }
+
+    const AI = new AiProvider(provider)
+    // 使用emoji生成提示词
+    const result = await AI.generateText({
+      prompt: EMOJI_GENERATOR_PROMPT,
+      content: prompt
+    })
+
+    // 从结果中提取emoji
+    if (result.includes('Emoji:')) {
+      const match = result.match(/Emoji:\s*([^\s]+)/)
+      return match ? match[1] : result
     }
     
-    return emoji
+    return result
   } catch (error) {
     console.error('Error generating emoji from prompt:', error)
-    // 如果生成失败，返回默认表情
-    const defaultEmojis = ['🤖', '💡', '✨', '🧠', '📚']
-    return defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]
+    // 如果生成失败，回退到本地生成方式
+    try {
+      const { generateEmojiFromPrompt } = await import('@renderer/utils')
+      return await generateEmojiFromPrompt(prompt)
+    } catch (e) {
+      console.error('Fallback emoji generation also failed:', e)
+      // 如果本地生成也失败，返回默认表情
+      const defaultEmojis = ['🤖', '💡', '✨', '🧠', '📚']
+      return defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]
+    }
   }
 }
 

@@ -12,7 +12,7 @@ import { estimateTextTokens } from '@renderer/services/TokenService'
 import { useAppSelector } from '@renderer/store'
 import { Agent, KnowledgeBase } from '@renderer/types'
 import { getLeadingEmoji, uuid } from '@renderer/utils'
-import { Button, Form, FormInstance, Input, Modal, Popover, Select, SelectProps, Space } from 'antd'
+import { Button, Form, FormInstance, Input, Modal, Popover, Select, SelectProps, Space, Tooltip } from 'antd'
 import TextArea from 'antd/es/input/TextArea'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -140,7 +140,7 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
     } catch (error) {
       console.error('Error generating emoji:', error)
       // 出错时使用默认emoji
-      const defaultEmojis = ['🤖', '💡', '✨', '🧠', '📚']
+      const defaultEmojis = ['🤖', '��', '✨', '🧠', '📚']
       const defaultEmoji = defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]
       setEmoji(defaultEmoji)
     } finally {
@@ -178,20 +178,20 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
             setTokenCount(count)
           }
         }}>
-        <Form.Item label="Emoji">
+        <Form.Item name="emoji" label="Emoji">
           <Space>
             <Popover content={<EmojiPicker onEmojiClick={setEmoji} />} arrow>
-              <Button style={{ width: '60px', height: '40px', fontSize: '24px' }}>
-                {emoji || '😀'}
-              </Button>
+              <Button icon={emoji && <span style={{ fontSize: 20 }}>{emoji}</span>}>{t('common.select')}</Button>
             </Popover>
-            <Button 
-              onClick={generateEmoji} 
-              loading={emojiLoading}
-              disabled={!formRef.current?.getFieldValue('name')}
-            >
-              自动生成
-            </Button>
+            <Tooltip title="自动生成">
+              <Button 
+                type="text"
+                icon={emojiLoading ? <LoadingOutlined /> : <ThunderboltOutlined />}
+                onClick={generateEmoji} 
+                loading={emojiLoading}
+                disabled={!formRef.current?.getFieldValue('name')}
+              />
+            </Tooltip>
           </Space>
         </Form.Item>
         <Form.Item 
