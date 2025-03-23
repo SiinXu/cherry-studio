@@ -678,8 +678,7 @@
       "xirang": "天翼云息壤",
       "yi": "零一万物",
       "zhinao": "360智脑",
-      "zhipu": "智谱AI",
-      "voyageai":"Voyage AI"
+      "zhipu": "智谱AI"
     },
     "restore": {
       "confirm": "确定要恢复数据吗？",
@@ -1143,7 +1142,10 @@
           "title": "Tavily"
         },
         "title": "网络搜索"
-      }
+      },
+      "display.group.title": "分组设置",
+      "advanced.assistantGroup": "启用助手分组",
+      "advanced.topicsGroup": "启用话题分组"
     },
     "translate": {
       "any.language": "任意语言",
