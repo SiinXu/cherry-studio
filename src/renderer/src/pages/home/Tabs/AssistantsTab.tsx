@@ -231,7 +231,7 @@ const Assistants: FC<AssistantsTabProps> = ({
 
     return (
       <Draggable key={group.id} draggableId={group.id} index={index}>
-        {(provided, snapshot) => (
+        {(provided) => (
           <GroupContainer
             ref={provided.innerRef}
             {...provided.draggableProps}
@@ -458,127 +458,6 @@ const Assistants: FC<AssistantsTabProps> = ({
 
 export default Assistants
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  padding-top: 11px;
-  user-select: none;
-  height: 100%;
-  overflow-y: auto;
-  padding: 0 16px 16px;
-  box-sizing: border-box;
-
-  .assistant-item-wrapper[draggable='true'] {
-    cursor: grab;
-
-    &:active {
-      cursor: grabbing;
-    }
-  }
-
-  /* 解决拖拽时的白边问题 */
-  [draggable] {
-    -webkit-user-drag: element;
-    user-select: none;
-  }
-`
-
-const UngroupedSection = styled.div<{ $enableGroup: boolean }>`
-  padding: 8px;
-  border-radius: 8px;
-  min-height: 60px;
-  overflow-y: auto;
-  max-height: ${(props) => (props.$enableGroup ? '300px' : 'none')};
-
-  .section-title {
-    font-size: 13px;
-    color: var(--color-text-3);
-    margin: 5px 8px;
-    padding-left: 8px;
-  }
-
-  &.drag-over {
-    background-color: var(--color-bg-3);
-  }
-
-  .assistant-item-wrapper[draggable='true'] {
-    cursor: grab;
-    &:active {
-      cursor: grabbing;
-    }
-  }
-`
-
-const SectionDivider = styled.div`
-  height: 1px;
-  background-color: var(--color-border);
-  margin: 8px 0;
-`
-
-const GroupsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-`
-
-const GroupContainer = styled.div<{ isDragging?: boolean }>`
-  margin-bottom: 16px;
-  background-color: var(--color-bg-1);
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  opacity: ${(props) => (props.isDragging ? 0.5 : 1)};
-  box-shadow: ${(props) => (props.isDragging ? '0 5px 10px rgba(0, 0, 0, 0.1)' : 'none')};
-  transition:
-    opacity 0.2s,
-    box-shadow 0.2s;
-`
-
-const GroupHeader = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-bg-2);
-  position: relative;
-`
-
-const GroupTitle = styled.div`
-  flex: 1;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  color: var(--color-text-1);
-`
-
-const GroupIcon = styled.span`
-  margin-right: 8px;
-  font-size: 16px;
-  color: var(--color-text-3);
-`
-
-const GroupCount = styled.span`
-  margin-left: 8px;
-  color: var(--color-text-3);
-  font-size: 12px;
-  font-weight: normal;
-`
-
-const GroupActions = styled.div`
-  display: flex;
-  gap: 8px;
-
-  .anticon {
-    font-size: 16px;
-    color: var(--color-text-3);
-    cursor: pointer;
-
-    &:hover {
-      color: var(--color-primary);
-    }
-  }
-`
-
 const GroupContent = styled.div<{ isEmpty?: boolean }>`
   padding: ${(props) => (props.isEmpty ? '12px 16px' : '12px 0')};
   color: ${(props) => (props.isEmpty ? 'var(--color-text-3)' : 'inherit')};
@@ -637,4 +516,118 @@ const AssistantName = styled.div`
   align-items: center;
   font-size: 14px;
   color: var(--color-text-2);
+`
+
+const UngroupedSection = styled.div<{ $enableGroup: boolean }>`
+  margin-bottom: 16px;
+  max-height: ${(props) => (props.$enableGroup ? 'calc(100vh - 250px)' : 'none')};
+  overflow-y: auto;
+  padding: 8px 0;
+  border-radius: 8px;
+  transition: all 0.2s;
+
+  &.drag-over {
+    background-color: var(--color-primary-bg);
+    border: 1px dashed var(--color-primary);
+  }
+
+  .section-title {
+    margin: 0 0 12px 8px;
+    color: var(--color-text-3);
+    font-size: 13px;
+  }
+
+  .assistant-item-wrapper {
+    margin-bottom: 8px;
+  }
+`
+
+const SectionDivider = styled.div`
+  height: 1px;
+  background-color: var(--color-border);
+  margin: 16px 0;
+`
+
+const Container = styled.div`
+  height: 100%;
+  overflow-y: auto;
+  padding: 0 16px 16px;
+  box-sizing: border-box;
+
+  .assistant-item-wrapper[draggable='true'] {
+    cursor: grab;
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  /* 解决拖拽时的白边问题 */
+  [draggable] {
+    -webkit-user-drag: element;
+    user-select: none;
+  }
+
+  .groups-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+`
+
+const GroupContainer = styled.div<{ isDragging?: boolean }>`
+  margin-bottom: 16px;
+  background-color: var(--color-bg-1);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  opacity: ${(props) => (props.isDragging ? 0.5 : 1)};
+  box-shadow: ${(props) => (props.isDragging ? '0 5px 10px rgba(0, 0, 0, 0.1)' : 'none')};
+  transition:
+    opacity 0.2s,
+    box-shadow 0.2s;
+`
+
+const GroupHeader = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg-2);
+  position: relative;
+`
+
+const GroupTitle = styled.div`
+  flex: 1;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  color: var(--color-text-1);
+`
+
+const GroupIcon = styled.span`
+  margin-right: 8px;
+  font-size: 16px;
+  color: var(--color-text-3);
+`
+
+const GroupCount = styled.span`
+  margin-left: 8px;
+  color: var(--color-text-3);
+  font-size: 12px;
+  font-weight: normal;
+`
+
+const GroupActions = styled.div`
+  display: flex;
+  gap: 8px;
+
+  .anticon {
+    font-size: 16px;
+    color: var(--color-text-3);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
 `
