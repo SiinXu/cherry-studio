@@ -1,13 +1,13 @@
 import 'emoji-picker-element'
 
-import { CloseCircleFilled, ThunderboltOutlined, LoadingOutlined } from '@ant-design/icons'
+import { CloseCircleFilled, LoadingOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import EmojiPicker from '@renderer/components/EmojiPicker'
 import { Box, HStack } from '@renderer/components/Layout'
 import { fetchEmojiSuggestion } from '@renderer/services/ApiService'
 import { estimateTextTokens } from '@renderer/services/TokenService'
 import { Assistant, AssistantSettings } from '@renderer/types'
 import { getLeadingEmoji } from '@renderer/utils'
-import { Button, Input, Popover, Tooltip, Space } from 'antd'
+import { Button, Input, Popover, Space, Tooltip } from 'antd'
 import TextArea from 'antd/es/input/TextArea'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -56,22 +56,27 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
   const generateEmoji = async () => {
     if (!name) return
 
+    console.log('开始生成emoji, 名称:', name)
     setEmojiLoading(true)
     try {
+      console.log('调用fetchEmojiSuggestion前')
       const suggestedEmoji = await fetchEmojiSuggestion(name)
+      console.log('获取到emoji结果:', suggestedEmoji)
       setEmoji(suggestedEmoji)
       const _assistant = { ...assistant, name: name.trim(), emoji: suggestedEmoji, prompt }
       updateAssistant(_assistant)
       console.log('生成的emoji:', suggestedEmoji)
     } catch (error) {
       console.error('Error generating emoji:', error)
-      const defaultEmojis = ['��', '💡', '✨', '🧠', '📚']
+      const defaultEmojis = ['🤖', '💡', '✨', '🧠', '📚']
       const defaultEmoji = defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]
+      console.log('生成出错，使用默认emoji:', defaultEmoji)
       setEmoji(defaultEmoji)
       const _assistant = { ...assistant, name: name.trim(), emoji: defaultEmoji, prompt }
       updateAssistant(_assistant)
     } finally {
       setEmojiLoading(false)
+      console.log('完成emoji生成流程')
     }
   }
 
@@ -106,10 +111,10 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
             </EmojiButtonWrapper>
           </Popover>
           <Tooltip title="自动生成">
-            <Button 
+            <Button
               type="text"
               icon={emojiLoading ? <LoadingOutlined /> : <ThunderboltOutlined />}
-              onClick={generateEmoji} 
+              onClick={generateEmoji}
               loading={emojiLoading}
               disabled={!name}
             />
