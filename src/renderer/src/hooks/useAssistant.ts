@@ -53,8 +53,14 @@ export function useAssistants() {
 }
 
 export function useAssistant(assistantId: string) {
+  console.log('useAssistant钩子运行, assistantId:', assistantId)
+
   const assistants = useAppSelector((state) => state.assistants.assistants)
+  console.log('从store获取到assistants, 数量:', assistants?.length)
+
   const assistant = assistants.find((c) => c.id === assistantId) as Assistant
+  console.log('找到匹配的assistant:', assistant?.id)
+
   const dispatch = useAppDispatch()
   const { defaultModel } = useDefaultModel()
   const { t } = useTranslation()
