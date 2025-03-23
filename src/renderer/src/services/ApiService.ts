@@ -312,7 +312,7 @@ export async function fetchEmojiSuggestion(prompt: string): Promise<string> {
       console.log('提取的emoji:', extractedEmoji)
       return extractedEmoji
     }
-    
+
     return result
   } catch (error) {
     console.error('Error generating emoji from prompt:', error)
