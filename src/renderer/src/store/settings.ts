@@ -85,6 +85,7 @@ export interface SettingsState {
   joplinToken: string | null
   joplinUrl: string | null
   forceDollarMathInMarkdown: boolean
+  markdownExportPath: string
 }
 
 export type MultiModelMessageStyle = 'horizontal' | 'vertical' | 'fold' | 'grid'
@@ -154,7 +155,8 @@ const initialState: SettingsState = {
   messageNavigation: false,
   joplinToken: null,
   joplinUrl: null,
-  forceDollarMathInMarkdown: false
+  forceDollarMathInMarkdown: false,
+  markdownExportPath: ''
 }
 
 const settingsSlice = createSlice({
@@ -358,6 +360,9 @@ const settingsSlice = createSlice({
     },
     setForceDollarMathInMarkdown: (state, action: PayloadAction<boolean>) => {
       state.forceDollarMathInMarkdown = action.payload
+    },
+    setmarkdownExportPath: (state, action: PayloadAction<string>) => {
+      state.markdownExportPath = action.payload
     }
   }
 })
@@ -426,7 +431,8 @@ export const {
   setMessageNavigation,
   setJoplinToken,
   setJoplinUrl,
-  setForceDollarMathInMarkdown
+  setForceDollarMathInMarkdown,
+  setmarkdownExportPath
 } = settingsSlice.actions
 
 export default settingsSlice.reducer
