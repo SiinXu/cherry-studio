@@ -269,6 +269,29 @@ export async function fetchGenerate({ prompt, content }: { prompt: string; conte
   }
 }
 
+/**
+ * 根据提示词生成emoji表情建议
+ * @param prompt 提示词
+ * @returns emoji表情
+ */
+export async function fetchEmojiSuggestion(prompt: string): Promise<string> {
+  // 如果提示词为空，返回默认表情
+  if (!prompt || prompt.trim() === '') {
+    const defaultEmojis = ['🤖', '💡', '✨', '🧠', '📚']
+    return defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]
+  }
+
+  try {
+    const { generateEmojiFromPrompt } = await import('@renderer/utils')
+    return await generateEmojiFromPrompt(prompt)
+  } catch (error) {
+    console.error('Error generating emoji from prompt:', error)
+    // 如果生成失败，返回默认表情
+    const defaultEmojis = ['🤖', '💡', '✨', '🧠', '📚']
+    return defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]
+  }
+}
+
 export async function fetchSuggestions({
   messages,
   assistant

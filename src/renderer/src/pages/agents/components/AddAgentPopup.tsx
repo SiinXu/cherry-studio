@@ -6,13 +6,13 @@ import { TopView } from '@renderer/components/TopView'
 import { AGENT_PROMPT } from '@renderer/config/prompts'
 import { useAgents } from '@renderer/hooks/useAgents'
 import { useSidebarIconShow } from '@renderer/hooks/useSidebarIcon'
-import { fetchGenerate } from '@renderer/services/ApiService'
+import { fetchEmojiSuggestion, fetchGenerate } from '@renderer/services/ApiService'
 import { getDefaultModel } from '@renderer/services/AssistantService'
 import { estimateTextTokens } from '@renderer/services/TokenService'
 import { useAppSelector } from '@renderer/store'
 import { Agent, KnowledgeBase } from '@renderer/types'
 import { getLeadingEmoji, uuid } from '@renderer/utils'
-import { Button, Form, FormInstance, Input, Modal, Popover, Select, SelectProps } from 'antd'
+import { Button, Form, FormInstance, Input, Modal, Popover, Select, SelectProps, Space } from 'antd'
 import TextArea from 'antd/es/input/TextArea'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -38,6 +38,7 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
   const formRef = useRef<FormInstance>(null)
   const [emoji, setEmoji] = useState('')
   const [loading, setLoading] = useState(false)
+  const [emojiLoading, setEmojiLoading] = useState(false)
   const [tokenCount, setTokenCount] = useState(0)
   const knowledgeState = useAppSelector((state) => state.knowledge)
   const showKnowledgeIcon = useSidebarIconShow('knowledge')
@@ -126,6 +127,22 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
     setLoading(false)
   }
 
+  // 生成emoji的函数
+  const generateEmoji = async () => {
+    const name = formRef.current?.getFieldValue('name')
+    if (!name) return
+
+    setEmojiLoading(true)
+    try {
+      const suggestedEmoji = await fetchEmojiSuggestion(name)
+      setEmoji(suggestedEmoji)
+    } catch (error) {
+      console.error('Error generating emoji:', error)
+    } finally {
+      setEmojiLoading(false)
+    }
+  }
+
   // Compute label width based on the longest label
   const labelWidth = [t('agents.add.name'), t('agents.add.prompt'), t('agents.add.knowledge_base')]
     .map((labelText) => stringWidth(labelText) * 8)
@@ -156,13 +173,36 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
             setTokenCount(count)
           }
         }}>
-        <Form.Item name="name" label="Emoji">
-          <Popover content={<EmojiPicker onEmojiClick={setEmoji} />} arrow>
-            <Button icon={emoji && <span style={{ fontSize: 20 }}>{emoji}</span>}>{t('common.select')}</Button>
-          </Popover>
+        <Form.Item name="emoji" label="Emoji">
+          <Space>
+            <Popover content={<EmojiPicker onEmojiClick={setEmoji} />} arrow>
+              <Button icon={emoji && <span style={{ fontSize: 20 }}>{emoji}</span>}>{t('common.select')}</Button>
+            </Popover>
+            <Button 
+              onClick={generateEmoji} 
+              loading={emojiLoading}
+              disabled={!formRef.current?.getFieldValue('name')}
+            >
+              自动生成
+            </Button>
+          </Space>
         </Form.Item>
-        <Form.Item name="name" label={t('agents.add.name')} rules={[{ required: true }]}>
-          <Input placeholder={t('agents.add.name.placeholder')} spellCheck={false} allowClear />
+        <Form.Item 
+          name="name" 
+          label={t('agents.add.name')} 
+          rules={[{ required: true }]}
+        >
+          <Input 
+            placeholder={t('agents.add.name.placeholder')} 
+            spellCheck={false} 
+            allowClear 
+            onChange={(e) => {
+              // 当名称改变时，清除emoji以避免混淆
+              if (emoji && e.target.value === '') {
+                setEmoji('')
+              }
+            }}
+          />
         </Form.Item>
         <div style={{ position: 'relative' }}>
           <Form.Item
