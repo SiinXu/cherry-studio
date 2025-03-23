@@ -31,25 +31,35 @@ type FieldType = {
 }
 
 const PopupContainer: React.FC<Props> = ({ resolve }) => {
-  const [open, setOpen] = useState(true)
-  const [form] = Form.useForm()
   const { t } = useTranslation()
   const { addAgent } = useAgents()
-  const formRef = useRef<FormInstance>(null)
-  const [emoji, setEmoji] = useState('')
+  const [open, setOpen] = useState(true)
+  const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [emojiLoading, setEmojiLoading] = useState(false)
+  const [emoji, setEmoji] = useState('')
   const [tokenCount, setTokenCount] = useState(0)
-  const knowledgeState = useAppSelector((state) => state.knowledge)
+  const formRef = useRef<FormInstance<FieldType>>(null)
   const showKnowledgeIcon = useSidebarIconShow('knowledge')
   const knowledgeOptions: SelectProps['options'] = []
+  const emojiTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const knowledgeState = useAppSelector((state) => state.knowledge)
 
   knowledgeState.bases.forEach((base) => {
     knowledgeOptions.push({
-      label: base.name,
-      value: base.id
+      value: base.id,
+      label: base.name
     })
   })
+
+  // 组件卸载时清除定时器
+  useEffect(() => {
+    return () => {
+      if (emojiTimeoutRef.current) {
+        clearTimeout(emojiTimeoutRef.current)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     const updateTokenCount = async () => {
@@ -184,30 +194,43 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
               <Button icon={emoji && <span style={{ fontSize: 20 }}>{emoji}</span>}>{t('common.select')}</Button>
             </Popover>
             <Tooltip title="自动生成">
-              <Button 
+              <Button
                 type="text"
                 icon={emojiLoading ? <LoadingOutlined /> : <ThunderboltOutlined />}
-                onClick={generateEmoji} 
+                onClick={generateEmoji}
                 loading={emojiLoading}
                 disabled={!formRef.current?.getFieldValue('name')}
               />
             </Tooltip>
           </Space>
         </Form.Item>
-        <Form.Item 
-          name="name" 
-          label={t('agents.add.name')} 
-          rules={[{ required: true }]}
-        >
-          <Input 
-            placeholder={t('agents.add.name.placeholder')} 
-            spellCheck={false} 
-            allowClear 
+        <Form.Item name="name" label={t('agents.add.name')} rules={[{ required: true }]}>
+          <Input
+            placeholder={t('agents.add.name.placeholder')}
+            spellCheck={false}
+            allowClear
             onChange={(e) => {
-              // 当名称改变时，清除emoji以避免混淆
-              if (emoji && e.target.value === '') {
+              const newName = e.target.value
+              console.log('📝名称输入变化:', newName)
+
+              // 当名称为空时，清除emoji
+              if (!newName) {
                 setEmoji('')
+                return
               }
+
+              // 如果有名称内容，设置定时器自动生成emoji
+              // 清除之前的定时器
+              if (emojiTimeoutRef.current) {
+                clearTimeout(emojiTimeoutRef.current)
+              }
+
+              // 设置新的定时器，延迟300ms执行
+              console.log('即将延迟生成emoji')
+              emojiTimeoutRef.current = setTimeout(async () => {
+                console.log('⚡执行自动生成emoji')
+                generateEmoji()
+              }, 300)
             }}
           />
         </Form.Item>
