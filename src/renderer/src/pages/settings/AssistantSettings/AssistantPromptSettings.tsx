@@ -144,13 +144,25 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value
-    console.log('📝handleNameChange触发📝', { oldName: name, newName, autoGenEnabled })
+    console.log('📝handleNameChange触发📝', { oldName: name, newName })
+
+    // 先更新名称状态
     setName(newName)
-    // 当用户开始输入时，重新启用自动生成
-    if (newName && !autoGenEnabled) {
-      console.log('🔄重新启用自动生成🔄')
-      setAutoGenEnabled(true)
+
+    // 如果名称为空，直接返回
+    if (!newName) return
+
+    // 清除之前的定时器
+    if (emojiTimeoutRef.current) {
+      clearTimeout(emojiTimeoutRef.current)
     }
+
+    // 设置一个短暂的定时器，在用户停止输入300ms后触发emoji生成
+    console.log('即将延迟生成emoji')
+    emojiTimeoutRef.current = setTimeout(() => {
+      console.log('⚡直接在onChange回调中执行emoji生成')
+      generateEmoji()
+    }, 300)
   }
 
   return (
@@ -187,10 +199,7 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
             <Button
               type="text"
               icon={emojiLoading ? <LoadingOutlined /> : <ThunderboltOutlined />}
-              onClick={() => {
-                setAutoGenEnabled(true)
-                generateEmoji()
-              }}
+              onClick={generateEmoji}
               loading={emojiLoading}
               disabled={!name}
             />
