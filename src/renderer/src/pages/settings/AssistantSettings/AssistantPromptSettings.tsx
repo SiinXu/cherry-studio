@@ -9,7 +9,7 @@ import { Assistant, AssistantSettings } from '@renderer/types'
 import { getLeadingEmoji } from '@renderer/utils'
 import { Button, Input, Popover, Space, Tooltip } from 'antd'
 import TextArea from 'antd/es/input/TextArea'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
@@ -39,45 +39,7 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
     updateTokenCount()
   }, [prompt])
 
-  useEffect(() => {
-    if (name && name !== prevNameRef.current && autoGenEnabled) {
-      prevNameRef.current = name
-
-      if (emojiTimeoutRef.current) {
-        clearTimeout(emojiTimeoutRef.current)
-      }
-
-      emojiTimeoutRef.current = setTimeout(() => {
-        generateEmoji()
-      }, 800)
-    }
-
-    return () => {
-      if (emojiTimeoutRef.current) {
-        clearTimeout(emojiTimeoutRef.current)
-      }
-    }
-  }, [name])
-
-  const onUpdate = () => {
-    const _assistant = { ...assistant, name: name.trim(), emoji, prompt }
-    updateAssistant(_assistant)
-  }
-
-  const handleEmojiSelect = (selectedEmoji: string) => {
-    setEmoji(selectedEmoji)
-    const _assistant = { ...assistant, name: name.trim(), emoji: selectedEmoji, prompt }
-    updateAssistant(_assistant)
-    setAutoGenEnabled(false)
-  }
-
-  const handleEmojiDelete = () => {
-    setEmoji('')
-    const _assistant = { ...assistant, name: name.trim(), prompt, emoji: '' }
-    updateAssistant(_assistant)
-  }
-
-  const generateEmoji = async () => {
+  const generateEmoji = useCallback(async () => {
     if (!name) return
 
     console.log('开始生成emoji, 名称:', name)
@@ -102,6 +64,44 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
       setEmojiLoading(false)
       console.log('完成emoji生成流程')
     }
+  }, [name, prompt, assistant, updateAssistant])
+
+  useEffect(() => {
+    if (name && name !== prevNameRef.current && autoGenEnabled) {
+      prevNameRef.current = name
+
+      if (emojiTimeoutRef.current) {
+        clearTimeout(emojiTimeoutRef.current)
+      }
+
+      emojiTimeoutRef.current = setTimeout(() => {
+        generateEmoji()
+      }, 800)
+    }
+
+    return () => {
+      if (emojiTimeoutRef.current) {
+        clearTimeout(emojiTimeoutRef.current)
+      }
+    }
+  }, [name, autoGenEnabled, generateEmoji])
+
+  const onUpdate = () => {
+    const _assistant = { ...assistant, name: name.trim(), emoji, prompt }
+    updateAssistant(_assistant)
+  }
+
+  const handleEmojiSelect = (selectedEmoji: string) => {
+    setEmoji(selectedEmoji)
+    const _assistant = { ...assistant, name: name.trim(), emoji: selectedEmoji, prompt }
+    updateAssistant(_assistant)
+    setAutoGenEnabled(false)
+  }
+
+  const handleEmojiDelete = () => {
+    setEmoji('')
+    const _assistant = { ...assistant, name: name.trim(), prompt, emoji: '' }
+    updateAssistant(_assistant)
   }
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
