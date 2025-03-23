@@ -134,10 +134,56 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
 
     setEmojiLoading(true)
     try {
-      const suggestedEmoji = await fetchEmojiSuggestion(name)
-      setEmoji(suggestedEmoji)
+      // 使用简单的emoji映射表直接生成，避免复杂的外部调用
+      const emojiMap: Record<string, string[]> = {
+        // 智能助手相关
+        '助手': ['🤖', '🧠', '💡', '🔍', '📚'],
+        '智能': ['🧠', '💡', '⚡', '✨', '🔮'],
+        '翻译': ['🌐', '🔄', '📝', '🗣️'],
+        '学习': ['📚', '🎓', '✏️', '📝', '🧠'],
+        '编程': ['💻', '⌨️', '🖥️', '📱'],
+        '写作': ['✍️', '📝', '📄', '📰'],
+        '数据': ['📊', '📈', '📉', '🧮'],
+        '游戏': ['🎮', '🎲', '🎯', '🎪'],
+        '音乐': ['🎵', '🎼', '🎧', '🎷'],
+        '设计': ['🎨', '✏️', '📐', '📱'],
+        '旅游': ['✈️', '🌍', '🗺️', '🧳'],
+        '美食': ['🍲', '🍳', '🍽️', '🍔'],
+        '猫': ['🐱', '😺', '😻', '🐾'],
+        '狗': ['🐶', '🐕', '🦮', '🐾']
+      }
+      
+      // 查找匹配的emoji
+      const words = name.toLowerCase().split(/\s+/)
+      const matchedEmojis: string[] = []
+      
+      for (const word of words) {
+        for (const [key, emojis] of Object.entries(emojiMap)) {
+          if (word.includes(key) || key.includes(word)) {
+            const emoji = emojis[Math.floor(Math.random() * emojis.length)]
+            matchedEmojis.push(emoji)
+          }
+        }
+      }
+      
+      // 如果找到匹配的emoji，随机选择一个
+      if (matchedEmojis.length > 0) {
+        const suggestedEmoji = matchedEmojis[Math.floor(Math.random() * matchedEmojis.length)]
+        setEmoji(suggestedEmoji)
+        console.log('生成的emoji:', suggestedEmoji) // 调试用
+      } else {
+        // 如果没有匹配的emoji，使用默认的
+        const defaultEmojis = ['🤖', '💡', '✨', '🧠', '📚']
+        const defaultEmoji = defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]
+        setEmoji(defaultEmoji)
+        console.log('使用默认emoji:', defaultEmoji) // 调试用
+      }
     } catch (error) {
       console.error('Error generating emoji:', error)
+      // 出错时使用默认emoji
+      const defaultEmojis = ['🤖', '💡', '✨', '🧠', '📚']
+      const defaultEmoji = defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]
+      setEmoji(defaultEmoji)
     } finally {
       setEmojiLoading(false)
     }
@@ -173,10 +219,12 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
             setTokenCount(count)
           }
         }}>
-        <Form.Item name="emoji" label="Emoji">
+        <Form.Item label="Emoji">
           <Space>
             <Popover content={<EmojiPicker onEmojiClick={setEmoji} />} arrow>
-              <Button icon={emoji && <span style={{ fontSize: 20 }}>{emoji}</span>}>{t('common.select')}</Button>
+              <Button style={{ width: '60px', height: '40px', fontSize: '24px' }}>
+                {emoji || '😀'}
+              </Button>
             </Popover>
             <Button 
               onClick={generateEmoji} 

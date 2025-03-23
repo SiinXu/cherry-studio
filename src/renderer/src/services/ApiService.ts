@@ -283,7 +283,16 @@ export async function fetchEmojiSuggestion(prompt: string): Promise<string> {
 
   try {
     const { generateEmojiFromPrompt } = await import('@renderer/utils')
-    return await generateEmojiFromPrompt(prompt)
+    const emoji = await generateEmojiFromPrompt(prompt)
+    
+    // 确保函数返回单个emoji，而不是带有格式的字符串
+    // 如果返回格式为 "Emoji: 🐱"，则提取出emoji部分
+    if (emoji.includes('Emoji:')) {
+      const match = emoji.match(/Emoji:\s*([^\s]+)/)
+      return match ? match[1] : emoji
+    }
+    
+    return emoji
   } catch (error) {
     console.error('Error generating emoji from prompt:', error)
     // 如果生成失败，返回默认表情
