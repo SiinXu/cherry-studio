@@ -198,7 +198,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     const topicId = e.dataTransfer.getData('topicId')
     if (topicId && assistant.id) {
       // 使用正确的函数处理话题拖拽
-      updateTopicGroup(assistant.id, topicId, groupId || undefined)
+      updateTopicGroup(topicId, groupId || undefined)
     }
     setDragging(false)
     dropTargetRef.current = null
@@ -530,7 +530,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
                     key: 'no-group',
                     onClick: () => {
                       if (assistant.id) {
-                        updateTopicGroup(assistant.id, topic.id, undefined)
+                        updateTopicGroup(topic.id, undefined)
                       }
                     }
                   },
@@ -539,7 +539,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
                     key: group.id,
                     onClick: () => {
                       if (assistant.id) {
-                        updateTopicGroup(assistant.id, topic.id, group.id)
+                        updateTopicGroup(topic.id, group.id)
                       }
                     }
                   }))

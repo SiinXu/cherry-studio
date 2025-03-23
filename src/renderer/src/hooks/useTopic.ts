@@ -44,7 +44,9 @@ export function useTopicGroups(assistantId?: string) {
   }
 
   const updateTopicGroup = (topicId: string, groupId?: string) => {
-    dispatch({ type: 'topics/updateTopicGroup', payload: { topicId, groupId, assistantId } })
+    if (assistantId) {
+      dispatch({ type: 'assistants/updateTopicGroup', payload: { assistantId, topicId, groupId } })
+    }
   }
 
   const updateGroupsOrder = (groups: TopicGroup[]) => {
