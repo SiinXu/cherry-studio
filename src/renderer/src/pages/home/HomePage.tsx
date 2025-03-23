@@ -14,15 +14,23 @@ import HomeTabs from './Tabs'
 let _activeAssistant: Assistant
 
 const HomePage: FC = () => {
-  const { assistants } = useAssistants()
-  const navigate = useNavigate()
+  console.log('HomePage组件开始渲染')
 
+  const { assistants } = useAssistants()
+  console.log('获取到assistants:', Array.isArray(assistants) ? assistants.length : '非数组')
+
+  const navigate = useNavigate()
   const location = useLocation()
   const state = location.state
 
   const [activeAssistant, setActiveAssistant] = useState(state?.assistant || _activeAssistant || assistants[0])
+  console.log('activeAssistant设置完成:', activeAssistant?.id)
+
   const { activeTopic, setActiveTopic } = useActiveTopic(activeAssistant, state?.topic)
+  console.log('activeTopic设置完成:', activeTopic?.id)
+
   const { showAssistants, showTopics, topicPosition } = useSettings()
+  console.log('获取设置完成')
 
   _activeAssistant = activeAssistant
 
