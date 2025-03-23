@@ -23,10 +23,27 @@ const HomePage: FC = () => {
   const location = useLocation()
   const state = location.state
 
-  const [activeAssistant, setActiveAssistant] = useState(state?.assistant || _activeAssistant || assistants[0])
+  const hasAssistants = assistants && assistants.length > 0
+  console.log('是否有可用助手:', hasAssistants)
+
+  const initialAssistant = state?.assistant || _activeAssistant || (hasAssistants ? assistants[0] : undefined)
+  const [activeAssistant, setActiveAssistant] = useState(initialAssistant)
   console.log('activeAssistant设置完成:', activeAssistant?.id)
 
-  const { activeTopic, setActiveTopic } = useActiveTopic(activeAssistant, state?.topic)
+  const safeAssistant =
+    activeAssistant ||
+    (hasAssistants
+      ? assistants[0]
+      : {
+          id: 'default',
+          name: 'Default',
+          topics: [],
+          prompt: '',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        })
+
+  const { activeTopic, setActiveTopic } = useActiveTopic(safeAssistant, state?.topic)
   console.log('activeTopic设置完成:', activeTopic?.id)
 
   const { showAssistants, showTopics, topicPosition } = useSettings()
