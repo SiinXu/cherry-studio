@@ -195,7 +195,7 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
               )}
             </EmojiButtonWrapper>
           </Popover>
-          <Tooltip title="手动重新生成">
+          <Tooltip title={t('common.generate_emoji')}>
             <Button
               type="text"
               icon={emojiLoading ? <LoadingOutlined /> : <ThunderboltOutlined />}

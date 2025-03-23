@@ -198,7 +198,7 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
             <Popover content={<EmojiPicker onEmojiClick={setEmoji} />} arrow>
               <Button icon={emoji && <span style={{ fontSize: 20 }}>{emoji}</span>}>{t('common.select')}</Button>
             </Popover>
-            <Tooltip title="自动生成">
+            <Tooltip title={t('common.generate_emoji')}>
               <Button
                 type="text"
                 icon={emojiLoading ? <LoadingOutlined /> : <ThunderboltOutlined />}
