@@ -24,7 +24,7 @@ const topicsSlice = createSlice({
       state.loadingError = action.payload
     },
     updateGroups: (state, action: PayloadAction<TopicGroup[]>) => {
-      state.groups = action.payload
+      state.groups = action.payload || []
     },
     addGroup: (state, action: PayloadAction<TopicGroup>) => {
       state.groups.push(action.payload)

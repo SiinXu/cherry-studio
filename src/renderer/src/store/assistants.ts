@@ -164,6 +164,33 @@ const assistantsSlice = createSlice({
     },
     updateGroupsOrder: (state, action: PayloadAction<AssistantGroup[]>) => {
       state.groups = action.payload
+    },
+    updateTopicGroup: (state, action: PayloadAction<{ assistantId: string; topicId: string; groupId?: string }>) => {
+      console.log('updateTopicGroup被调用:', action.payload)
+
+      const { assistantId, topicId, groupId } = action.payload
+
+      // 查找对应的助手
+      const assistantIndex = state.assistants.findIndex((assistant) => assistant.id === assistantId)
+
+      if (assistantIndex >= 0) {
+        console.log('找到助手:', state.assistants[assistantIndex].name)
+
+        // 查找对应的topic
+        const topicIndex = state.assistants[assistantIndex].topics.findIndex((topic) => topic.id === topicId)
+
+        if (topicIndex >= 0) {
+          console.log('找到topic:', state.assistants[assistantIndex].topics[topicIndex].name)
+
+          // 更新groupId
+          state.assistants[assistantIndex].topics[topicIndex].groupId = groupId
+          console.log('更新groupId成功')
+        } else {
+          console.log('未找到对应的topic')
+        }
+      } else {
+        console.log('未找到对应的助手')
+      }
     }
   }
 })
@@ -185,7 +212,8 @@ export const {
   updateGroup,
   removeGroup,
   updateAssistantGroup,
-  updateGroupsOrder
+  updateGroupsOrder,
+  updateTopicGroup
 } = assistantsSlice.actions
 
 export default assistantsSlice.reducer
