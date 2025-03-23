@@ -89,6 +89,7 @@ export interface SettingsState {
   obsidianFolder: string
   obsidianValut: string
   obsidianTages: string
+  readClipboardAtStartup: boolean
 }
 
 export type MultiModelMessageStyle = 'horizontal' | 'vertical' | 'fold' | 'grid'
@@ -162,7 +163,8 @@ const initialState: SettingsState = {
   markdownExportPath: '',
   obsidianFolder: '',
   obsidianValut: '',
-  obsidianTages: ''
+  obsidianTages: '',
+  readClipboardAtStartup: false
 }
 
 const settingsSlice = createSlice({
@@ -378,6 +380,9 @@ const settingsSlice = createSlice({
     },
     setObsidianTages: (state, action: PayloadAction<string>) => {
       state.obsidianTages = action.payload
+    },
+    setReadClipboardAtStartup: (state, action: PayloadAction<boolean>) => {
+      state.readClipboardAtStartup = action.payload
     }
   }
 })
@@ -450,7 +455,8 @@ export const {
   setmarkdownExportPath,
   setObsidianFolder,
   setObsidianValut,
-  setObsidianTages
+  setObsidianTages,
+  setReadClipboardAtStartup
 } = settingsSlice.actions
 
 export default settingsSlice.reducer
