@@ -15,7 +15,6 @@ import { useSettings } from '@renderer/hooks/useSettings'
 import { useAppSelector } from '@renderer/store'
 import { Assistant, AssistantGroup } from '@renderer/types'
 import { droppableReorder } from '@renderer/utils'
-import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
 import { Alert, Form, Input, Modal, Spin } from 'antd'
 import { FC, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -31,15 +30,33 @@ interface AssistantsTabProps {
   onCreateDefaultAssistant: () => void
 }
 
+// 自定义 safeFilter 和 safeMap 函数实现，避免import错误
+function safeFilter<T>(arr: T[] | null | undefined, predicate: (value: T, index: number, array: T[]) => boolean): T[] {
+  if (!Array.isArray(arr)) return []
+  return arr.filter(predicate)
+}
+
+function safeMap<T, U>(arr: T[] | null | undefined, callback: (value: T, index: number, array: T[]) => U): U[] {
+  if (!Array.isArray(arr)) return []
+  return arr.map(callback)
+}
+
 const Assistants: FC<AssistantsTabProps> = ({
   activeAssistant,
   setActiveAssistant,
   onCreateAssistant,
   onCreateDefaultAssistant
 }) => {
-
-  const { assistants, addGroup, updateGroup, removeGroup, updateAssistantGroup, addAssistant, updateGroupsOrder } =
-    useAssistants()
+  const {
+    assistants,
+    addGroup,
+    updateGroup,
+    removeGroup,
+    updateAssistantGroup,
+    addAssistant,
+    removeAssistant,
+    updateGroupsOrder
+  } = useAssistants()
   const { groups, isLoading, loadingError } = useAppSelector((state) => state.assistants) // 直接从store获取状态
   const { enableAssistantGroup } = useSettings()
   const { addAgent } = useAgents()
@@ -249,19 +266,25 @@ const Assistants: FC<AssistantsTabProps> = ({
               {safeMap(groupAssistants, (assistant) => (
                 <div
                   key={assistant.id}
-                  draggable="true"
+                  draggable
                   onDragStart={(e) => handleAssistantDragStart(e, assistant.id)}
-                  onDragEnd={handleAssistantDragEnd}
-                  className="assistant-item-wrapper">
+                  onDragEnd={handleAssistantDragEnd}>
                   <AssistantItem
+                    key={assistant.id}
                     assistant={assistant}
-                    isActive={activeAssistant && assistant.id === activeAssistant.id}
+                    isActive={assistant.id === activeAssistant.id}
                     onSwitch={setActiveAssistant}
+                    onDelete={(assistant) => {
+                      const remaining = assistants.filter((a) => a.id !== assistant.id)
+                      if (assistant.id === activeAssistant?.id) {
+                        const newActive = remaining[remaining.length - 1]
+                        newActive ? setActiveAssistant(newActive) : onCreateDefaultAssistant()
+                      }
+                      removeAssistant(assistant.id)
+                    }}
                     addAgent={addAgent}
                     addAssistant={addAssistant}
                     onCreateDefaultAssistant={onCreateDefaultAssistant}
-                    onMoveToGroup={(assistantId, groupId) => updateAssistantGroup(assistantId, groupId)}
-                    groups={groups}
                   />
                 </div>
               ))}
@@ -279,7 +302,12 @@ const Assistants: FC<AssistantsTabProps> = ({
       ) : (
         <>
           {loadingError ? (
-            <Alert message={t('assistants.load.error')} description={loadingError} type="error" showIcon />
+            <Alert
+              message={t('assistants.load.error')}
+              description={loadingError?.message || String(loadingError)}
+              type="error"
+              showIcon
+            />
           ) : (
             <>
               {enableAssistantGroup ? (
@@ -296,19 +324,24 @@ const Assistants: FC<AssistantsTabProps> = ({
                     {safeMap(ungroupedAssistants, (assistant) => (
                       <div
                         key={assistant.id}
-                        draggable="true"
+                        draggable
                         onDragStart={(e) => handleAssistantDragStart(e, assistant.id)}
-                        onDragEnd={handleAssistantDragEnd}
-                        className="assistant-item-wrapper">
+                        onDragEnd={handleAssistantDragEnd}>
                         <AssistantItem
                           assistant={assistant}
-                          isActive={activeAssistant && assistant.id === activeAssistant.id}
+                          isActive={assistant.id === activeAssistant.id}
                           onSwitch={setActiveAssistant}
+                          onDelete={(assistant) => {
+                            const remaining = assistants.filter((a) => a.id !== assistant.id)
+                            if (assistant.id === activeAssistant?.id) {
+                              const newActive = remaining[remaining.length - 1]
+                              newActive ? setActiveAssistant(newActive) : onCreateDefaultAssistant()
+                            }
+                            removeAssistant(assistant.id)
+                          }}
                           addAgent={addAgent}
                           addAssistant={addAssistant}
                           onCreateDefaultAssistant={onCreateDefaultAssistant}
-                          onMoveToGroup={(assistantId, groupId) => updateAssistantGroup(assistantId, groupId)}
-                          groups={groups}
                         />
                       </div>
                     ))}
@@ -336,8 +369,16 @@ const Assistants: FC<AssistantsTabProps> = ({
                     <div key={assistant.id} className="assistant-item-wrapper">
                       <AssistantItem
                         assistant={assistant}
-                        isActive={activeAssistant && assistant.id === activeAssistant.id}
+                        isActive={assistant.id === activeAssistant.id}
                         onSwitch={setActiveAssistant}
+                        onDelete={(assistant) => {
+                          const remaining = assistants.filter((a) => a.id !== assistant.id)
+                          if (assistant.id === activeAssistant?.id) {
+                            const newActive = remaining[remaining.length - 1]
+                            newActive ? setActiveAssistant(newActive) : onCreateDefaultAssistant()
+                          }
+                          removeAssistant(assistant.id)
+                        }}
                         addAgent={addAgent}
                         addAssistant={addAssistant}
                         onCreateDefaultAssistant={onCreateDefaultAssistant}
