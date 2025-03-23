@@ -1,12 +1,13 @@
 import 'emoji-picker-element'
 
-import { CloseCircleFilled } from '@ant-design/icons'
+import { CloseCircleFilled, ThunderboltOutlined, LoadingOutlined } from '@ant-design/icons'
 import EmojiPicker from '@renderer/components/EmojiPicker'
 import { Box, HStack } from '@renderer/components/Layout'
+import { fetchEmojiSuggestion } from '@renderer/services/ApiService'
 import { estimateTextTokens } from '@renderer/services/TokenService'
 import { Assistant, AssistantSettings } from '@renderer/types'
 import { getLeadingEmoji } from '@renderer/utils'
-import { Button, Input, Popover } from 'antd'
+import { Button, Input, Popover, Tooltip, Space } from 'antd'
 import TextArea from 'antd/es/input/TextArea'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -24,6 +25,7 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
   const [name, setName] = useState(assistant.name.replace(getLeadingEmoji(assistant.name) || '', '').trim())
   const [prompt, setPrompt] = useState(assistant.prompt)
   const [tokenCount, setTokenCount] = useState(0)
+  const [emojiLoading, setEmojiLoading] = useState(false)
   const { t } = useTranslation()
 
   useEffect(() => {
@@ -51,35 +53,68 @@ const AssistantPromptSettings: React.FC<Props> = ({ assistant, updateAssistant, 
     updateAssistant(_assistant)
   }
 
+  const generateEmoji = async () => {
+    if (!name) return
+
+    setEmojiLoading(true)
+    try {
+      const suggestedEmoji = await fetchEmojiSuggestion(name)
+      setEmoji(suggestedEmoji)
+      const _assistant = { ...assistant, name: name.trim(), emoji: suggestedEmoji, prompt }
+      updateAssistant(_assistant)
+      console.log('生成的emoji:', suggestedEmoji)
+    } catch (error) {
+      console.error('Error generating emoji:', error)
+      const defaultEmojis = ['��', '💡', '✨', '🧠', '📚']
+      const defaultEmoji = defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]
+      setEmoji(defaultEmoji)
+      const _assistant = { ...assistant, name: name.trim(), emoji: defaultEmoji, prompt }
+      updateAssistant(_assistant)
+    } finally {
+      setEmojiLoading(false)
+    }
+  }
+
   return (
     <Container>
       <Box mb={8} style={{ fontWeight: 'bold' }}>
         {t('common.name')}
       </Box>
       <HStack gap={8} alignItems="center">
-        <Popover content={<EmojiPicker onEmojiClick={handleEmojiSelect} />} arrow>
-          <EmojiButtonWrapper>
-            <Button style={{ fontSize: 20, padding: '4px', minWidth: '32px', height: '32px' }}>{emoji}</Button>
-            {emoji && (
-              <CloseCircleFilled
-                className="delete-icon"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleEmojiDelete()
-                }}
-                style={{
-                  display: 'none',
-                  position: 'absolute',
-                  top: '-8px',
-                  right: '-8px',
-                  fontSize: '16px',
-                  color: '#ff4d4f',
-                  cursor: 'pointer'
-                }}
-              />
-            )}
-          </EmojiButtonWrapper>
-        </Popover>
+        <Space>
+          <Popover content={<EmojiPicker onEmojiClick={handleEmojiSelect} />} arrow>
+            <EmojiButtonWrapper>
+              <Button style={{ fontSize: 20, padding: '4px', minWidth: '32px', height: '32px' }}>{emoji}</Button>
+              {emoji && (
+                <CloseCircleFilled
+                  className="delete-icon"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleEmojiDelete()
+                  }}
+                  style={{
+                    display: 'none',
+                    position: 'absolute',
+                    top: '-8px',
+                    right: '-8px',
+                    fontSize: '16px',
+                    color: '#ff4d4f',
+                    cursor: 'pointer'
+                  }}
+                />
+              )}
+            </EmojiButtonWrapper>
+          </Popover>
+          <Tooltip title="自动生成">
+            <Button 
+              type="text"
+              icon={emojiLoading ? <LoadingOutlined /> : <ThunderboltOutlined />}
+              onClick={generateEmoji} 
+              loading={emojiLoading}
+              disabled={!name}
+            />
+          </Tooltip>
+        </Space>
         <Input
           placeholder={t('common.assistant') + t('common.name')}
           value={name}

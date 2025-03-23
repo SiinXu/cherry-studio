@@ -277,6 +277,7 @@ export async function fetchGenerate({ prompt, content }: { prompt: string; conte
 export async function fetchEmojiSuggestion(prompt: string): Promise<string> {
   // 如果提示词为空，返回默认表情
   if (!prompt || prompt.trim() === '') {
+    console.log('提示词为空，使用默认emoji')
     const defaultEmojis = ['🤖', '💡', '✨', '🧠', '📚']
     return defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]
   }
@@ -284,25 +285,32 @@ export async function fetchEmojiSuggestion(prompt: string): Promise<string> {
   try {
     // 尝试使用AI生成emoji
     const model = getDefaultModel()
+    console.log('使用模型:', model.id, model.name)
     const provider = getProviderByModel(model)
+    console.log('使用提供商:', provider.id, provider.name)
 
     if (!hasApiKey(provider)) {
+      console.log('API密钥不存在，回退到本地生成')
       // 如果没有API密钥，回退到本地生成方式
       const { generateEmojiFromPrompt } = await import('@renderer/utils')
       return await generateEmojiFromPrompt(prompt)
     }
 
+    console.log('开始使用AI生成emoji，提示词:', prompt)
     const AI = new AiProvider(provider)
     // 使用emoji生成提示词
     const result = await AI.generateText({
       prompt: EMOJI_GENERATOR_PROMPT,
       content: prompt
     })
+    console.log('AI生成结果:', result)
 
     // 从结果中提取emoji
     if (result.includes('Emoji:')) {
       const match = result.match(/Emoji:\s*([^\s]+)/)
-      return match ? match[1] : result
+      const extractedEmoji = match ? match[1] : result
+      console.log('提取的emoji:', extractedEmoji)
+      return extractedEmoji
     }
     
     return result
@@ -310,11 +318,13 @@ export async function fetchEmojiSuggestion(prompt: string): Promise<string> {
     console.error('Error generating emoji from prompt:', error)
     // 如果生成失败，回退到本地生成方式
     try {
+      console.log('AI生成失败，回退到本地生成')
       const { generateEmojiFromPrompt } = await import('@renderer/utils')
       return await generateEmojiFromPrompt(prompt)
     } catch (e) {
       console.error('Fallback emoji generation also failed:', e)
       // 如果本地生成也失败，返回默认表情
+      console.log('本地生成也失败，使用默认emoji')
       const defaultEmojis = ['🤖', '💡', '✨', '🧠', '📚']
       return defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]
     }
