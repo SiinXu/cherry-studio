@@ -239,7 +239,8 @@ const Assistants: FC<AssistantsTabProps> = ({
             onDragOver={(e) => handleAssistantDragOver(e, group.id)}
             onDragLeave={handleAssistantDragLeave}
             onDrop={(e) => handleAssistantDrop(e, group.id)}
-            className={dropTargetRef.current === group.id ? 'drag-over' : ''}>
+            className={dropTargetRef.current === group.id ? 'drag-over' : ''}
+            isDragging={dragging}>
             <GroupHeader className="group-header-style">
               <div onClick={(e) => toggleGroupExpanded(group.id, e)} style={{ display: 'flex', flex: 1 }}>
                 <GroupTitle>
@@ -262,7 +263,7 @@ const Assistants: FC<AssistantsTabProps> = ({
                 />
               </GroupActions>
             </GroupHeader>
-            <GroupContent className={isExpanded ? 'expanded' : 'collapsed'}>
+            <GroupContent className={isExpanded ? 'expanded' : 'collapsed'} isEmpty={groupAssistants.length === 0}>
               {safeMap(groupAssistants, (assistant) => (
                 <div
                   key={assistant.id}
@@ -311,85 +312,7 @@ const Assistants: FC<AssistantsTabProps> = ({
         </div>
       ) : (
         <>
-          {enableAssistantGroup ? (
-            // 启用分组时的显示方式
-            <>
-              {/* 未分组的助手 */}
-              <UngroupedSection
-                onDragOver={(e) => handleAssistantDragOver(e, null)}
-                onDragLeave={handleAssistantDragLeave}
-                onDrop={(e) => handleAssistantDrop(e, null)}
-                className={dropTargetRef.current === null ? 'drag-over' : ''}
-                $enableGroup={true}>
-                <p className="section-title">{t('assistants.ungrouped')}</p>
-                {safeMap(ungroupedAssistants, (assistant) => (
-                  <div
-                    key={assistant.id}
-                    draggable
-                    onDragStart={(e) => handleAssistantDragStart(e, assistant.id)}
-                    onDragEnd={handleAssistantDragEnd}>
-                    <AssistantItem
-                      assistant={assistant}
-                      isActive={assistant.id === activeAssistant.id}
-                      onSwitch={setActiveAssistant}
-                      onDelete={(assistant) => {
-                        const remaining = assistants.filter((a) => a.id !== assistant.id)
-                        if (assistant.id === activeAssistant?.id) {
-                          const newActive = remaining[remaining.length - 1]
-                          newActive ? setActiveAssistant(newActive) : onCreateDefaultAssistant()
-                        }
-                        removeAssistant(assistant.id)
-                      }}
-                      addAgent={addAgent}
-                      addAssistant={addAssistant}
-                      onCreateDefaultAssistant={onCreateDefaultAssistant}
-                    />
-                  </div>
-                ))}
-              </UngroupedSection>
-
-              {/* 分割线 - 当分组展示时 */}
-              {ungroupedAssistants.length > 0 && groups.length > 0 && <SectionDivider />}
-
-              {/* 分组区域 - 可拖拽排序 */}
-              <DragDropContext onDragEnd={handleGroupDragEnd}>
-                <Droppable droppableId="groups-droppable">
-                  {(provided) => (
-                    <GroupsContainer {...provided.droppableProps} ref={provided.innerRef}>
-                      {safeMap(groups, (group, index) => renderGroup(group, index))}
-                      {provided.placeholder}
-                    </GroupsContainer>
-                  )}
-                </Droppable>
-              </DragDropContext>
-            </>
-          ) : (
-            // 未启用分组时的原始显示方式
-            <UngroupedSection $enableGroup={false}>
-              {safeMap(assistants, (assistant) => (
-                <div key={assistant.id} className="assistant-item-wrapper">
-                  <AssistantItem
-                    assistant={assistant}
-                    isActive={assistant.id === activeAssistant.id}
-                    onSwitch={setActiveAssistant}
-                    onDelete={(assistant) => {
-                      const remaining = assistants.filter((a) => a.id !== assistant.id)
-                      if (assistant.id === activeAssistant?.id) {
-                        const newActive = remaining[remaining.length - 1]
-                        newActive ? setActiveAssistant(newActive) : onCreateDefaultAssistant()
-                      }
-                      removeAssistant(assistant.id)
-                    }}
-                    addAgent={addAgent}
-                    addAssistant={addAssistant}
-                    onCreateDefaultAssistant={onCreateDefaultAssistant}
-                  />
-                </div>
-              ))}
-            </UngroupedSection>
-          )}
-
-          {/* 添加按钮 */}
+          {/* 添加助手按钮 */}
           <ActionButtons>
             {!dragging && (
               <>
@@ -416,9 +339,91 @@ const Assistants: FC<AssistantsTabProps> = ({
             )}
           </ActionButtons>
 
+          {enableAssistantGroup ? (
+            // 启用分组时的显示方式
+            <>
+              {/* 未分组的助手 */}
+              <UngroupedSection
+                onDragOver={(e) => handleAssistantDragOver(e, null)}
+                onDragLeave={handleAssistantDragLeave}
+                onDrop={(e) => handleAssistantDrop(e, null)}
+                className={dropTargetRef.current === null ? 'drag-over' : ''}
+                $enableGroup={enableAssistantGroup}>
+                <p className="section-title">{t('assistants.ungrouped')}</p>
+                {safeMap(ungroupedAssistants, (assistant) => (
+                  <div
+                    key={assistant.id}
+                    draggable="true"
+                    onDragStart={(e) => handleAssistantDragStart(e, assistant.id)}
+                    onDragEnd={handleAssistantDragEnd}
+                    className="assistant-item-wrapper">
+                    <AssistantItem
+                      key={assistant.id}
+                      assistant={assistant}
+                      isActive={assistant.id === activeAssistant.id}
+                      onSwitch={setActiveAssistant}
+                      onDelete={(assistant) => {
+                        const remaining = assistants.filter((a) => a.id !== assistant.id)
+                        if (assistant.id === activeAssistant?.id) {
+                          const newActive = remaining[remaining.length - 1]
+                          newActive ? setActiveAssistant(newActive) : onCreateDefaultAssistant()
+                        }
+                        removeAssistant(assistant.id)
+                      }}
+                      addAgent={addAgent}
+                      addAssistant={addAssistant}
+                      onCreateDefaultAssistant={onCreateDefaultAssistant}
+                      onMoveToGroup={updateAssistantGroup}
+                      groups={groups}
+                    />
+                  </div>
+                ))}
+              </UngroupedSection>
+
+              {/* 分割线 - 当分组展示时 */}
+              {ungroupedAssistants.length > 0 && groups.length > 0 && <SectionDivider />}
+
+              {/* 分组区域 - 可拖拽排序 */}
+              <DragDropContext onDragEnd={handleGroupDragEnd}>
+                <Droppable droppableId="groups-droppable">
+                  {(provided) => (
+                    <div ref={provided.innerRef} {...provided.droppableProps} className="groups-container">
+                      {safeMap(groups, (group, index) => renderGroup(group, index))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
+            </>
+          ) : (
+            // 未启用分组时的原始显示方式
+            <UngroupedSection $enableGroup={enableAssistantGroup}>
+              {safeMap(assistants, (assistant) => (
+                <div key={assistant.id} className="assistant-item-wrapper">
+                  <AssistantItem
+                    assistant={assistant}
+                    isActive={assistant.id === activeAssistant.id}
+                    onSwitch={setActiveAssistant}
+                    onDelete={(assistant) => {
+                      const remaining = assistants.filter((a) => a.id !== assistant.id)
+                      if (assistant.id === activeAssistant?.id) {
+                        const newActive = remaining[remaining.length - 1]
+                        newActive ? setActiveAssistant(newActive) : onCreateDefaultAssistant()
+                      }
+                      removeAssistant(assistant.id)
+                    }}
+                    addAgent={addAgent}
+                    addAssistant={addAssistant}
+                    onCreateDefaultAssistant={onCreateDefaultAssistant}
+                  />
+                </div>
+              ))}
+            </UngroupedSection>
+          )}
+
           {/* 创建/编辑分组模态框 */}
           <Modal
-            title={currentGroup ? t('assistants.group.edit') : t('assistants.group.add')}
+            title={currentGroup ? t('assistants.group.edit.title') : t('assistants.group.add.title')}
             open={groupModalVisible}
             onOk={handleGroupSubmit}
             onCancel={() => setGroupModalVisible(false)}
@@ -454,6 +459,9 @@ const Container = styled.div`
   padding-top: 11px;
   user-select: none;
   height: 100%;
+  overflow-y: auto;
+  padding: 0 16px 16px;
+  box-sizing: border-box;
 
   .assistant-item-wrapper[draggable='true'] {
     cursor: grab;
@@ -471,16 +479,35 @@ const Container = styled.div`
 `
 
 const UngroupedSection = styled.div<{ $enableGroup: boolean }>`
-  display: flex;
-  flex-direction: column;
-  padding-bottom: ${(props) => (props.$enableGroup ? '0' : '10px')};
+  padding: 8px;
+  border-radius: 8px;
+  min-height: 60px;
+  overflow-y: auto;
+  max-height: ${(props) => (props.$enableGroup ? '300px' : 'none')};
+
+  .section-title {
+    font-size: 13px;
+    color: var(--color-text-3);
+    margin: 5px 8px;
+    padding-left: 8px;
+  }
+
+  &.drag-over {
+    background-color: var(--color-bg-3);
+  }
+
+  .assistant-item-wrapper[draggable='true'] {
+    cursor: grab;
+    &:active {
+      cursor: grabbing;
+    }
+  }
 `
 
 const SectionDivider = styled.div`
   height: 1px;
   background-color: var(--color-border);
-  margin: 10px 10px;
-  opacity: 0.5;
+  margin: 8px 0;
 `
 
 const GroupsContainer = styled.div`
@@ -489,189 +516,120 @@ const GroupsContainer = styled.div`
   gap: 4px;
 `
 
-const GroupContainer = styled.div`
-  margin-bottom: 4px; /* 减小Group间距 */
-  position: relative;
-  /* 移除Group间分割线 */
-
-  &.drag-over {
-    background-color: var(--color-bg-3);
-    border-radius: 6px;
-  }
+const GroupContainer = styled.div<{ isDragging?: boolean }>`
+  margin-bottom: 16px;
+  background-color: var(--color-bg-1);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  opacity: ${(props) => (props.isDragging ? 0.5 : 1)};
+  box-shadow: ${(props) => (props.isDragging ? '0 5px 10px rgba(0, 0, 0, 0.1)' : 'none')};
+  transition:
+    opacity 0.2s,
+    box-shadow 0.2s;
 `
 
 const GroupHeader = styled.div`
-  padding: 10px 12px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  cursor: pointer;
-  user-select: none;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg-2);
   position: relative;
-  border-radius: 6px;
-
-  &:hover {
-    background-color: var(--color-bg-2);
-
-    .group-actions {
-      opacity: 1;
-      visibility: visible;
-    }
-  }
 `
 
 const GroupTitle = styled.div`
+  flex: 1;
+  font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 500;
+  color: var(--color-text-1);
 `
 
 const GroupIcon = styled.span`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  min-width: 16px; /* 确保最小宽度固定 */
-  font-size: 12px;
-  margin-right: 4px; /* 添加右边距使布局更一致 */
-`
-
-const GroupActions = styled.div`
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s;
-  display: flex;
-  gap: 8px;
-  z-index: 10; /* 确保操作按钮不被盖住 */
-
-  .anticon {
-    cursor: pointer;
-    color: var(--color-text-3);
-    &:hover {
-      color: var(--color-text-1);
-    }
-  }
-
-  .delete-icon:hover {
-    color: var(--color-error);
-  }
-
-  .drag-handle {
-    cursor: grab;
-    color: var(--color-text-3);
-    &:hover {
-      color: var(--color-text-1);
-    }
-    &:active {
-      cursor: grabbing;
-    }
-  }
+  margin-right: 8px;
+  font-size: 16px;
+  color: var(--color-text-3);
 `
 
 const GroupCount = styled.span`
-  font-size: 12px;
+  margin-left: 8px;
   color: var(--color-text-3);
-  background-color: var(--color-bg-3);
-  padding: 1px 6px;
-  border-radius: 10px;
-  margin-left: 4px;
+  font-size: 12px;
+  font-weight: normal;
 `
 
-const GroupContent = styled.div`
-  padding-left: 20px;
-  overflow: hidden;
-  padding-top: 8px;
-  padding-bottom: 8px;
+const GroupActions = styled.div`
+  display: flex;
+  gap: 8px;
 
-  &.expanded {
-    display: block;
-  }
+  .anticon {
+    font-size: 16px;
+    color: var(--color-text-3);
+    cursor: pointer;
 
-  &.collapsed {
-    display: none;
+    &:hover {
+      color: var(--color-primary);
+    }
   }
+`
+
+const GroupContent = styled.div<{ isEmpty?: boolean }>`
+  padding: ${(props) => (props.isEmpty ? '12px 16px' : '12px 0')};
+  color: ${(props) => (props.isEmpty ? 'var(--color-text-3)' : 'inherit')};
 `
 
 const ActionButtons = styled.div`
   display: flex;
   gap: 10px;
-  padding: 10px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  background: var(--color-bg-1);
-  z-index: 10;
-
-  button {
-    flex: 1;
-  }
+  margin-bottom: 16px;
+  width: 100%;
 `
 
-/* 新的按钮样式，带有更明显的悬停效果 */
 const CreateButton = styled.button`
-  height: 34px;
-  border-radius: 6px;
-  border: none;
-  background-color: var(--color-primary);
-  color: #fff;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
+  background-color: var(--color-bg-2);
+  border: 1px dashed var(--color-border);
+  color: var(--color-text-2);
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  width: 100%;
   transition: all 0.3s;
-  z-index: 2;
 
   &:hover {
-    background-color: #05d47b; /* 使用更浅的绿色，但不透明 */
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    color: #fff; /* 修复hover效果变白的问题 */
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background-color: var(--color-primary-bg);
   }
 `
 
 const GroupCreateButton = styled(CreateButton)`
-  background-color: var(--color-neutral-5);
-  color: var(--color-text-1);
-
-  &:hover {
-    background-color: var(--color-neutral-6);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    color: var(--color-primary); /* 悬停时文字变为绿色 */
-  }
+  border-style: dashed;
 `
 
-/* 非分组模式下的加号按钮样式 */
 const AssistantAddItem = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  padding: 7px 12px;
-  position: relative;
-  margin: 0 10px;
-  padding-right: 35px;
-  font-family: Ubuntu;
-  border-radius: var(--list-item-border-radius);
-  border: 0.5px solid transparent;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px dashed var(--color-border);
+  background-color: var(--color-bg-2);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
 
   &:hover {
-    background-color: var(--color-background-soft);
-  }
-
-  &.active {
-    background-color: var(--color-background-soft);
-    border: 0.5px solid var(--color-border);
+    border-color: var(--color-primary);
+    background-color: var(--color-primary-bg);
   }
 `
 
 const AssistantName = styled.div`
-  color: var(--color-text);
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  font-size: 13px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: var(--color-text-2);
 `
