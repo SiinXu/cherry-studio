@@ -226,33 +226,32 @@ const Assistants: FC<AssistantsTabProps> = ({
 
   // 渲染一个分组
   const renderGroup = (group: AssistantGroup, index: number) => {
-    const groupAssistants = safeFilter(assistants, (a) => a.groupId === group.id)
     const isExpanded = expandedGroups.has(group.id)
+    const groupAssistants = safeFilter(assistants, (a) => a.groupId === group.id)
 
     return (
       <Draggable key={group.id} draggableId={group.id} index={index}>
-        {(provided) => (
+        {(provided, snapshot) => (
           <GroupContainer
-            {...provided.draggableProps}
             ref={provided.innerRef}
-            data-groupid={group.id}
+            {...provided.draggableProps}
+            style={{
+              ...provided.draggableProps.style,
+              margin: '0 0 8px 0'
+            }}
             onDragOver={(e) => handleAssistantDragOver(e, group.id)}
             onDragLeave={handleAssistantDragLeave}
             onDrop={(e) => handleAssistantDrop(e, group.id)}
-            className={dropTargetRef.current === group.id ? 'drag-over' : ''}
-            isDragging={dragging}>
+            className={dropTargetRef.current === group.id ? 'drag-over' : ''}>
             <GroupHeader className="group-header-style">
               <div onClick={(e) => toggleGroupExpanded(group.id, e)} style={{ display: 'flex', flex: 1 }}>
                 <GroupTitle>
                   <GroupIcon>{isExpanded ? <DownOutlined /> : <RightOutlined />}</GroupIcon>
-                  <div>{group.name}</div>
-                  <GroupCount>{groupAssistants.length}</GroupCount>
+                  {group.name}
+                  <GroupCount>({groupAssistants.length})</GroupCount>
                 </GroupTitle>
               </div>
               <GroupActions className="group-actions">
-                <span {...provided.dragHandleProps} className="drag-handle">
-                  <HolderOutlined />
-                </span>
                 <EditOutlined onClick={(e) => handleEditGroup(group, e)} />
                 <DeleteOutlined
                   className="delete-icon"
@@ -261,17 +260,20 @@ const Assistants: FC<AssistantsTabProps> = ({
                     handleDeleteGroup(group.id)
                   }}
                 />
+                <div className="drag-handle" {...provided.dragHandleProps}>
+                  <HolderOutlined />
+                </div>
               </GroupActions>
             </GroupHeader>
             <GroupContent className={isExpanded ? 'expanded' : 'collapsed'} isEmpty={groupAssistants.length === 0}>
               {safeMap(groupAssistants, (assistant) => (
                 <div
                   key={assistant.id}
-                  draggable
+                  draggable="true"
                   onDragStart={(e) => handleAssistantDragStart(e, assistant.id)}
-                  onDragEnd={handleAssistantDragEnd}>
+                  onDragEnd={handleAssistantDragEnd}
+                  className="assistant-item-wrapper">
                   <AssistantItem
-                    key={assistant.id}
                     assistant={assistant}
                     isActive={assistant.id === activeAssistant.id}
                     onSwitch={setActiveAssistant}
@@ -286,9 +288,12 @@ const Assistants: FC<AssistantsTabProps> = ({
                     addAgent={addAgent}
                     addAssistant={addAssistant}
                     onCreateDefaultAssistant={onCreateDefaultAssistant}
+                    onMoveToGroup={updateAssistantGroup}
+                    groups={groups}
                   />
                 </div>
               ))}
+              {groupAssistants.length === 0 && <div>{t('assistants.group.empty')}</div>}
             </GroupContent>
           </GroupContainer>
         )}

@@ -113,6 +113,15 @@ export type Topic = {
   pinned?: boolean
   prompt?: string
   isNameManuallyEdited?: boolean
+  groupId?: string
+}
+
+export type TopicGroup = {
+  id: string
+  name: string
+  description?: string
+  createdAt: string
+  updatedAt: string
 }
 
 export type User = {
