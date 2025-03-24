@@ -39,6 +39,19 @@
       "delete.content": "Deleting an assistant will delete all topics and files under the assistant. Are you sure you want to delete it?",
       "delete.title": "Delete Assistant",
       "edit.title": "Edit Assistant",
+      "group": {
+        "add": "Add Group",
+        "add.title": "Add Group",
+        "delete.content": "Deleting the group will move all assistants in the group to the ungrouped area. Are you sure?",
+        "delete.title": "Delete Group",
+        "description": "Group Description",
+        "description.placeholder": "Enter group description (optional)",
+        "edit.title": "Edit Group",
+        "empty": "No assistants in this group",
+        "name": "Group Name",
+        "name.placeholder": "Enter group name",
+        "validation.name": "Group name cannot be empty"
+      },
       "save.success": "Saved successfully",
       "save.title": "Save to agent",
       "search": "Search assistants...",
@@ -53,7 +66,8 @@
       "settings.reasoning_effort.medium": "medium",
       "settings.reasoning_effort.off": "off",
       "settings.reasoning_effort.tip": "Only supports OpenAI o-series and Anthropic reasoning models",
-      "title": "Assistants"
+      "title": "Assistants",
+      "ungrouped": "Ungrouped Assistants"
     },
     "auth": {
       "error": "API key automatically obtained failed, please get it manually",
@@ -1144,7 +1158,7 @@
         "title": "Web Search"
       },
       "display.group.title": "Group Settings",
-      "advanced.assistantGroup": "Enable Assistant Grouping",
+      "advanced.assistantGroup": "Enable Assistants Grouping",
       "advanced.topicsGroup": "Enable Topics Grouping"
     },
     "translate": {
@@ -1182,6 +1196,22 @@
       "quit": "Quit",
       "show_window": "Show Window",
       "visualization": "Visualization"
+    },
+    "topics": {
+      "add": "New Topic",
+      "delete": "Delete Topic",
+      "group": {
+        "add": "Add Group",
+        "delete": "Delete Group",
+        "description": "Group Description",
+        "description.placeholder": "Enter group description (optional)",
+        "edit": "Edit Group",
+        "empty": "No topics in this group",
+        "name": "Group Name",
+        "name.placeholder": "Enter group name",
+        "name.required": "Group name cannot be empty"
+      },
+      "ungrouped": "Ungrouped Topics"
     }
   }
 }
