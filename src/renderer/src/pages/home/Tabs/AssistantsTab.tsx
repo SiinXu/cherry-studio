@@ -486,7 +486,7 @@ const GroupsContainer = styled.div`
 `
 
 const GroupContainer = styled.div<{ isDragging?: boolean }>`
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   position: relative;
   border-radius: 6px;
   transition: all 0.2s ease;
@@ -507,7 +507,7 @@ const GroupContainer = styled.div<{ isDragging?: boolean }>`
 `
 
 const GroupHeader = styled.div`
-  padding: 10px 12px;
+  padding: 8px 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
