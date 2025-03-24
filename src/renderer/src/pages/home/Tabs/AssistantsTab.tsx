@@ -486,7 +486,7 @@ const GroupsContainer = styled.div`
 `
 
 const GroupContainer = styled.div<{ isDragging?: boolean }>`
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   position: relative;
   border-radius: 6px;
   transition: all 0.2s ease;
@@ -507,7 +507,7 @@ const GroupContainer = styled.div<{ isDragging?: boolean }>`
 `
 
 const GroupHeader = styled.div`
-  padding: 8px 12px;
+  padding: 10px 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -584,7 +584,7 @@ const GroupContent = styled.div`
   min-height: 0;
 
   &.expanded {
-    display: flex;
+    display: block;
   }
   &.collapsed {
     display: none;
@@ -648,6 +648,8 @@ const AssistantName = styled.div`
 
 const AddAssistantItem = styled.div`
   padding: 7px 12px;
+  margin-left: 10px;
+  margin-right: 4px;
   margin-bottom: 8px;
   border-radius: 6px;
   border: 1px dashed var(--color-border);
@@ -668,7 +670,7 @@ const UngroupedSection = styled.div<{ $enableGroup: boolean }>`
   border-radius: 8px;
   min-height: 60px;
   overflow-y: auto;
-  max-height: ${(props) => (props.$enableGroup ? 'calc(30vh - 60px)' : 'none')};
+  max-height: ${(props) => (props.$enableGroup ? '300px' : 'none')};
   flex-shrink: ${(props) => (props.$enableGroup ? 0 : 1)};
   flex-grow: ${(props) => (props.$enableGroup ? 0 : 1)};
 

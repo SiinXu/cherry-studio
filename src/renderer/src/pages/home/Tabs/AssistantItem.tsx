@@ -180,13 +180,13 @@ const Container = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  padding: 7px 10px;
+  padding: 7px 12px;
   position: relative;
-  margin: 0 10px;
+  margin-left: 10px;
+  margin-right: 4px;
   font-family: Ubuntu;
   border-radius: var(--list-item-border-radius);
   border: 0.5px solid transparent;
-  width: calc(var(--assistants-width) - 20px);
   cursor: pointer;
   .iconfont {
     opacity: 0;
@@ -204,7 +204,7 @@ const Container = styled.div`
 `
 
 const AssistantNameRow = styled.div`
-  color: var(--color-text);
+  color: var(--color-text-1);
   font-size: 13px;
   display: flex;
   flex-direction: row;
@@ -212,7 +212,12 @@ const AssistantNameRow = styled.div`
   gap: 5px;
 `
 
-const AssistantName = styled.div``
+const AssistantName = styled.div`
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+`
 
 const MenuButton = styled.div`
   display: flex;
@@ -226,7 +231,7 @@ const MenuButton = styled.div`
   border-radius: 11px;
   position: absolute;
   background-color: var(--color-background);
-  right: 9px;
+  right: 8px;
   top: 6px;
   padding: 0 5px;
   border: 0.5px solid var(--color-border);
