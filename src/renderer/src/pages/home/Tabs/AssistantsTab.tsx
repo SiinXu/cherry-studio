@@ -476,12 +476,9 @@ const GroupsContainer = styled.div`
 `
 
 const GroupContainer = styled.div<{ isDragging?: boolean }>`
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   position: relative;
   border-radius: 6px;
-  background-color: var(--color-bg-1);
-  overflow: hidden;
-  border: 1px solid var(--color-border);
   transition: all 0.2s ease;
 
   &.drag-over {
@@ -492,42 +489,45 @@ const GroupContainer = styled.div<{ isDragging?: boolean }>`
 
   &.dragging {
     opacity: 0.8;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
   }
 `
 
 const GroupHeader = styled.div`
+  padding: 10px 12px;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-bg-2);
+  align-items: center;
   cursor: pointer;
+  user-select: none;
+  position: relative;
+  border-radius: 6px;
+
   &:hover {
+    background-color: var(--color-bg-2);
     .group-actions {
-      visibility: visible;
       opacity: 1;
+      visibility: visible;
     }
   }
 `
 
 const GroupTitle = styled.div`
-  flex: 1;
-  font-weight: 500;
   display: flex;
   align-items: center;
-  color: var(--color-text-1);
-  font-size: 14px;
+  flex-grow: 1;
+  font-weight: 500;
+  font-size: 13px;
 `
 
 const GroupIcon = styled.span`
-  margin-right: 6px;
+  margin-right: 8px;
   font-size: 12px;
   color: var(--color-text-3);
 `
 
 const GroupCount = styled.span`
-  margin-left: 6px;
+  margin-left: 8px;
   color: var(--color-text-3);
   font-size: 12px;
   font-weight: normal;
@@ -538,7 +538,7 @@ const GroupActions = styled.div`
   visibility: hidden;
   transition: opacity 0.2s;
   display: flex;
-  gap: 6px;
+  gap: 8px;
 
   .drag-handle {
     cursor: grab;
@@ -563,7 +563,7 @@ const GroupActions = styled.div`
 `
 
 const GroupContent = styled.div`
-  padding: 4px 8px;
+  padding-left: 20px;
   overflow: hidden;
   &.expanded {
     display: block;
@@ -573,7 +573,7 @@ const GroupContent = styled.div`
   }
 
   .empty-group {
-    padding: 6px 10px;
+    padding: 8px 12px;
     color: var(--color-text-3);
     font-size: 13px;
   }
@@ -581,17 +581,17 @@ const GroupContent = styled.div`
 
 const ActionButtons = styled.div`
   display: flex;
-  gap: 8px;
-  padding: 8px 0;
-  margin-top: 8px;
-  margin-bottom: 8px;
+  gap: 10px;
+  padding: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
   button {
     flex: 1;
   }
 `
 
 const CreateButton = styled.button`
-  height: 32px;
+  height: 34px;
   border-radius: 6px;
   border: none;
   background-color: var(--color-primary);
@@ -602,7 +602,6 @@ const CreateButton = styled.button`
   justify-content: center;
   gap: 6px;
   transition: all 0.3s;
-  font-size: 14px;
   &:hover {
     background-color: #05d47b;
     transform: translateY(-1px);
@@ -630,8 +629,8 @@ const AssistantName = styled.div`
 `
 
 const AddAssistantItem = styled.div`
-  padding: 8px 12px;
-  margin-bottom: 6px;
+  padding: 7px 12px;
+  margin-bottom: 8px;
   border-radius: 6px;
   border: 1px dashed var(--color-border);
   background-color: var(--color-bg-2);
@@ -647,17 +646,17 @@ const AddAssistantItem = styled.div`
 `
 
 const UngroupedSection = styled.div<{ $enableGroup: boolean }>`
-  padding: 6px;
-  border-radius: 6px;
-  min-height: 40px;
+  padding: 8px;
+  border-radius: 8px;
+  min-height: 60px;
   overflow-y: auto;
   max-height: ${(props) => (props.$enableGroup ? '300px' : 'none')};
 
   .section-title {
     font-size: 13px;
     color: var(--color-text-3);
-    margin: 4px 6px;
-    padding-left: 4px;
+    margin: 5px 8px;
+    padding-left: 8px;
   }
 
   &.drag-over {
