@@ -1204,6 +1204,24 @@
       "quit": "退出",
       "show_window": "显示窗口",
       "visualization": "可视化"
+    },
+    "topics": {
+      "add": "新建话题",
+      "delete": "删除话题",
+      "duplicate_to": "复制到",
+      "move_to_group": "移动到分组",
+      "group": {
+        "add": "添加分组",
+        "delete": "删除分组",
+        "description": "分组描述",
+        "description.placeholder": "请输入分组描述（选填）",
+        "edit": "编辑分组",
+        "empty": "分组内暂无话题",
+        "name": "分组名称",
+        "name.placeholder": "请输入分组名称",
+        "name.required": "分组名称不能为空"
+      },
+      "ungrouped": "未分组话题"
     }
   }
 }
