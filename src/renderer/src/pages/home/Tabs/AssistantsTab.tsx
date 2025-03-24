@@ -303,155 +303,118 @@ const Assistants: FC<AssistantsTabProps> = ({
 
   return (
     <Container>
-      {loadingError ? (
-        <Alert
-          message={t('assistants.load.error')}
-          description={loadingError?.message || String(loadingError)}
-          type="error"
-          showIcon
-        />
-      ) : isLoading ? (
+      {loadingError && (
+        <Alert message={t('common.loading_error')} description={loadingError.message} type="error" showIcon />
+      )}
+
+      {isLoading ? (
         <div style={{ textAlign: 'center', padding: '20px' }}>
           <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
-          <div style={{ marginTop: '10px' }}>{t('assistants.loading')}</div>
+          <div style={{ marginTop: '10px' }}>{t('common.loading')}</div>
         </div>
       ) : (
         <>
-          {/* 添加助手按钮 */}
-          <ActionButtons>
-            {!dragging && (
-              <>
-                {enableAssistantGroup ? (
-                  <>
-                    <CreateButton type="button" className="add-assistant-btn" onClick={onCreateAssistant}>
-                      <PlusOutlined />
-                      {t('chat.add.assistant.title')}
-                    </CreateButton>
-                    <GroupCreateButton type="button" className="add-group-btn" onClick={handleCreateGroup}>
-                      <FolderAddOutlined />
-                      {t('assistants.group.add')}
-                    </GroupCreateButton>
-                  </>
-                ) : (
-                  <AssistantAddItem onClick={onCreateAssistant} style={{ width: '100%' }}>
-                    <AssistantName>
-                      <PlusOutlined style={{ color: 'var(--color-text-2)', marginRight: 4 }} />
-                      {t('chat.add.assistant.title')}
-                    </AssistantName>
-                  </AssistantAddItem>
-                )}
-              </>
-            )}
-          </ActionButtons>
-
           {enableAssistantGroup ? (
-            // 启用分组时的显示方式
             <>
-              {/* 未分组的助手 */}
-              <UngroupedSection
-                onDragOver={(e) => handleAssistantDragOver(e, null)}
-                onDragLeave={handleAssistantDragLeave}
-                onDrop={(e) => handleAssistantDrop(e, null)}
-                className={dropTargetRef.current === null ? 'drag-over' : ''}
-                $enableGroup={enableAssistantGroup}>
-                <p className="section-title">{t('assistants.ungrouped')}</p>
-                {safeMap(ungroupedAssistants, (assistant) => (
-                  <div
-                    key={assistant.id}
-                    draggable="true"
-                    onDragStart={(e) => handleAssistantDragStart(e, assistant.id)}
-                    onDragEnd={handleAssistantDragEnd}
-                    className="assistant-item-wrapper">
-                    <AssistantItem
-                      key={assistant.id}
-                      assistant={assistant}
-                      isActive={assistant.id === activeAssistant.id}
-                      onSwitch={setActiveAssistant}
-                      onDelete={(assistant) => {
-                        const remaining = assistants.filter((a) => a.id !== assistant.id)
-                        if (assistant.id === activeAssistant?.id) {
-                          const newActive = remaining[remaining.length - 1]
-                          newActive ? setActiveAssistant(newActive) : onCreateDefaultAssistant()
-                        }
-                        removeAssistant(assistant.id)
-                      }}
-                      addAgent={addAgent}
-                      addAssistant={addAssistant}
-                      onCreateDefaultAssistant={onCreateDefaultAssistant}
-                      onMoveToGroup={updateAssistantGroup}
-                      groups={groups}
-                    />
-                  </div>
-                ))}
-              </UngroupedSection>
+              <ActionButtons>
+                <CreateButton onClick={onCreateAssistant}>
+                  <PlusOutlined />
+                  {t('chat.assistants.add.title')}
+                </CreateButton>
+                <GroupCreateButton onClick={handleCreateGroup}>
+                  <FolderAddOutlined />
+                  {t('assistants.group.add.title')}
+                </GroupCreateButton>
+              </ActionButtons>
 
-              {/* 分割线 - 当分组展示时 */}
-              {ungroupedAssistants.length > 0 && groups.length > 0 && <SectionDivider />}
-
-              {/* 分组区域 - 可拖拽排序 */}
               <DragDropContext onDragEnd={handleGroupDragEnd}>
-                <Droppable droppableId="groups-droppable">
-                  {(provided) => (
-                    <div ref={provided.innerRef} {...provided.droppableProps} className="groups-container">
-                      {safeMap(groups, (group, index) => renderGroup(group, index))}
-                      {provided.placeholder}
+                {/* 未分组的助手 */}
+                <UngroupedSection
+                  $enableGroup={true}
+                  className={dropTargetRef.current === null && dragging ? 'drag-over' : ''}
+                  onDragOver={(e) => handleAssistantDragOver(e, null)}
+                  onDragLeave={handleAssistantDragLeave}
+                  onDrop={(e) => handleAssistantDrop(e, null)}>
+                  <div className="section-title">{t('assistants.ungrouped')}</div>
+                  {safeMap(ungroupedAssistants, (assistant) => (
+                    <div
+                      key={assistant.id}
+                      className="assistant-item-wrapper"
+                      draggable={true}
+                      onDragStart={(e) => handleAssistantDragStart(e, assistant.id)}
+                      onDragEnd={handleAssistantDragEnd}>
+                      <AssistantItem
+                        key={assistant.id}
+                        assistant={assistant}
+                        active={assistant.id === activeAssistant?.id}
+                        onClick={() => setActiveAssistant(assistant)}
+                      />
                     </div>
-                  )}
-                </Droppable>
+                  ))}
+                </UngroupedSection>
+
+                <SectionDivider />
+
+                {/* 分组助手 */}
+                <GroupsContainer>
+                  <Droppable droppableId="assistantGroups">
+                    {(provided) => (
+                      <div className="assistant-groups-container" ref={provided.innerRef} {...provided.droppableProps}>
+                        {safeMap(groups, (group, index) => renderGroup(group, index))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </GroupsContainer>
               </DragDropContext>
             </>
           ) : (
-            // 未启用分组时的原始显示方式
-            <UngroupedSection $enableGroup={enableAssistantGroup}>
+            <div className="assistants-list">
               {safeMap(assistants, (assistant) => (
-                <div key={assistant.id} className="assistant-item-wrapper">
-                  <AssistantItem
-                    assistant={assistant}
-                    isActive={assistant.id === activeAssistant.id}
-                    onSwitch={setActiveAssistant}
-                    onDelete={(assistant) => {
-                      const remaining = assistants.filter((a) => a.id !== assistant.id)
-                      if (assistant.id === activeAssistant?.id) {
-                        const newActive = remaining[remaining.length - 1]
-                        newActive ? setActiveAssistant(newActive) : onCreateDefaultAssistant()
-                      }
-                      removeAssistant(assistant.id)
-                    }}
-                    addAgent={addAgent}
-                    addAssistant={addAssistant}
-                    onCreateDefaultAssistant={onCreateDefaultAssistant}
-                  />
-                </div>
+                <AssistantItem
+                  key={assistant.id}
+                  assistant={assistant}
+                  active={assistant.id === activeAssistant?.id}
+                  onClick={() => setActiveAssistant(assistant)}
+                />
               ))}
-            </UngroupedSection>
+              <AddAssistantItem onClick={onCreateAssistant}>
+                <AssistantName>
+                  <PlusOutlined style={{ fontSize: '16px', marginRight: '6px' }} />
+                  {t('chat.assistants.add.title')}
+                </AssistantName>
+              </AddAssistantItem>
+            </div>
           )}
-
-          {/* 创建/编辑分组模态框 */}
-          <Modal
-            title={currentGroup ? t('assistants.group.edit.title') : t('assistants.group.add.title')}
-            open={groupModalVisible}
-            onOk={handleGroupSubmit}
-            onCancel={() => setGroupModalVisible(false)}
-            destroyOnClose>
-            <Form form={form} layout="vertical">
-              <Form.Item
-                name="name"
-                label={t('assistants.group.name')}
-                rules={[
-                  {
-                    required: true,
-                    message: t('assistants.group.name.required')
-                  }
-                ]}>
-                <Input placeholder={t('assistants.group.name.placeholder')} />
-              </Form.Item>
-              <Form.Item name="description" label={t('assistants.group.description')}>
-                <Input.TextArea placeholder={t('assistants.group.description.placeholder')} rows={3} />
-              </Form.Item>
-            </Form>
-          </Modal>
         </>
       )}
+
+      {/* 添加/编辑分组的弹窗 */}
+      <Modal
+        open={groupModalVisible}
+        title={currentGroup ? t('assistants.group.edit.title') : t('assistants.group.add.title')}
+        okText={t('common.confirm')}
+        cancelText={t('common.cancel')}
+        onCancel={() => setGroupModalVisible(false)}
+        onOk={handleGroupSubmit}
+        centered>
+        <Form form={form} layout="vertical">
+          <Form.Item
+            name="name"
+            label={t('assistants.group.name')}
+            rules={[{ required: true, message: t('assistants.group.validation.name') }]}>
+            <Input placeholder={t('assistants.group.name.placeholder')} maxLength={50} showCount />
+          </Form.Item>
+          <Form.Item name="description" label={t('assistants.group.description')}>
+            <Input.TextArea
+              placeholder={t('assistants.group.description.placeholder')}
+              maxLength={200}
+              showCount
+              rows={4}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </Container>
   )
 }
@@ -495,8 +458,16 @@ const GroupCreateButton = styled(CreateButton)`
   border-style: dashed;
 `
 
-const AssistantAddItem = styled.div`
+const AssistantName = styled.div`
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: var(--color-text-2);
+`
+
+const AddAssistantItem = styled.div`
   padding: 12px 16px;
+  margin-bottom: 8px;
   border-radius: 8px;
   border: 1px dashed var(--color-border);
   background-color: var(--color-bg-2);
@@ -509,13 +480,6 @@ const AssistantAddItem = styled.div`
     border-color: var(--color-primary);
     background-color: var(--color-primary-bg);
   }
-`
-
-const AssistantName = styled.div`
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  color: var(--color-text-2);
 `
 
 const UngroupedSection = styled.div<{ $enableGroup: boolean }>`
@@ -574,6 +538,16 @@ const Container = styled.div`
   }
 `
 
+const GroupsContainer = styled.div`
+  flex: 1;
+  overflow-y: auto;
+
+  .assistant-groups-container {
+    display: flex;
+    flex-direction: column;
+  }
+`
+
 const GroupContainer = styled.div<{ isDragging?: boolean }>`
   margin-bottom: 16px;
   background-color: var(--color-bg-1);
@@ -585,6 +559,16 @@ const GroupContainer = styled.div<{ isDragging?: boolean }>`
   transition:
     opacity 0.2s,
     box-shadow 0.2s;
+
+  &.drag-over {
+    background-color: var(--color-bg-3);
+    border-radius: 6px;
+    outline: 2px solid var(--color-primary);
+  }
+
+  &.dragging {
+    opacity: 0.8;
+  }
 `
 
 const GroupHeader = styled.div`
