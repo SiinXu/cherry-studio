@@ -60,6 +60,8 @@
         "name.placeholder": "Enter group name",
         "validation.name": "Group name cannot be empty"
       },
+      "move_to_group": "Move to Group",
+      "no_group": "No Group",
       "save.success": "Saved successfully",
       "save.title": "Save to agent",
       "search": "Search assistants...",

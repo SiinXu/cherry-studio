@@ -75,7 +75,9 @@
       "settings.reasoning_effort.off": "关",
       "settings.reasoning_effort.tip": "仅支持 OpenAI o-series 和 Anthropic 推理模型",
       "title": "助手",
-      "ungrouped": "未分组助手"
+      "ungrouped": "未分组助手",
+      "move_to_group": "移动到分组",
+      "no_group": "无分组"
     },
     "auth": {
       "error": "自动获取密钥失败，请手动获取",
