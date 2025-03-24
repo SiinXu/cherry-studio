@@ -94,10 +94,11 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   }
   // 创建新话题
   const handleCreateTopic = () => {
+    // 创建新话题
     const newTopic: Topic = {
       id: uuid(),
       name: t('topics.new'),
-      assistantId: assistant.id,
+      groupId: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       messages: []
