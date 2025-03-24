@@ -26,6 +26,7 @@ import { useSettings } from '@renderer/hooks/useSettings'
 import { useTopicGroups } from '@renderer/hooks/useTopic'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import store from '@renderer/store'
+import { addTopic as addTopicAction } from '@renderer/store/assistants'
 import { setGenerating } from '@renderer/store/runtime'
 import { Assistant, Topic, TopicGroup } from '@renderer/types'
 import { droppableReorder } from '@renderer/utils'
@@ -44,6 +45,7 @@ import { FC, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { v4 as uuid } from 'uuid'
+
 interface Props {
   assistant: Assistant
   activeTopic: Topic
@@ -51,7 +53,7 @@ interface Props {
 }
 const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic }) => {
   const { assistants } = useAssistants()
-  const { assistant, removeTopic, updateTopic, addTopic, duplicateTopic } = useAssistant(_assistant.id)
+  const { assistant, removeTopic, updateTopic, addTopic } = useAssistant(_assistant.id)
   const { t } = useTranslation()
   const { showTopicTime, topicPosition, enableTopicsGroup } = useSettings()
   const {
@@ -98,7 +100,8 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     const newTopic: Topic = {
       id: uuid(),
       name: t('topics.new'),
-      groupId: null,
+      assistantId: assistant.id,
+      groupId: undefined,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       messages: []
@@ -253,9 +256,26 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   const onDuplicateTopic = useCallback(
     async (topic: Topic, toAssistant: Assistant) => {
       await modelGenerating()
-      duplicateTopic(topic, toAssistant)
+      // 创建新主题并复制关键信息
+      const newTopic: Topic = {
+        ...topic,
+        id: uuid(),
+        assistantId: toAssistant.id,
+        name: `${topic.name} ${t('topic.copy')}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        messages: [] // 确保有messages字段
+      }
+
+      // 使用正确的action creator
+      store.dispatch(
+        addTopicAction({
+          assistantId: toAssistant.id,
+          topic: newTopic
+        })
+      )
     },
-    [duplicateTopic]
+    [t]
   )
   const onSwitchTopic = useCallback(
     async (topic: Topic) => {
