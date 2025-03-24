@@ -313,60 +313,50 @@ const Assistants: FC<AssistantsTabProps> = ({
         <>
           {enableAssistantGroup ? (
             <>
-              <ActionButtons>
-                <CreateButton onClick={onCreateAssistant}>
-                  <PlusOutlined />
-                  {t('chat.assistants.add.title')}
-                </CreateButton>
-                <GroupCreateButton onClick={handleCreateGroup}>
-                  <FolderAddOutlined />
-                  {t('assistants.group.add.title')}
-                </GroupCreateButton>
-              </ActionButtons>
-
-              <DragDropContext onDragEnd={handleGroupDragEnd}>
-                {/* 未分组的助手 */}
-                <UngroupedSection
-                  $enableGroup={true}
-                  className={dropTargetRef.current === null && dragging ? 'drag-over' : ''}
-                  onDragOver={(e) => handleAssistantDragOver(e, null)}
-                  onDragLeave={handleAssistantDragLeave}
-                  onDrop={(e) => handleAssistantDrop(e, null)}>
-                  <div className="section-title">{t('assistants.ungrouped')}</div>
-                  {safeMap(ungroupedAssistants, (assistant) => (
-                    <div
+              {/* 未分组的助手 */}
+              <UngroupedSection
+                $enableGroup={true}
+                className={dropTargetRef.current === null && dragging ? 'drag-over' : ''}
+                onDragOver={(e) => handleAssistantDragOver(e, null)}
+                onDragLeave={handleAssistantDragLeave}
+                onDrop={(e) => handleAssistantDrop(e, null)}>
+                <div className="section-title">{t('assistants.ungrouped')}</div>
+                {safeMap(ungroupedAssistants, (assistant) => (
+                  <div
+                    key={assistant.id}
+                    className="assistant-item-wrapper"
+                    draggable={true}
+                    onDragStart={(e) => handleAssistantDragStart(e, assistant.id)}
+                    onDragEnd={handleAssistantDragEnd}>
+                    <AssistantItem
                       key={assistant.id}
-                      className="assistant-item-wrapper"
-                      draggable={true}
-                      onDragStart={(e) => handleAssistantDragStart(e, assistant.id)}
-                      onDragEnd={handleAssistantDragEnd}>
-                      <AssistantItem
-                        key={assistant.id}
-                        assistant={assistant}
-                        isActive={assistant.id === activeAssistant?.id}
-                        onSwitch={setActiveAssistant}
-                        onDelete={(assistant) => {
-                          const remaining = assistants.filter((a) => a.id !== assistant.id)
-                          if (assistant.id === activeAssistant?.id) {
-                            const newActive = remaining[remaining.length - 1]
-                            newActive ? setActiveAssistant(newActive) : onCreateDefaultAssistant()
-                          }
-                          removeAssistant(assistant.id)
-                        }}
-                        addAgent={addAgent}
-                        addAssistant={addAssistant}
-                        onCreateDefaultAssistant={onCreateDefaultAssistant}
-                        onMoveToGroup={updateAssistantGroup}
-                        groups={groups}
-                      />
-                    </div>
-                  ))}
-                </UngroupedSection>
+                      assistant={assistant}
+                      isActive={assistant.id === activeAssistant?.id}
+                      onSwitch={setActiveAssistant}
+                      onDelete={(assistant) => {
+                        const remaining = assistants.filter((a) => a.id !== assistant.id)
+                        if (assistant.id === activeAssistant?.id) {
+                          const newActive = remaining[remaining.length - 1]
+                          newActive ? setActiveAssistant(newActive) : onCreateDefaultAssistant()
+                        }
+                        removeAssistant(assistant.id)
+                      }}
+                      addAgent={addAgent}
+                      addAssistant={addAssistant}
+                      onCreateDefaultAssistant={onCreateDefaultAssistant}
+                      onMoveToGroup={updateAssistantGroup}
+                      groups={groups}
+                    />
+                  </div>
+                ))}
+              </UngroupedSection>
 
-                <SectionDivider />
+              {/* 分割线 - 只有当未分组助手和有分组都存在时才显示 */}
+              {ungroupedAssistants.length > 0 && groups.length > 0 && <SectionDivider />}
 
-                {/* 分组助手 */}
-                <GroupsContainer>
+              {/* 分组助手 */}
+              <GroupsContainer>
+                <DragDropContext onDragEnd={handleGroupDragEnd}>
                   <Droppable droppableId="assistantGroups">
                     {(provided) => (
                       <div className="assistant-groups-container" ref={provided.innerRef} {...provided.droppableProps}>
@@ -375,8 +365,24 @@ const Assistants: FC<AssistantsTabProps> = ({
                       </div>
                     )}
                   </Droppable>
-                </GroupsContainer>
-              </DragDropContext>
+                </DragDropContext>
+              </GroupsContainer>
+
+              {/* 添加按钮 - 移到底部 */}
+              <ActionButtons>
+                {!dragging && (
+                  <>
+                    <CreateButton onClick={onCreateAssistant}>
+                      <PlusOutlined />
+                      {t('chat.assistants.add.title')}
+                    </CreateButton>
+                    <GroupCreateButton onClick={handleCreateGroup}>
+                      <FolderAddOutlined />
+                      {t('assistants.group.add.title')}
+                    </GroupCreateButton>
+                  </>
+                )}
+              </ActionButtons>
             </>
           ) : (
             <div className="assistants-list">
@@ -444,8 +450,120 @@ const Assistants: FC<AssistantsTabProps> = ({
 
 export default Assistants
 
+const Container = styled.div`
+  height: 100%;
+  overflow-y: auto;
+  padding: 0 16px 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+
+  /* 解决拖拽时的白边问题 */
+  [draggable] {
+    -webkit-user-drag: element;
+    user-select: none;
+  }
+`
+
+const GroupsContainer = styled.div`
+  flex: 1;
+  overflow-y: auto;
+
+  .assistant-groups-container {
+    display: flex;
+    flex-direction: column;
+  }
+`
+
+const GroupContainer = styled.div<{ isDragging?: boolean }>`
+  margin-bottom: 8px;
+  position: relative;
+  border-radius: 6px;
+  background-color: var(--color-bg-1);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  transition: all 0.2s ease;
+
+  &.drag-over {
+    background-color: var(--color-bg-3);
+    border-radius: 6px;
+    outline: 2px solid var(--color-primary);
+  }
+
+  &.dragging {
+    opacity: 0.8;
+  }
+`
+
+const GroupHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg-2);
+  cursor: pointer;
+  &:hover {
+    .group-actions {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+`
+
+const GroupTitle = styled.div`
+  flex: 1;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  color: var(--color-text-1);
+  font-size: 14px;
+`
+
+const GroupIcon = styled.span`
+  margin-right: 6px;
+  font-size: 12px;
+  color: var(--color-text-3);
+`
+
+const GroupCount = styled.span`
+  margin-left: 6px;
+  color: var(--color-text-3);
+  font-size: 12px;
+  font-weight: normal;
+`
+
+const GroupActions = styled.div`
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s;
+  display: flex;
+  gap: 6px;
+
+  .drag-handle {
+    cursor: grab;
+    display: flex;
+    align-items: center;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  .anticon {
+    cursor: pointer;
+    color: var(--color-text-3);
+    &:hover {
+      color: var(--color-text-1);
+    }
+  }
+  .delete-icon:hover {
+    color: var(--color-error);
+  }
+`
+
 const GroupContent = styled.div`
-  padding-left: 20px;
+  padding: 4px 8px;
   overflow: hidden;
   &.expanded {
     display: block;
@@ -455,7 +573,7 @@ const GroupContent = styled.div`
   }
 
   .empty-group {
-    padding: 8px 12px;
+    padding: 6px 10px;
     color: var(--color-text-3);
     font-size: 13px;
   }
@@ -463,17 +581,17 @@ const GroupContent = styled.div`
 
 const ActionButtons = styled.div`
   display: flex;
-  gap: 10px;
-  padding: 10px;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  gap: 8px;
+  padding: 8px 0;
+  margin-top: 8px;
+  margin-bottom: 8px;
   button {
     flex: 1;
   }
 `
 
 const CreateButton = styled.button`
-  height: 34px;
+  height: 32px;
   border-radius: 6px;
   border: none;
   background-color: var(--color-primary);
@@ -484,6 +602,7 @@ const CreateButton = styled.button`
   justify-content: center;
   gap: 6px;
   transition: all 0.3s;
+  font-size: 14px;
   &:hover {
     background-color: #05d47b;
     transform: translateY(-1px);
@@ -511,9 +630,9 @@ const AssistantName = styled.div`
 `
 
 const AddAssistantItem = styled.div`
-  padding: 12px 16px;
-  margin-bottom: 8px;
-  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  border-radius: 6px;
   border: 1px dashed var(--color-border);
   background-color: var(--color-bg-2);
   cursor: pointer;
@@ -528,17 +647,17 @@ const AddAssistantItem = styled.div`
 `
 
 const UngroupedSection = styled.div<{ $enableGroup: boolean }>`
-  padding: 8px;
-  border-radius: 8px;
-  min-height: 60px;
+  padding: 6px;
+  border-radius: 6px;
+  min-height: 40px;
   overflow-y: auto;
   max-height: ${(props) => (props.$enableGroup ? '300px' : 'none')};
 
   .section-title {
     font-size: 13px;
     color: var(--color-text-3);
-    margin: 5px 8px;
-    padding-left: 8px;
+    margin: 4px 6px;
+    padding-left: 4px;
   }
 
   &.drag-over {
@@ -557,114 +676,4 @@ const SectionDivider = styled.div`
   height: 1px;
   background-color: var(--color-border);
   margin: 8px 0;
-`
-
-const Container = styled.div`
-  height: 100%;
-  overflow-y: auto;
-  padding: 0 16px 16px;
-  box-sizing: border-box;
-
-  /* 解决拖拽时的白边问题 */
-  [draggable] {
-    -webkit-user-drag: element;
-    user-select: none;
-  }
-`
-
-const GroupsContainer = styled.div`
-  flex: 1;
-  overflow-y: auto;
-
-  .assistant-groups-container {
-    display: flex;
-    flex-direction: column;
-  }
-`
-
-const GroupContainer = styled.div<{ isDragging?: boolean }>`
-  margin-bottom: 4px;
-  position: relative;
-  border-radius: 6px;
-  background-color: var(--color-bg-1);
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  transition: all 0.2s ease;
-
-  &.drag-over {
-    background-color: var(--color-bg-3);
-    border-radius: 6px;
-    outline: 2px solid var(--color-primary);
-  }
-
-  &.dragging {
-    opacity: 0.8;
-  }
-`
-
-const GroupHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-bg-2);
-  cursor: pointer;
-  &:hover {
-    .group-actions {
-      visibility: visible;
-      opacity: 1;
-    }
-  }
-`
-
-const GroupTitle = styled.div`
-  flex: 1;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  color: var(--color-text-1);
-  font-size: 14px;
-`
-
-const GroupIcon = styled.span`
-  margin-right: 8px;
-  font-size: 14px;
-  color: var(--color-text-3);
-`
-
-const GroupCount = styled.span`
-  margin-left: 8px;
-  color: var(--color-text-3);
-  font-size: 12px;
-  font-weight: normal;
-`
-
-const GroupActions = styled.div`
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s;
-  display: flex;
-  gap: 8px;
-
-  .drag-handle {
-    cursor: grab;
-    display: flex;
-    align-items: center;
-
-    &:active {
-      cursor: grabbing;
-    }
-  }
-
-  .anticon {
-    cursor: pointer;
-    color: var(--color-text-3);
-    &:hover {
-      color: var(--color-text-1);
-    }
-  }
-  .delete-icon:hover {
-    color: var(--color-error);
-  }
 `
