@@ -374,7 +374,7 @@ const Assistants: FC<AssistantsTabProps> = ({
                   <>
                     <CreateButton onClick={onCreateAssistant}>
                       <PlusOutlined />
-                      {t('chat.assistants.add.title')}
+                      {t('assistants.add.title')}
                     </CreateButton>
                     <GroupCreateButton onClick={handleCreateGroup}>
                       <FolderAddOutlined />
@@ -410,7 +410,7 @@ const Assistants: FC<AssistantsTabProps> = ({
               <AddAssistantItem onClick={onCreateAssistant}>
                 <AssistantName>
                   <PlusOutlined style={{ fontSize: '16px', marginRight: '6px' }} />
-                  {t('chat.assistants.add.title')}
+                  {t('assistants.add.title')}
                 </AssistantName>
               </AddAssistantItem>
             </div>
