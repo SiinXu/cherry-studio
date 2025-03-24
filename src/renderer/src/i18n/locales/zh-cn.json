@@ -1210,6 +1210,8 @@
       "delete": "删除话题",
       "duplicate_to": "复制到",
       "move_to_group": "移动到分组",
+      "no_group": "无分组",
+      "new": "新建话题",
       "group": {
         "add": "添加分组",
         "delete": "删除分组",

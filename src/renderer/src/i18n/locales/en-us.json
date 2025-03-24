@@ -1210,6 +1210,8 @@
       "delete": "Delete Topic",
       "duplicate_to": "Duplicate to",
       "move_to_group": "Move to Group",
+      "no_group": "No Group",
+      "new": "New Topic",
       "group": {
         "add": "Add Group",
         "delete": "Delete Group",
