@@ -1,9 +1,10 @@
 import FileManager from '@renderer/services/FileManager'
 import { FileType } from '@renderer/types'
-import { Upload as AntdUpload, UploadFile } from 'antd'
+import { Upload } from '../../../../../../components'
+import { UploadFile } from 'antd'
 import { isEmpty } from 'lodash'
 import { FC } from 'react'
-import styled from 'styled-components'
+import './AttachmentPreview.css'
 
 interface Props {
   files: FileType[]
@@ -16,8 +17,9 @@ const AttachmentPreview: FC<Props> = ({ files, setFiles }) => {
   }
 
   return (
-    <ContentContainer>
+    <div className="rb-attachment-preview">
       <Upload
+        className="rb-attachment-upload"
         listType={files.length > 20 ? 'text' : 'picture-card'}
         fileList={files.map(
           (file) =>
@@ -30,21 +32,8 @@ const AttachmentPreview: FC<Props> = ({ files, setFiles }) => {
         )}
         onRemove={(item) => setFiles(files.filter((file) => item.uid !== file.id))}
       />
-    </ContentContainer>
+    </div>
   )
 }
-
-const ContentContainer = styled.div`
-  max-height: 40vh;
-  overflow-y: auto;
-  width: 100%;
-  padding: 10px 15px 0;
-`
-
-const Upload = styled(AntdUpload)`
-  .ant-upload-list-item {
-    background-color: var(--color-background);
-  }
-`
 
 export default AttachmentPreview

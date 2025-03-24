@@ -1,0 +1,10 @@
+.rb-attachment-preview {
+  max-height: 40vh;
+  overflow-y: auto;
+  width: 100%;
+  padding: 10px 15px 0;
+}
+
+.rb-attachment-upload .ant-upload-list-item {
+  background-color: var(--color-background);
+} 

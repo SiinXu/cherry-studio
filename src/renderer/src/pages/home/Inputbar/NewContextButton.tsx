@@ -1,25 +1,27 @@
-import { PicCenterOutlined } from '@ant-design/icons'
-import { useShortcut, useShortcutDisplay } from '@renderer/hooks/useShortcuts'
-import { Tooltip } from 'antd'
+import { PartitionOutlined } from '@ant-design/icons'
+import { Button, Tooltip } from '../../../../../../components'
 import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 
 interface Props {
   onNewContext: () => void
-  ToolbarButton: any
+  disabled?: boolean
+  buttonClass?: string
 }
 
-const NewContextButton: FC<Props> = ({ onNewContext, ToolbarButton }) => {
-  const newContextShortcut = useShortcutDisplay('toggle_new_context')
+const NewContextButton: FC<Props> = ({ onNewContext, disabled, buttonClass }) => {
   const { t } = useTranslation()
 
-  useShortcut('toggle_new_context', onNewContext)
-
   return (
-    <Tooltip placement="top" title={t('chat.input.new.context', { Command: newContextShortcut })} arrow>
-      <ToolbarButton type="text" onClick={onNewContext}>
-        <PicCenterOutlined />
-      </ToolbarButton>
+    <Tooltip placement="top" title={t('chat.input.new_context')}>
+      <Button
+        className={buttonClass}
+        type="text"
+        onClick={onNewContext}
+        disabled={disabled}
+      >
+        <PartitionOutlined />
+      </Button>
     </Tooltip>
   )
 }

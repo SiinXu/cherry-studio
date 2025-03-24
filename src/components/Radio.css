@@ -1,0 +1,168 @@
+.rb-radio {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  margin-right: 16px;
+  position: relative;
+  font-size: 14px;
+  user-select: none;
+}
+
+.rb-radio-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.rb-radio-inner {
+  position: relative;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #d0d5dd;
+  border-radius: 50%;
+  background-color: #fff;
+  transition: all 0.2s;
+}
+
+.rb-radio-inner::after {
+  content: '';
+  position: absolute;
+  opacity: 0;
+  transform: scale(0);
+  border-radius: 50%;
+  background-color: #fff;
+  transition: all 0.2s;
+}
+
+/* 已选中状态 */
+.rb-radio-input:checked + .rb-radio-inner {
+  background-color: #4a86e8;
+  border-color: #4a86e8;
+}
+
+.rb-radio-input:checked + .rb-radio-inner::after {
+  opacity: 1;
+  transform: scale(1);
+  width: 6px;
+  height: 6px;
+  left: 4px;
+  top: 4px;
+}
+
+/* 尺寸 */
+.rb-radio-sm .rb-radio-inner {
+  width: 14px;
+  height: 14px;
+}
+
+.rb-radio-sm .rb-radio-inner::after {
+  width: 4px;
+  height: 4px;
+  left: 4px;
+  top: 4px;
+}
+
+.rb-radio-sm .rb-radio-label {
+  font-size: 12px;
+}
+
+.rb-radio-md .rb-radio-inner {
+  width: 16px;
+  height: 16px;
+}
+
+.rb-radio-md .rb-radio-inner::after {
+  width: 6px;
+  height: 6px;
+  left: 4px;
+  top: 4px;
+}
+
+.rb-radio-md .rb-radio-label {
+  font-size: 14px;
+}
+
+.rb-radio-lg .rb-radio-inner {
+  width: 20px;
+  height: 20px;
+}
+
+.rb-radio-lg .rb-radio-inner::after {
+  width: 8px;
+  height: 8px;
+  left: 5px;
+  top: 5px;
+}
+
+.rb-radio-lg .rb-radio-label {
+  font-size: 16px;
+}
+
+/* 颜色 */
+.rb-radio-primary .rb-radio-input:checked + .rb-radio-inner {
+  background-color: #4a86e8;
+  border-color: #4a86e8;
+}
+
+.rb-radio-secondary .rb-radio-input:checked + .rb-radio-inner {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.rb-radio-success .rb-radio-input:checked + .rb-radio-inner {
+  background-color: #4caf50;
+  border-color: #4caf50;
+}
+
+.rb-radio-error .rb-radio-input:checked + .rb-radio-inner {
+  background-color: #f44336;
+  border-color: #f44336;
+}
+
+.rb-radio-warning .rb-radio-input:checked + .rb-radio-inner {
+  background-color: #ff9800;
+  border-color: #ff9800;
+}
+
+.rb-radio-info .rb-radio-input:checked + .rb-radio-inner {
+  background-color: #2196f3;
+  border-color: #2196f3;
+}
+
+/* 禁用状态 */
+.rb-radio-disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.rb-radio-disabled .rb-radio-inner {
+  background-color: #f5f5f5;
+  border-color: #d9d9d9;
+}
+
+.rb-radio-disabled .rb-radio-label {
+  color: #999;
+}
+
+/* 标签间距 */
+.rb-radio-label {
+  margin-left: 8px;
+  line-height: 1;
+}
+
+/* Radio Group */
+.rb-radio-group {
+  display: flex;
+}
+
+.rb-radio-group-vertical {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rb-radio-group-horizontal {
+  flex-direction: row;
+  gap: 16px;
+} 

@@ -4,9 +4,9 @@ import store, { persistor } from '@renderer/store'
 import { Provider } from 'react-redux'
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import { PersistGate } from 'redux-persist/integration/react'
+import { Layout } from '../../../src/components'
 
 import Sidebar from './components/app/Sidebar'
-import TopViewContainer from './components/TopView'
 import AntdProvider from './context/AntdProvider'
 import StyleSheetManager from './context/StyleSheetManager'
 import { SyntaxHighlighterProvider } from './context/SyntaxHighlighterProvider'
@@ -21,6 +21,7 @@ import KnowledgePage from './pages/knowledge/KnowledgePage'
 import PaintingsPage from './pages/paintings/PaintingsPage'
 import SettingsPage from './pages/settings/SettingsPage'
 import TranslatePage from './pages/translate/TranslatePage'
+import './App.css'
 
 function App(): JSX.Element {
   return (
@@ -30,23 +31,25 @@ function App(): JSX.Element {
           <AntdProvider>
             <SyntaxHighlighterProvider>
               <PersistGate loading={null} persistor={persistor}>
-                <TopViewContainer>
+                <Layout className="rb-app">
                   <HashRouter>
                     <NavigationHandler />
                     <Sidebar />
-                    <Routes>
-                      <Route path="/" element={<HomePage />} />
-                      <Route path="/agents" element={<AgentsPage />} />
-                      <Route path="/paintings" element={<PaintingsPage />} />
-                      <Route path="/translate" element={<TranslatePage />} />
-                      <Route path="/files" element={<FilesPage />} />
-                      <Route path="/knowledge" element={<KnowledgePage />} />
-                      <Route path="/apps" element={<AppsPage />} />
-                      <Route path="/settings/*" element={<SettingsPage />} />
-                      <Route path="/demo" element={<DemoPage />} />
-                    </Routes>
+                    <Layout.Main className="rb-app-content">
+                      <Routes>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/agents" element={<AgentsPage />} />
+                        <Route path="/paintings" element={<PaintingsPage />} />
+                        <Route path="/translate" element={<TranslatePage />} />
+                        <Route path="/files" element={<FilesPage />} />
+                        <Route path="/knowledge" element={<KnowledgePage />} />
+                        <Route path="/apps" element={<AppsPage />} />
+                        <Route path="/settings/*" element={<SettingsPage />} />
+                        <Route path="/demo" element={<DemoPage />} />
+                      </Routes>
+                    </Layout.Main>
                   </HashRouter>
-                </TopViewContainer>
+                </Layout>
               </PersistGate>
             </SyntaxHighlighterProvider>
           </AntdProvider>

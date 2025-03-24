@@ -1,0 +1,70 @@
+.rb-home-tabs {
+  display: flex;
+  flex-direction: column;
+  max-width: var(--assistants-width);
+  min-width: var(--assistants-width);
+  height: calc(100vh - var(--navbar-height));
+  background-color: var(--color-background);
+  overflow: hidden;
+  transition: all 0.2s ease-in-out;
+}
+
+.rb-home-tabs.collapsed {
+  width: 0;
+  min-width: 0;
+  border-left: none;
+}
+
+.rb-home-tabs-nav {
+  padding: 10px;
+  border-bottom: 0.5px solid var(--color-border);
+}
+
+.rb-home-tabs-nav .rb-tabs-nav-list {
+  gap: 2px;
+}
+
+.rb-home-tabs-nav .rb-tabs-tab {
+  margin: 0;
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: var(--list-item-border-radius);
+  border: 0.5px solid transparent;
+  transition: none;
+  background-color: transparent;
+  user-select: none;
+}
+
+.rb-home-tabs-nav .rb-tabs-tab-active {
+  background-color: var(--color-background-soft);
+  border-color: var(--color-border);
+}
+
+.rb-home-tabs-nav .rb-tabs-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rb-home-tabs-nav .rb-tabs-tab .iconfont {
+  font-size: 13px;
+  margin-left: -2px;
+}
+
+.rb-home-tabs-nav .rb-tabs-tab .anticon-setting {
+  font-size: 12px;
+}
+
+.rb-home-tabs-nav .rb-tabs-tab .icon-business-smart-assistant {
+  margin-right: -2px;
+}
+
+.rb-home-tabs-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.rb-home-tabs-content::-webkit-scrollbar {
+  display: none;
+} 

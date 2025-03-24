@@ -1,0 +1,87 @@
+/* 布局相关样式 */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-content {
+  display: flex;
+  flex-grow: 1;
+  margin-top: 64px; /* 导航栏高度 */
+}
+
+.app-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+}
+
+.app-main {
+  flex-grow: 1;
+  padding: 24px;
+}
+
+/* 导航栏样式 */
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.navbar-title {
+  margin-left: 12px;
+  font-weight: 500;
+  font-size: 1.25rem;
+}
+
+.navbar-spacer {
+  flex-grow: 1;
+}
+
+.navbar-login-btn {
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* 表格样式 */
+.table-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.table-pagination {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 表单样式 */
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-row > * {
+  flex: 1;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+/* 卡片样式 */
+.dashboard-card,
+.project-form-card {
+  margin-top: 24px;
+}
+
+.dashboard-alert {
+  margin-bottom: 24px;
+} 

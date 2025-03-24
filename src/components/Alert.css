@@ -1,0 +1,159 @@
+.rb-alert {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+/* 类型变体 */
+.rb-alert-info {
+  background-color: #e6f7ff;
+  border: 1px solid #91d5ff;
+  color: #1890ff;
+}
+
+.rb-alert-success {
+  background-color: #f6ffed;
+  border: 1px solid #b7eb8f;
+  color: #52c41a;
+}
+
+.rb-alert-warning {
+  background-color: #fffbe6;
+  border: 1px solid #ffe58f;
+  color: #faad14;
+}
+
+.rb-alert-error {
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  color: #f5222d;
+}
+
+/* 内容 */
+.rb-alert-content {
+  flex: 1;
+}
+
+.rb-alert-title {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.rb-alert-message {
+  color: rgba(0, 0, 0, 0.65);
+}
+
+/* 图标 */
+.rb-alert-icon {
+  margin-right: 8px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+}
+
+/* 关闭按钮 */
+.rb-alert-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.45);
+  padding: 4px;
+  border-radius: 50%;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.rb-alert-close-btn:hover {
+  color: rgba(0, 0, 0, 0.75);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* 无标题时的消息样式 */
+.rb-alert:not(:has(.rb-alert-title)) .rb-alert-message {
+  color: inherit;
+}
+
+/* 带描述的警告提示 */
+.rb-alert-with-description {
+  padding: 16px;
+  align-items: center;
+}
+
+.rb-alert-with-description .rb-alert-icon {
+  font-size: 24px;
+  margin-right: 16px;
+}
+
+.rb-alert-with-description .rb-alert-title {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+/* 动画效果 */
+@keyframes rb-alert-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rb-alert {
+  animation: rb-alert-fade-in 0.3s ease-out;
+}
+
+/* 修复关闭按钮样式 */
+.rb-alert-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  padding: 0 4px;
+  margin-left: 12px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.rb-alert-close:hover {
+  opacity: 1;
+}
+
+/* 带描述的样式 */
+.rb-alert-with-description {
+  padding: 16px;
+}
+
+.rb-alert-with-description .rb-alert-message {
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.rb-alert-with-description .rb-alert-description {
+  color: inherit;
+  opacity: 0.85;
+}
+
+/* Banner样式 */
+.rb-alert-banner {
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  width: 100%;
+  margin-bottom: 0;
+} 

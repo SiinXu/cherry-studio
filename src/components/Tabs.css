@@ -1,0 +1,268 @@
+.rb-tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 水平/垂直方向 */
+.rb-tabs-horizontal .rb-tabs-list {
+  display: flex;
+  flex-direction: row;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.rb-tabs-vertical {
+  flex-direction: row;
+}
+
+.rb-tabs-vertical .rb-tabs-list {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #e0e0e0;
+  min-width: 160px;
+}
+
+.rb-tabs-vertical .rb-tabs-content {
+  flex: 1;
+  padding-left: 24px;
+}
+
+/* 居中 */
+.rb-tabs-centered .rb-tabs-list {
+  justify-content: center;
+}
+
+/* 全宽 */
+.rb-tabs-fullwidth .rb-tabs-list {
+  width: 100%;
+}
+
+.rb-tabs-fullwidth .rb-tab {
+  flex: 1;
+}
+
+/* 变体风格 */
+.rb-tabs-default .rb-tab {
+  padding: 12px 16px;
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #666;
+}
+
+.rb-tabs-default .rb-tab-active {
+  color: #4a86e8;
+  border-bottom-color: #4a86e8;
+}
+
+.rb-tabs-contained .rb-tab {
+  padding: 10px 16px;
+  background-color: #f5f5f5;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  margin-right: 2px;
+  color: #666;
+}
+
+.rb-tabs-contained .rb-tab-active {
+  background-color: #fff;
+  border-color: #e0e0e0;
+  color: #4a86e8;
+}
+
+.rb-tabs-pill .rb-tabs-list {
+  background-color: #f5f5f5;
+  border-radius: 50px;
+  padding: 4px;
+  border: none;
+}
+
+.rb-tabs-pill .rb-tab {
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: none;
+  color: #666;
+}
+
+.rb-tabs-pill .rb-tab-active {
+  background-color: #fff;
+  color: #4a86e8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 标签 */
+.rb-tab {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.rb-tab:hover:not(.rb-tab-disabled) {
+  color: #4a86e8;
+}
+
+.rb-tab-icon {
+  margin-right: 8px;
+}
+
+.rb-tab-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rb-tabs-content {
+  padding-top: 16px;
+}
+
+.rb-tab-panel {
+  width: 100%;
+}
+
+/* 垂直方向特殊样式 */
+.rb-tabs-vertical .rb-tabs-default .rb-tab {
+  border-bottom: none;
+  border-right: 2px solid transparent;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+.rb-tabs-vertical .rb-tabs-default .rb-tab-active {
+  border-right-color: #4a86e8;
+}
+
+.rb-tabs-vertical .rb-tabs-contained .rb-tab {
+  border-radius: 4px 0 0 4px;
+  border-right: none;
+  border-bottom: 1px solid transparent;
+  margin-right: 0;
+  margin-bottom: 2px;
+}
+
+/* 选项卡头部 */
+.rb-tabs-nav-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.rb-tabs-nav {
+  position: relative;
+  display: flex;
+  white-space: nowrap;
+  transition: transform 0.3s;
+}
+
+.rb-tabs-tab {
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+}
+
+.rb-tabs-tab-active {
+  color: #4a86e8;
+  font-weight: 500;
+}
+
+.rb-tabs-tab-disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+/* 下划线指示器 */
+.rb-tabs-ink-bar {
+  position: absolute;
+  bottom: 0;
+  height: 2px;
+  background-color: #4a86e8;
+  transition: all 0.3s;
+}
+
+/* 选项卡内容 */
+.rb-tabs-content {
+  flex-grow: 1;
+  padding-top: 16px;
+}
+
+.rb-tabs-tabpane {
+  transition: opacity 0.3s;
+}
+
+.rb-tabs-tabpane-inactive {
+  display: none;
+  opacity: 0;
+}
+
+.rb-tabs-tabpane-active {
+  display: block;
+  opacity: 1;
+}
+
+/* 线型选项卡 */
+.rb-tabs-line .rb-tabs-nav {
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.rb-tabs-line .rb-tabs-tab {
+  margin-right: 24px;
+  margin-bottom: -1px;
+}
+
+/* 卡片型选项卡 */
+.rb-tabs-card .rb-tabs-nav {
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.rb-tabs-card .rb-tabs-tab {
+  margin-right: 2px;
+  border: 1px solid #e8e8e8;
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+  background-color: #f5f5f5;
+}
+
+.rb-tabs-card .rb-tabs-tab-active {
+  background-color: #fff;
+  border-bottom: 1px solid #fff;
+  margin-bottom: -1px;
+}
+
+/* 可编辑卡片型选项卡 */
+.rb-tabs-editable-card .rb-tabs-nav {
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.rb-tabs-editable-card .rb-tabs-tab {
+  margin-right: 2px;
+  padding: 8px 16px 8px 12px;
+  border: 1px solid #e8e8e8;
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+  background-color: #f5f5f5;
+}
+
+.rb-tabs-editable-card .rb-tabs-tab-active {
+  background-color: #fff;
+  border-bottom: 1px solid #fff;
+  margin-bottom: -1px;
+}
+
+/* 尺寸变体 */
+.rb-tabs-sm .rb-tabs-tab {
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+.rb-tabs-md .rb-tabs-tab {
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+.rb-tabs-lg .rb-tabs-tab {
+  padding: 16px 24px;
+  font-size: 16px;
+} 

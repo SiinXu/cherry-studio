@@ -1,0 +1,129 @@
+/* 表单 */
+.rb-form {
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+/* 垂直布局 */
+.rb-form-vertical .rb-form-item {
+  margin-bottom: 16px;
+}
+
+/* 水平布局 */
+.rb-form-horizontal .rb-form-item {
+  display: flex;
+  margin-bottom: 16px;
+}
+
+.rb-form-item-label-horizontal {
+  flex: 0 0 120px;
+  margin-bottom: 0;
+  padding-right: 12px;
+  text-align: right;
+}
+
+.rb-form-item-control-horizontal {
+  flex: 1;
+}
+
+/* 内联布局 */
+.rb-form-inline {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.rb-form-inline .rb-form-item {
+  margin-right: 16px;
+  margin-bottom: 16px;
+  flex-grow: 0;
+}
+
+/* 表单项 */
+.rb-form-item {
+  position: relative;
+}
+
+.rb-form-item-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.rb-form-item-required {
+  color: #f44336;
+  margin-left: 4px;
+}
+
+.rb-form-item-control {
+  position: relative;
+}
+
+.rb-form-item-error {
+  color: #f44336;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.rb-form-item-help {
+  color: #666;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.rb-form-item-extra {
+  color: #999;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+/* 表单项状态 */
+.rb-form-item-error input, 
+.rb-form-item-error textarea, 
+.rb-form-item-error .rb-select {
+  border-color: #f44336;
+}
+
+.rb-form-item-error input:focus, 
+.rb-form-item-error textarea:focus, 
+.rb-form-item-error .rb-select:focus {
+  box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2);
+}
+
+.rb-form-item-success input, 
+.rb-form-item-success textarea, 
+.rb-form-item-success .rb-select {
+  border-color: #4caf50;
+}
+
+.rb-form-item-success input:focus, 
+.rb-form-item-success textarea:focus, 
+.rb-form-item-success .rb-select:focus {
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.rb-form-item-warning input, 
+.rb-form-item-warning textarea, 
+.rb-form-item-warning .rb-select {
+  border-color: #ff9800;
+}
+
+.rb-form-item-warning input:focus, 
+.rb-form-item-warning textarea:focus, 
+.rb-form-item-warning .rb-select:focus {
+  box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.2);
+}
+
+/* 禁用表单 */
+.rb-form-disabled input,
+.rb-form-disabled textarea,
+.rb-form-disabled select,
+.rb-form-disabled .rb-select,
+.rb-form-disabled .rb-checkbox,
+.rb-form-disabled .rb-radio {
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+  color: #999;
+}

@@ -4,10 +4,10 @@ import { useSettings } from '@renderer/hooks/useSettings'
 import { fetchTranslate } from '@renderer/services/ApiService'
 import { getDefaultTopic, getDefaultTranslateAssistant } from '@renderer/services/AssistantService'
 import { getUserMessage } from '@renderer/services/MessagesService'
-import { Button, Tooltip } from 'antd'
+import { Button, Tooltip } from '../../../../../components'
 import { FC, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import styled from 'styled-components'
+import { classNames } from '@renderer/utils'
 
 interface Props {
   text?: string
@@ -15,9 +15,17 @@ interface Props {
   disabled?: boolean
   style?: React.CSSProperties
   isLoading?: boolean
+  buttonClass?: string
 }
 
-const TranslateButton: FC<Props> = ({ text, onTranslated, disabled, style, isLoading }) => {
+const TranslateButton: FC<Props> = ({ 
+  text, 
+  onTranslated, 
+  disabled, 
+  style, 
+  isLoading,
+  buttonClass = 'rb-inputbar-tool-btn'
+}) => {
   const { t } = useTranslation()
   const { translateModel } = useDefaultModel()
   const [isTranslating, setIsTranslating] = useState(false)
@@ -81,47 +89,17 @@ const TranslateButton: FC<Props> = ({ text, onTranslated, disabled, style, isLoa
       placement="top"
       title={t('chat.input.translate', { target_language: t(`languages.${targetLanguage.toString()}`) })}
       arrow>
-      <ToolbarButton onClick={handleTranslate} disabled={disabled || isTranslating} style={style} type="text">
+      <Button 
+        onClick={handleTranslate} 
+        disabled={disabled || isTranslating} 
+        style={style} 
+        type="text"
+        className={buttonClass}
+      >
         {isTranslating ? <LoadingOutlined spin /> : <TranslationOutlined />}
-      </ToolbarButton>
+      </Button>
     </Tooltip>
   )
 }
-
-const ToolbarButton = styled(Button)`
-  min-width: 30px;
-  height: 30px;
-  font-size: 16px;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-  color: var(--color-icon);
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  padding: 0;
-  &.anticon,
-  &.iconfont {
-    transition: all 0.3s ease;
-    color: var(--color-icon);
-  }
-  &:hover {
-    background-color: var(--color-background-soft);
-    .anticon,
-    .iconfont {
-      color: var(--color-text-1);
-    }
-  }
-  &.active {
-    background-color: var(--color-primary) !important;
-    .anticon,
-    .iconfont {
-      color: var(--color-white-soft);
-    }
-    &:hover {
-      background-color: var(--color-primary);
-    }
-  }
-`
 
 export default TranslateButton

@@ -1,0 +1,64 @@
+.rb-messages {
+  display: flex;
+  flex-direction: column-reverse;
+  padding: 10px 0 20px;
+  overflow-x: hidden;
+  background-color: var(--color-background);
+}
+
+.rb-messages.right {
+  border-right: 1px solid var(--color-border);
+}
+
+.rb-messages-layout {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.rb-messages-scroll {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.rb-messages-loader {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  width: 100%;
+  background: var(--color-background);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.rb-messages-loader.loading {
+  opacity: 1;
+}
+
+/* Scrollbar styles */
+.rb-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.rb-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.rb-messages::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.rb-messages::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-hover);
+}
+
+@media (max-width: 768px) {
+  .rb-messages {
+    padding: 10px 0;
+  }
+  
+  .rb-messages.right {
+    border-right: none;
+  }
+} 

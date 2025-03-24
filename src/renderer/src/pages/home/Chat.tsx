@@ -2,9 +2,9 @@ import { useAssistant } from '@renderer/hooks/useAssistant'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { useShowTopics } from '@renderer/hooks/useStore'
 import { Assistant, Topic } from '@renderer/types'
-import { Flex } from 'antd'
 import { FC } from 'react'
-import styled from 'styled-components'
+import { Layout } from '../../../../../components'
+import './Chat.css'
 
 import Inputbar from './Inputbar/Inputbar'
 import Messages from './Messages/Messages'
@@ -23,8 +23,8 @@ const Chat: FC<Props> = (props) => {
   const { showTopics } = useShowTopics()
 
   return (
-    <Container id="chat" className={messageStyle}>
-      <Main id="chat-main" vertical flex={1} justify="space-between">
+    <Layout.Content className={`rb-chat ${messageStyle}`}>
+      <div className="rb-chat-main">
         <Messages
           key={props.activeTopic.id}
           assistant={assistant}
@@ -32,7 +32,7 @@ const Chat: FC<Props> = (props) => {
           setActiveTopic={props.setActiveTopic}
         />
         <Inputbar assistant={assistant} setActiveTopic={props.setActiveTopic} topic={props.activeTopic} />
-      </Main>
+      </div>
       {topicPosition === 'right' && showTopics && (
         <Tabs
           activeAssistant={assistant}
@@ -42,20 +42,8 @@ const Chat: FC<Props> = (props) => {
           position="right"
         />
       )}
-    </Container>
+    </Layout.Content>
   )
 }
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: row;
-  height: 100%;
-  flex: 1;
-  justify-content: space-between;
-`
-
-const Main = styled(Flex)`
-  height: calc(100vh - var(--navbar-height));
-`
 
 export default Chat

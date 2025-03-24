@@ -1,0 +1,82 @@
+.rb-navbar {
+  min-width: 100%;
+  display: flex;
+  flex-direction: row;
+  min-height: var(--navbar-height);
+  max-height: var(--navbar-height);
+  margin-left: var(--sidebar-width-negative);
+  padding-left: var(--sidebar-width);
+  -webkit-app-region: drag;
+  background-color: var(--color-background);
+}
+
+.rb-navbar-container {
+  display: flex;
+  width: 100%;
+  align-items: center;
+}
+
+.rb-navbar-left {
+  min-width: var(--assistants-width);
+  padding: 0 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-weight: bold;
+  color: var(--color-text-1);
+}
+
+.rb-navbar-right {
+  min-width: var(--topic-list-width);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.rb-navbar-icon {
+  -webkit-app-region: none;
+  border-radius: 8px;
+  height: 30px;
+  padding: 0 7px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.rb-navbar-icon .iconfont {
+  font-size: 18px;
+  color: var(--color-icon);
+}
+
+.rb-navbar-icon .iconfont.icon-a-addchat,
+.rb-navbar-icon .iconfont.icon-a-darkmode,
+.rb-navbar-icon .iconfont.icon-appstore {
+  font-size: 20px;
+}
+
+.rb-navbar-icon .anticon {
+  color: var(--color-icon);
+  font-size: 16px;
+}
+
+.rb-navbar-icon:hover {
+  background-color: var(--color-background-mute);
+  color: var(--color-icon-white);
+}
+
+.rb-navbar-narrow-icon {
+  display: flex;
+}
+
+@media (max-width: 1000px) {
+  .rb-navbar-narrow-icon {
+    display: none;
+  }
+}
+
+.home-navbar {
+  border-bottom: 1px solid var(--color-border);
+} 

@@ -1,0 +1,146 @@
+.rb-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.rb-modal-content {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 100%;
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 尺寸 */
+.rb-modal-sm {
+  width: 400px;
+}
+
+.rb-modal-md {
+  width: 600px;
+}
+
+.rb-modal-lg {
+  width: 800px;
+}
+
+.rb-modal-fullscreen {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  max-height: 100vh;
+}
+
+/* 动画 */
+.rb-modal-fade {
+  animation: rb-modal-fade-in 0.3s ease;
+}
+
+.rb-modal-slide {
+  animation: rb-modal-slide-in 0.3s ease;
+}
+
+.rb-modal-zoom {
+  animation: rb-modal-zoom-in 0.3s ease;
+}
+
+@keyframes rb-modal-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rb-modal-slide-in {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes rb-modal-zoom-in {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.rb-modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rb-modal-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.rb-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  color: #666;
+}
+
+.rb-modal-close:hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.rb-modal-body {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.rb-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.rb-modal-content-wrapper {
+  padding: 0;
+}
+
+.rb-modal-footer-wrapper {
+  padding: 16px 0 0 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+} 

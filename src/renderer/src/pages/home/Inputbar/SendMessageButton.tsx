@@ -1,23 +1,28 @@
 import { FC } from 'react'
+import { Button } from '../../../../../../components'
+import { classNames } from '@renderer/utils'
 
 interface Props {
   disabled: boolean
   sendMessage: () => void
+  buttonClass?: string
 }
 
-const SendMessageButton: FC<Props> = ({ disabled, sendMessage }) => {
+const SendMessageButton: FC<Props> = ({ disabled, sendMessage, buttonClass = 'rb-inputbar-tool-btn' }) => {
   return (
-    <i
-      className="iconfont icon-ic_send"
+    <Button
+      className={classNames(buttonClass, { 'active': !disabled })}
       onClick={sendMessage}
-      style={{
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        color: disabled ? 'var(--color-text-3)' : 'var(--color-primary)',
-        fontSize: 22,
-        transition: 'all 0.2s',
-        marginRight: 2
-      }}
-    />
+      disabled={disabled}
+      type="text"
+    >
+      <i
+        className="iconfont icon-ic_send"
+        style={{
+          fontSize: 22
+        }}
+      />
+    </Button>
   )
 }
 

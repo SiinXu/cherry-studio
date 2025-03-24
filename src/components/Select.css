@@ -1,0 +1,203 @@
+.rb-select-container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.rb-select-fullwidth {
+  width: 100%;
+}
+
+.rb-select-label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.rb-select-required {
+  color: #f44336;
+  margin-left: 4px;
+}
+
+.rb-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #d0d5dd;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.rb-select:hover:not(.rb-select-disabled) {
+  border-color: #a0a0a0;
+}
+
+.rb-select:focus {
+  outline: none;
+  border-color: #4a86e8;
+  box-shadow: 0 0 0 2px rgba(74, 134, 232, 0.2);
+}
+
+/* 尺寸 */
+.rb-select-sm {
+  min-height: 30px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.rb-select-md {
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+.rb-select-lg {
+  min-height: 42px;
+  padding: 8px 16px;
+  font-size: 16px;
+}
+
+.rb-select-value {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rb-select-placeholder {
+  color: #999;
+}
+
+.rb-select-actions {
+  display: flex;
+  align-items: center;
+}
+
+.rb-select-clear-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 4px;
+  color: #999;
+  cursor: pointer;
+  margin-right: 4px;
+}
+
+.rb-select-clear-btn:hover {
+  color: #666;
+}
+
+.rb-select-arrow {
+  font-size: 10px;
+  color: #666;
+  transition: transform 0.2s;
+  margin-left: 4px;
+}
+
+.rb-select-arrow-open {
+  transform: rotate(180deg);
+}
+
+.rb-select-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background-color: #fff;
+  border: 1px solid #d0d5dd;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.rb-select-options {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.rb-select-option {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.rb-select-option:hover:not(.rb-select-option-disabled) {
+  background-color: #f5f8ff;
+}
+
+.rb-select-option-selected {
+  background-color: #edf2ff;
+  color: #4a86e8;
+  font-weight: 500;
+}
+
+.rb-select-option-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rb-select-checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #d0d5dd;
+  border-radius: 2px;
+  margin-right: 8px;
+  color: white;
+  font-size: 12px;
+}
+
+.rb-select-option-selected .rb-select-checkbox {
+  background-color: #4a86e8;
+  border-color: #4a86e8;
+}
+
+.rb-select-no-options {
+  padding: 8px 12px;
+  color: #999;
+  text-align: center;
+}
+
+/* 错误 */
+.rb-select-error .rb-select {
+  border-color: #f44336;
+}
+
+.rb-select-error .rb-select:focus {
+  box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2);
+}
+
+.rb-select-error-message {
+  color: #f44336;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* 辅助文本 */
+.rb-select-helper-text {
+  color: #666;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* 禁用 */
+.rb-select-disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}

@@ -1,4 +1,4 @@
-import { PushpinOutlined } from '@ant-design/icons'
+import { AtOutlined, PushpinOutlined } from '@ant-design/icons'
 import ModelTags from '@renderer/components/ModelTags'
 import { getModelLogo, isEmbeddingModel } from '@renderer/config/models'
 import db from '@renderer/databases'
@@ -6,19 +6,20 @@ import { useProviders } from '@renderer/hooks/useProvider'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import { getModelUniqId } from '@renderer/services/ModelService'
 import { Model, Provider } from '@renderer/types'
-import { Avatar, Dropdown, Tooltip } from 'antd'
+import { Button, Dropdown, Tooltip, Avatar } from '../../../../../../components'
 import { first, sortBy } from 'lodash'
 import { FC, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import styled from 'styled-components'
+import { classNames } from '@renderer/utils'
+import './MentionModelsButton.css'
 
 interface Props {
   mentionModels: Model[]
-  onMentionModel: (model: Model, fromKeyboard?: boolean) => void
-  ToolbarButton: any
+  onMentionModel: (model: Model, fromKeyboard: boolean) => void
+  buttonClass?: string
 }
 
-const MentionModelsButton: FC<Props> = ({ mentionModels, onMentionModel: onSelect, ToolbarButton }) => {
+const MentionModelsButton: FC<Props> = ({ mentionModels, onMentionModel, buttonClass = 'rb-inputbar-tool-btn' }) => {
   const { providers } = useProviders()
   const [pinnedModels, setPinnedModels] = useState<string[]>([])
   const { t } = useTranslation()
@@ -55,10 +56,10 @@ const MentionModelsButton: FC<Props> = ({ mentionModels, onMentionModel: onSelec
       if (mentionModels.some((selected) => getModelUniqId(selected) === getModelUniqId(model))) {
         return
       }
-      onSelect(model, fromKeyboard)
+      onMentionModel(model, fromKeyboard)
       setIsOpen(false)
     },
-    [fromKeyboard, mentionModels, onSelect]
+    [fromKeyboard, mentionModels, onMentionModel]
   )
 
   const modelMenuItems = useMemo(() => {
@@ -81,19 +82,20 @@ const MentionModelsButton: FC<Props> = ({ mentionModels, onMentionModel: onSelec
             key: getModelUniqId(m),
             model: m,
             label: (
-              <ModelItem>
-                <ModelNameRow>
+              <div className="rb-model-item">
+                <div className="rb-model-name-row">
                   <span>{m?.name}</span> <ModelTags model={m} />
-                </ModelNameRow>
-                <PinIcon
+                </div>
+                <span 
+                  className={classNames('rb-pin-icon', { 'pinned': pinnedModels.includes(getModelUniqId(m)) })}
                   onClick={(e) => {
                     e.stopPropagation()
                     togglePin(getModelUniqId(m))
                   }}
-                  $isPinned={pinnedModels.includes(getModelUniqId(m))}>
+                >
                   <PushpinOutlined />
-                </PinIcon>
-              </ModelItem>
+                </span>
+              </div>
             ),
             icon: (
               <Avatar src={getModelLogo(m.id)} size={24}>
@@ -130,22 +132,23 @@ const MentionModelsButton: FC<Props> = ({ mentionModels, onMentionModel: onSelec
           ...m,
           key: m.key + 'pinned',
           label: (
-            <ModelItem>
-              <ModelNameRow>
+            <div className="rb-model-item">
+              <div className="rb-model-name-row">
                 <span>
                   {m.model?.name} | {m.provider.isSystem ? t(`provider.${m.provider.id}`) : m.provider.name}
                 </span>{' '}
                 <ModelTags model={m.model} />
-              </ModelNameRow>
-              <PinIcon
+              </div>
+              <span 
+                className="rb-pin-icon pinned"
                 onClick={(e) => {
                   e.stopPropagation()
                   togglePin(getModelUniqId(m.model))
                 }}
-                $isPinned={true}>
+              >
                 <PushpinOutlined />
-              </PinIcon>
-            </ModelItem>
+              </span>
+            </div>
           ),
           icon: (
             <Avatar src={getModelLogo(m.model.id)} size={24}>
@@ -311,7 +314,7 @@ const MentionModelsButton: FC<Props> = ({ mentionModels, onMentionModel: onSelec
   }, [isOpen, searchText, flatModelItems.length]) // Add dependencies that affect content
 
   const menu = (
-    <div ref={menuRef} className="ant-dropdown-menu">
+    <div ref={menuRef} className="rb-mention-dropdown-menu ant-dropdown-menu">
       {flatModelItems.length > 0 ? (
         modelMenuItems.map((group, groupIndex) => {
           if (!group) return null
@@ -347,6 +350,10 @@ const MentionModelsButton: FC<Props> = ({ mentionModels, onMentionModel: onSelec
     </div>
   )
 
+  const onClick = () => {
+    EventEmitter.emit(EVENT_NAMES.SHOW_MODEL_SELECTOR)
+  }
+
   return (
     <Dropdown
       overlayStyle={{ marginBottom: 20 }}
@@ -358,52 +365,18 @@ const MentionModelsButton: FC<Props> = ({ mentionModels, onMentionModel: onSelec
         open && setFromKeyboard(false) // Set fromKeyboard to false when opened by button click
       }}
       overlayClassName="mention-models-dropdown">
-      <Tooltip placement="top" title={t('agents.edit.model.select.title')} arrow>
-        <ToolbarButton type="text" ref={dropdownRef}>
-          <i className="iconfont icon-at" style={{ fontSize: 18 }}></i>
-        </ToolbarButton>
+      <Tooltip placement="top" title={t('chat.input.mention')}>
+        <Button
+          className={classNames(buttonClass, { 'active': mentionModels.length > 0 })}
+          type="text"
+          ref={dropdownRef}
+          onClick={onClick}
+        >
+          <AtOutlined />
+        </Button>
       </Tooltip>
     </Dropdown>
   )
 }
-
-const ModelItem = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 13px;
-  width: 100%;
-  min-width: 200px;
-  gap: 16px;
-
-  &:hover {
-    .pin-icon {
-      opacity: 0.3;
-    }
-  }
-`
-
-const ModelNameRow = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-`
-
-const PinIcon = styled.span.attrs({ className: 'pin-icon' })<{ $isPinned: boolean }>`
-  margin-left: auto;
-  padding: 0 8px;
-  opacity: ${(props) => (props.$isPinned ? 0.9 : 0)};
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  right: 0;
-  color: ${(props) => (props.$isPinned ? 'var(--color-primary)' : 'inherit')};
-  transform: ${(props) => (props.$isPinned ? 'rotate(-45deg)' : 'none')};
-  font-size: 13px;
-
-  &:hover {
-    opacity: ${(props) => (props.$isPinned ? 1 : 0.7)} !important;
-    color: ${(props) => (props.$isPinned ? 'var(--color-primary)' : 'inherit')};
-  }
-`
 
 export default MentionModelsButton

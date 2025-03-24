@@ -1,0 +1,204 @@
+/* 导航基础样式 */
+.rb-nav {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  box-sizing: border-box;
+}
+
+/* 水平导航 */
+.rb-nav-horizontal {
+  display: flex;
+  height: 100%;
+}
+
+.rb-nav-horizontal .rb-nav-item,
+.rb-nav-horizontal .rb-nav-submenu-title {
+  padding: 0 20px;
+  height: 64px;
+  line-height: 64px;
+  position: relative;
+}
+
+/* 垂直导航 */
+.rb-nav-vertical {
+  width: 100%;
+}
+
+.rb-nav-vertical .rb-nav-item,
+.rb-nav-vertical .rb-nav-submenu-title {
+  height: 40px;
+  line-height: 40px;
+  padding: 0 16px;
+}
+
+/* 内联导航 */
+.rb-nav-inline {
+  width: 100%;
+}
+
+.rb-nav-inline .rb-nav-submenu-list {
+  padding-left: 24px;
+  border-left: 2px solid #f0f0f0;
+}
+
+.rb-nav-inline .rb-nav-item,
+.rb-nav-inline .rb-nav-submenu-title {
+  height: 40px;
+  line-height: 40px;
+  padding: 0 16px;
+}
+
+/* 导航项 */
+.rb-nav-item,
+.rb-nav-submenu-title {
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+}
+
+.rb-nav-item-icon {
+  margin-right: 8px;
+}
+
+/* 子菜单 */
+.rb-nav-submenu {
+  position: relative;
+}
+
+.rb-nav-submenu-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rb-nav-submenu-arrow {
+  transition: transform 0.3s;
+}
+
+.rb-nav-submenu-arrow-open {
+  transform: rotate(90deg);
+}
+
+.rb-nav-horizontal .rb-nav-submenu-arrow-open {
+  transform: rotate(180deg);
+}
+
+.rb-nav-submenu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  transition: height 0.3s;
+}
+
+/* 水平导航的弹出子菜单 */
+.rb-nav-horizontal .rb-nav-submenu-popup {
+  position: absolute;
+  left: 0;
+  top: 64px;
+  min-width: 160px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1050;
+  display: none;
+}
+
+.rb-nav-horizontal .rb-nav-submenu-open .rb-nav-submenu-popup {
+  display: block;
+}
+
+.rb-nav-horizontal .rb-nav-submenu-popup .rb-nav-item,
+.rb-nav-horizontal .rb-nav-submenu-popup .rb-nav-submenu-title {
+  height: 40px;
+  line-height: 40px;
+}
+
+/* 主题样式 - Light */
+.rb-nav-light {
+  background-color: #fff;
+  color: #333;
+}
+
+.rb-nav-light .rb-nav-item:hover,
+.rb-nav-light .rb-nav-submenu-title:hover {
+  color: #4a86e8;
+}
+
+.rb-nav-light .rb-nav-item-selected,
+.rb-nav-light .rb-nav-submenu-selected > .rb-nav-submenu-title {
+  color: #4a86e8;
+  font-weight: 500;
+}
+
+.rb-nav-light.rb-nav-horizontal .rb-nav-item-selected:after,
+.rb-nav-light.rb-nav-horizontal .rb-nav-submenu-selected > .rb-nav-submenu-title:after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 20px;
+  right: 20px;
+  height: 2px;
+  background-color: #4a86e8;
+}
+
+.rb-nav-light .rb-nav-submenu-popup {
+  background-color: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+}
+
+/* 主题样式 - Dark */
+.rb-nav-dark {
+  background-color: #001529;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.rb-nav-dark .rb-nav-item:hover,
+.rb-nav-dark .rb-nav-submenu-title:hover {
+  color: #fff;
+}
+
+.rb-nav-dark .rb-nav-item-selected,
+.rb-nav-dark .rb-nav-submenu-selected > .rb-nav-submenu-title {
+  color: #fff;
+  background-color: #1890ff;
+}
+
+.rb-nav-dark.rb-nav-horizontal .rb-nav-item-selected:after,
+.rb-nav-dark.rb-nav-horizontal .rb-nav-submenu-selected > .rb-nav-submenu-title:after {
+  display: none;
+}
+
+.rb-nav-dark .rb-nav-submenu-popup {
+  background-color: #001529;
+  border: none;
+  border-radius: 4px;
+}
+
+/* 禁用状态 */
+.rb-nav-item-disabled,
+.rb-nav-submenu-disabled > .rb-nav-submenu-title {
+  color: rgba(0, 0, 0, 0.25) !important;
+  cursor: not-allowed;
+}
+
+.rb-nav-dark .rb-nav-item-disabled,
+.rb-nav-dark .rb-nav-submenu-disabled > .rb-nav-submenu-title {
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* 响应式菜单 */
+@media (max-width: 768px) {
+  .rb-nav-horizontal {
+    flex-wrap: wrap;
+  }
+  
+  .rb-nav-horizontal .rb-nav-item,
+  .rb-nav-horizontal .rb-nav-submenu-title {
+    padding: 0 12px;
+  }
+} 

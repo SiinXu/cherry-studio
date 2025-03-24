@@ -1,0 +1,120 @@
+.rb-input-container {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.rb-input-fullwidth {
+  width: 100%;
+}
+
+.rb-input-label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.rb-input-required {
+  color: #f44336;
+  margin-left: 4px;
+}
+
+.rb-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.rb-input {
+  width: 100%;
+  border: 1px solid #d0d5dd;
+  border-radius: 4px;
+  outline: none;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+  background-color: #fff;
+  transition: all 0.2s ease-in-out;
+  box-sizing: border-box;
+}
+
+.rb-input:focus {
+  border-color: #4a86e8;
+  box-shadow: 0 0 0 2px rgba(74, 134, 232, 0.2);
+}
+
+/* 尺寸 */
+.rb-input-sm {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.rb-input-md {
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.rb-input-lg {
+  padding: 10px 14px;
+  font-size: 16px;
+}
+
+/* 边饰 */
+.rb-input-adornment {
+  display: flex;
+  align-items: center;
+  color: #666;
+  z-index: 1;
+}
+
+.rb-input-start-adornment {
+  margin-right: -8px;
+  padding-left: 12px;
+}
+
+.rb-input-end-adornment {
+  margin-left: -8px;
+  padding-right: 12px;
+}
+
+.rb-input-with-start-adornment {
+  padding-left: 30px;
+}
+
+.rb-input-with-end-adornment {
+  padding-right: 30px;
+}
+
+/* 错误 */
+.rb-input-error .rb-input {
+  border-color: #f44336;
+}
+
+.rb-input-error .rb-input:focus {
+  box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2);
+}
+
+.rb-input-error-message {
+  color: #f44336;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* 辅助文本 */
+.rb-input-helper-text {
+  color: #666;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* 禁用 */
+.rb-input-disabled .rb-input {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.rb-input-disabled .rb-input-label {
+  color: #999;
+} 

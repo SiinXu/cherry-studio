@@ -1,15 +1,17 @@
 import { useProviders } from '@renderer/hooks/useProvider'
 import { getModelUniqId } from '@renderer/services/ModelService'
 import { Model } from '@renderer/types'
-import { Flex, Tag } from 'antd'
+import { Flex, Tag } from '../../../../../../components'
 import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
-import styled from 'styled-components'
+import './MentionModelsInput.css'
 
 const MentionModelsInput: FC<{
   selectedModels: Model[]
   onRemoveModel: (model: Model) => void
-}> = ({ selectedModels, onRemoveModel }) => {
+  onSelect?: (model: Model) => void
+  onClose?: () => void
+}> = ({ selectedModels, onRemoveModel, onSelect, onClose }) => {
   const { providers } = useProviders()
   const { t } = useTranslation()
 
@@ -19,7 +21,7 @@ const MentionModelsInput: FC<{
   }
 
   return (
-    <Container gap="4px 0" wrap>
+    <Flex className="rb-mention-models-input" gap="4px 0" wrap>
       {selectedModels.map((model) => (
         <Tag
           bordered={false}
@@ -30,13 +32,8 @@ const MentionModelsInput: FC<{
           @{model.name} ({getProviderName(model)})
         </Tag>
       ))}
-    </Container>
+    </Flex>
   )
 }
-
-const Container = styled(Flex)`
-  width: 100%;
-  padding: 10px 15px 0;
-`
 
 export default MentionModelsInput

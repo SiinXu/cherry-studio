@@ -1,4 +1,3 @@
-import Scrollbar from '@renderer/components/Scrollbar'
 import { LOAD_MORE_COUNT } from '@renderer/config/constant'
 import db from '@renderer/databases'
 import { useAssistant } from '@renderer/hooks/useAssistant'
@@ -23,7 +22,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import BeatLoader from 'react-spinners/BeatLoader'
-import styled from 'styled-components'
+import { Layout, ScrollArea } from '../../../../../../components'
+import './Messages.css'
 
 import ChatNavigation from './ChatNavigation'
 import MessageGroup from './MessageGroup'
@@ -186,13 +186,13 @@ const Messages: React.FC<MessagesProps> = ({ assistant, topic, setActiveTopic })
   })
 
   return (
-    <Container
+    <ScrollArea 
+      className={`rb-messages ${topicPosition === 'left' ? 'right' : ''}`}
       id="messages"
       style={{ maxWidth }}
-      key={assistant.id}
       ref={containerRef}
-      $right={topicPosition === 'left'}>
-      <NarrowLayout style={{ display: 'flex', flexDirection: 'column-reverse' }}>
+    >
+      <NarrowLayout className="rb-messages-layout">
         {messages.length >= 2 && !loading && <NewTopicButton />}
         <InfiniteScroll
           dataLength={displayMessages.length}
@@ -200,11 +200,12 @@ const Messages: React.FC<MessagesProps> = ({ assistant, topic, setActiveTopic })
           hasMore={hasMore}
           loader={null}
           inverse={true}
-          scrollableTarget="messages">
-          <ScrollContainer>
-            <LoaderContainer $loading={isLoadingMore}>
+          scrollableTarget="messages"
+        >
+          <div className="rb-messages-scroll">
+            <div className={`rb-messages-loader ${isLoadingMore ? 'loading' : ''}`}>
               <BeatLoader size={8} color="var(--color-text-2)" />
-            </LoaderContainer>
+            </div>
             {Object.entries(getGroupedMessages(displayMessages)).map(([key, groupMessages]) => (
               <MessageGroup
                 key={key}
@@ -213,45 +214,13 @@ const Messages: React.FC<MessagesProps> = ({ assistant, topic, setActiveTopic })
                 hidePresetMessages={assistant.settings?.hideMessages}
               />
             ))}
-          </ScrollContainer>
+          </div>
         </InfiniteScroll>
         <Prompt assistant={assistant} key={assistant.prompt} topic={topic} />
       </NarrowLayout>
       <ChatNavigation containerId="messages" />
-    </Container>
+    </ScrollArea>
   )
 }
-
-interface LoaderProps {
-  $loading: boolean
-}
-
-const LoaderContainer = styled.div<LoaderProps>`
-  display: flex;
-  justify-content: center;
-  padding: 10px;
-  width: 100%;
-  background: var(--color-background);
-  opacity: ${(props) => (props.$loading ? 1 : 0)};
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-`
-
-const ScrollContainer = styled.div`
-  display: flex;
-  flex-direction: column-reverse;
-`
-
-interface ContainerProps {
-  $right?: boolean
-}
-
-const Container = styled(Scrollbar)<ContainerProps>`
-  display: flex;
-  flex-direction: column-reverse;
-  padding: 10px 0 20px;
-  overflow-x: hidden;
-  background-color: var(--color-background);
-`
 
 export default Messages

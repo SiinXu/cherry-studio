@@ -1,0 +1,182 @@
+.rb-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  padding: 8px 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.rb-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.rb-button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* 尺寸 */
+.rb-button-sm {
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+.rb-button-md {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.rb-button-lg {
+  padding: 12px 20px;
+  font-size: 16px;
+}
+
+/* 类型 */
+.rb-button-primary {
+  background-color: #4a86e8;
+  color: white;
+  border-color: #4a86e8;
+}
+
+.rb-button-primary:hover, .rb-button-primary:focus {
+  background-color: #3a76d8;
+  border-color: #3a76d8;
+}
+
+.rb-button-secondary {
+  background-color: #f4f6f8;
+  color: #2e3b52;
+  border-color: #d1d9e6;
+}
+
+.rb-button-secondary:hover, .rb-button-secondary:focus {
+  background-color: #e8ecf0;
+  border-color: #c1c9d6;
+}
+
+.rb-button-danger {
+  background-color: #f44336;
+  color: white;
+  border-color: #f44336;
+}
+
+.rb-button-danger:hover, .rb-button-danger:focus {
+  background-color: #e53935;
+  border-color: #e53935;
+}
+
+.rb-button-success {
+  background-color: #4caf50;
+  color: white;
+  border-color: #4caf50;
+}
+
+.rb-button-success:hover, .rb-button-success:focus {
+  background-color: #43a047;
+  border-color: #43a047;
+}
+
+.rb-button-warning {
+  background-color: #ff9800;
+  color: white;
+  border-color: #ff9800;
+}
+
+.rb-button-warning:hover, .rb-button-warning:focus {
+  background-color: #fb8c00;
+  border-color: #fb8c00;
+}
+
+.rb-button-info {
+  background-color: #2196f3;
+  color: white;
+  border-color: #2196f3;
+}
+
+.rb-button-info:hover, .rb-button-info:focus {
+  background-color: #1e88e5;
+  border-color: #1e88e5;
+}
+
+.rb-button-ghost {
+  background-color: transparent;
+  color: #4a86e8;
+  border-color: #4a86e8;
+}
+
+.rb-button-ghost:hover, .rb-button-ghost:focus {
+  background-color: rgba(74, 134, 232, 0.1);
+}
+
+.rb-button-link {
+  background-color: transparent;
+  color: #4a86e8;
+  border-color: transparent;
+  padding: 0;
+  text-decoration: none;
+}
+
+.rb-button-link:hover, .rb-button-link:focus {
+  color: #3a76d8;
+  text-decoration: underline;
+  box-shadow: none;
+  transform: none;
+}
+
+/* 全宽 */
+.rb-button-fullwidth {
+  width: 100%;
+}
+
+/* 禁用状态 */
+.rb-button-disabled,
+.rb-button-disabled:hover,
+.rb-button-disabled:focus,
+.rb-button-disabled:active {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* 加载状态 */
+.rb-button-loading {
+  position: relative;
+  cursor: wait;
+}
+
+.rb-button-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  border-right-color: transparent;
+  animation: rb-spinner 0.75s linear infinite;
+}
+
+@keyframes rb-spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 图标 */
+.rb-button-icon {
+  margin-right: 8px;
+  display: inline-flex;
+  align-items: center;
+} 

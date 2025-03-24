@@ -1,0 +1,170 @@
+.rb-checkbox {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  margin-right: 16px;
+  position: relative;
+  font-size: 14px;
+  user-select: none;
+}
+
+.rb-checkbox-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.rb-checkbox-inner {
+  position: relative;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #d0d5dd;
+  border-radius: 2px;
+  background-color: #fff;
+  transition: all 0.2s;
+}
+
+.rb-checkbox-inner::after {
+  content: '';
+  position: absolute;
+  opacity: 0;
+  transform: rotate(45deg) scale(0);
+  border: 2px solid #fff;
+  border-top: 0;
+  border-left: 0;
+  transition: all 0.2s;
+}
+
+/* 已选中状态 */
+.rb-checkbox-input:checked + .rb-checkbox-inner {
+  background-color: #4a86e8;
+  border-color: #4a86e8;
+}
+
+.rb-checkbox-input:checked + .rb-checkbox-inner::after {
+  opacity: 1;
+  transform: rotate(45deg) scale(1);
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+}
+
+/* 不确定状态 */
+.rb-checkbox-indeterminate .rb-checkbox-inner {
+  background-color: #4a86e8;
+  border-color: #4a86e8;
+}
+
+.rb-checkbox-indeterminate .rb-checkbox-inner::after {
+  transform: none;
+  border: 0;
+  opacity: 1;
+  left: 3px;
+  top: 7px;
+  width: 10px;
+  height: 2px;
+  background-color: #fff;
+}
+
+/* 尺寸 */
+.rb-checkbox-sm .rb-checkbox-inner {
+  width: 14px;
+  height: 14px;
+}
+
+.rb-checkbox-sm .rb-checkbox-inner::after {
+  left: 3px;
+  top: 1px;
+  width: 4px;
+  height: 7px;
+}
+
+.rb-checkbox-sm .rb-checkbox-label {
+  font-size: 12px;
+}
+
+.rb-checkbox-md .rb-checkbox-inner {
+  width: 16px;
+  height: 16px;
+}
+
+.rb-checkbox-md .rb-checkbox-label {
+  font-size: 14px;
+}
+
+.rb-checkbox-lg .rb-checkbox-inner {
+  width: 18px;
+  height: 18px;
+}
+
+.rb-checkbox-lg .rb-checkbox-inner::after {
+  left: 5px;
+  top: 2px;
+  width: 6px;
+  height: 9px;
+}
+
+.rb-checkbox-lg .rb-checkbox-label {
+  font-size: 16px;
+}
+
+/* 颜色 */
+.rb-checkbox-primary .rb-checkbox-input:checked + .rb-checkbox-inner,
+.rb-checkbox-primary.rb-checkbox-indeterminate .rb-checkbox-inner {
+  background-color: #4a86e8;
+  border-color: #4a86e8;
+}
+
+.rb-checkbox-secondary .rb-checkbox-input:checked + .rb-checkbox-inner,
+.rb-checkbox-secondary.rb-checkbox-indeterminate .rb-checkbox-inner {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.rb-checkbox-success .rb-checkbox-input:checked + .rb-checkbox-inner,
+.rb-checkbox-success.rb-checkbox-indeterminate .rb-checkbox-inner {
+  background-color: #4caf50;
+  border-color: #4caf50;
+}
+
+.rb-checkbox-error .rb-checkbox-input:checked + .rb-checkbox-inner,
+.rb-checkbox-error.rb-checkbox-indeterminate .rb-checkbox-inner {
+  background-color: #f44336;
+  border-color: #f44336;
+}
+
+.rb-checkbox-warning .rb-checkbox-input:checked + .rb-checkbox-inner,
+.rb-checkbox-warning.rb-checkbox-indeterminate .rb-checkbox-inner {
+  background-color: #ff9800;
+  border-color: #ff9800;
+}
+
+.rb-checkbox-info .rb-checkbox-input:checked + .rb-checkbox-inner,
+.rb-checkbox-info.rb-checkbox-indeterminate .rb-checkbox-inner {
+  background-color: #2196f3;
+  border-color: #2196f3;
+}
+
+/* 禁用状态 */
+.rb-checkbox-disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.rb-checkbox-disabled .rb-checkbox-inner {
+  background-color: #f5f5f5;
+  border-color: #d9d9d9;
+}
+
+.rb-checkbox-disabled .rb-checkbox-label {
+  color: #999;
+}
+
+/* 标签间距 */
+.rb-checkbox-label {
+  margin-left: 8px;
+  line-height: 1;
+} 

@@ -1,0 +1,107 @@
+.rb-tooltip-target {
+  display: inline-block;
+  position: relative;
+}
+
+.rb-tooltip {
+  position: fixed;
+  z-index: 1000;
+  max-width: 250px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.rb-tooltip-visible {
+  opacity: 1;
+}
+
+.rb-tooltip-content {
+  background-color: #333;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  word-wrap: break-word;
+  line-height: 1.5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 箭头样式 */
+.rb-tooltip-arrow .rb-tooltip-arrow-pointer {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: #333;
+  transform: rotate(45deg);
+}
+
+/* 各个方向的箭头位置 */
+.rb-tooltip-top .rb-tooltip-arrow-pointer {
+  bottom: -4px;
+  left: 50%;
+  margin-left: -4px;
+}
+
+.rb-tooltip-bottom .rb-tooltip-arrow-pointer {
+  top: -4px;
+  left: 50%;
+  margin-left: -4px;
+}
+
+.rb-tooltip-left .rb-tooltip-arrow-pointer {
+  right: -4px;
+  top: 50%;
+  margin-top: -4px;
+}
+
+.rb-tooltip-right .rb-tooltip-arrow-pointer {
+  left: -4px;
+  top: 50%;
+  margin-top: -4px;
+}
+
+/* 主题变体 */
+.rb-tooltip-light .rb-tooltip-content {
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #e0e0e0;
+}
+
+.rb-tooltip-light .rb-tooltip-arrow-pointer {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-width: 1px 0 0 1px;
+}
+
+.rb-tooltip-primary .rb-tooltip-content {
+  background-color: #4a86e8;
+}
+
+.rb-tooltip-primary .rb-tooltip-arrow-pointer {
+  background-color: #4a86e8;
+}
+
+.rb-tooltip-success .rb-tooltip-content {
+  background-color: #52c41a;
+}
+
+.rb-tooltip-success .rb-tooltip-arrow-pointer {
+  background-color: #52c41a;
+}
+
+.rb-tooltip-warning .rb-tooltip-content {
+  background-color: #faad14;
+}
+
+.rb-tooltip-warning .rb-tooltip-arrow-pointer {
+  background-color: #faad14;
+}
+
+.rb-tooltip-error .rb-tooltip-content {
+  background-color: #f5222d;
+}
+
+.rb-tooltip-error .rb-tooltip-arrow-pointer {
+  background-color: #f5222d;
+} 

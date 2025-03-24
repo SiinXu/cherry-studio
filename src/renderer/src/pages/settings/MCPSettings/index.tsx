@@ -1,14 +1,14 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons'
+import { HStack } from '@renderer/components/Layout'
+import { useTheme } from '@renderer/context/ThemeProvider'
+import { useAppSelector } from '@renderer/store'
+import { type MCPServer } from '@renderer/types'
 import { Button, Space, Switch, Table, Tag, Tooltip, Typography } from 'antd'
 import { motion } from 'framer-motion' // eslint-disable-line no-unused-vars
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
-import { HStack } from '@renderer/components/Layout'
-import { useTheme } from '@renderer/context/ThemeProvider'
-import { useAppSelector } from '@renderer/store'
-import { type MCPServer } from '@renderer/types'
 import { SettingContainer, SettingDivider, SettingGroup, SettingTitle } from '..'
 import AddMcpServerPopup from './AddMcpServerPopup'
 

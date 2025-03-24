@@ -5,7 +5,8 @@ import NavigationService from '@renderer/services/NavigationService'
 import { Assistant } from '@renderer/types'
 import { FC, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import styled from 'styled-components'
+import { Layout } from '../../../../../src/components'
+import './HomePage.css'
 
 import Chat from './Chat'
 import Navbar from './Navbar'
@@ -46,9 +47,9 @@ const HomePage: FC = () => {
   }, [showAssistants, showTopics, topicPosition])
 
   return (
-    <Container id="home-page">
+    <Layout.Content className="rb-home-page">
       <Navbar activeAssistant={activeAssistant} activeTopic={activeTopic} setActiveTopic={setActiveTopic} />
-      <ContentContainer id="content-container">
+      <div className="rb-home-content">
         {showAssistants && (
           <HomeTabs
             activeAssistant={activeAssistant}
@@ -64,23 +65,9 @@ const HomePage: FC = () => {
           setActiveTopic={setActiveTopic}
           setActiveAssistant={setActiveAssistant}
         />
-      </ContentContainer>
-    </Container>
+      </div>
+    </Layout.Content>
   )
 }
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  max-width: calc(100vw - var(--sidebar-width));
-`
-
-const ContentContainer = styled.div`
-  display: flex;
-  flex: 1;
-  flex-direction: row;
-  overflow: hidden;
-`
 
 export default HomePage

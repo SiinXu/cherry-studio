@@ -1,0 +1,26 @@
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.app-logo {
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* 覆盖导航链接样式 */
+.rb-nav-item a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.rb-nav-light .rb-nav-item a:hover {
+  color: #4a86e8;
+}
+
+.rb-nav-dark .rb-nav-item a:hover {
+  color: #fff;
+} 

@@ -1,0 +1,189 @@
+.rb-inputbar {
+  position: relative;
+  padding: 0;
+  background-color: var(--color-background);
+  border-top: 0.5px solid var(--color-border);
+  transition: all 0.2s ease-in-out;
+  z-index: 50;
+}
+
+.rb-inputbar-wrapper {
+  width: 100%;
+}
+
+.rb-inputbar-expanded {
+  position: fixed;
+  bottom: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.rb-inputbar-dragging {
+  user-select: none;
+}
+
+.rb-inputbar-container {
+  border: 0.5px solid var(--color-border);
+  transition: all 0.3s ease;
+  position: relative;
+  margin: 14px 20px;
+  margin-top: 12px;
+  border-radius: 15px;
+  padding-top: 6px;
+  background-color: var(--color-background-opacity);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rb-inputbar-focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+.rb-inputbar-main {
+  position: relative;
+  display: flex;
+  padding: 0 15px;
+}
+
+.rb-inputbar-textarea {
+  padding: 4px 0 8px 0;
+  border-radius: 0;
+  display: flex;
+  flex: 1;
+  font-family: inherit;
+  resize: none !important;
+  overflow: auto;
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  background-color: transparent;
+  line-height: 1.4;
+  color: var(--color-text-1);
+}
+
+.rb-inputbar-textarea:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.rb-inputbar-textarea::placeholder {
+  color: var(--color-text-3);
+}
+
+.rb-inputbar-resize-handle {
+  position: absolute;
+  top: -3px;
+  left: 0;
+  right: 0;
+  height: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: row-resize;
+  color: var(--color-icon);
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 1;
+}
+
+.rb-inputbar-resize-handle:hover {
+  opacity: 1;
+}
+
+.rb-inputbar-resize-handle .anticon {
+  transform: rotate(90deg);
+  font-size: 14px;
+}
+
+.rb-inputbar-toolbar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0 8px;
+  padding-bottom: 0;
+  margin-bottom: 4px;
+  height: 36px;
+}
+
+.rb-inputbar-toolbar-menu {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.rb-inputbar-tool-btn {
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  color: var(--color-icon);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+
+.rb-inputbar-tool-btn .anticon,
+.rb-inputbar-tool-btn .iconfont {
+  transition: all 0.3s ease;
+  color: var(--color-icon);
+}
+
+.rb-inputbar-tool-btn .icon-a-addchat {
+  font-size: 18px;
+  margin-bottom: -2px;
+}
+
+.rb-inputbar-tool-btn:hover {
+  background-color: var(--color-background-soft);
+}
+
+.rb-inputbar-tool-btn:hover .anticon,
+.rb-inputbar-tool-btn:hover .iconfont {
+  color: var(--color-text-1);
+}
+
+.rb-inputbar-tool-btn.active {
+  background-color: var(--color-primary) !important;
+}
+
+.rb-inputbar-tool-btn.active .anticon,
+.rb-inputbar-tool-btn.active .iconfont {
+  color: var(--color-white-soft);
+}
+
+.rb-inputbar-tool-btn.active:hover {
+  background-color: var(--color-primary);
+}
+
+.rb-inputbar-pause-btn {
+  margin-right: -2px;
+  margin-top: 1px;
+}
+
+/* Dark mode adjustments */
+html[data-theme="dark"] .rb-inputbar-textarea {
+  color: var(--color-text-1);
+}
+
+html[data-theme="dark"] .rb-inputbar-container {
+  background-color: var(--color-background-opacity);
+  border-color: var(--color-border-dark, var(--color-border));
+}
+
+html[data-theme="dark"] .rb-inputbar-tool-btn:hover {
+  background-color: var(--color-background-hover);
+}
+
+@media (max-width: 768px) {
+  .rb-inputbar-container {
+    margin: 10px;
+  }
+} 

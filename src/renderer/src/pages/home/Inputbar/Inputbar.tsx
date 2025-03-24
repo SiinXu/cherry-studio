@@ -9,6 +9,7 @@ import {
   PauseCircleOutlined,
   QuestionCircleOutlined
 } from '@ant-design/icons'
+import { Layout, Input, Button, Tooltip, Popconfirm } from '../../../../../../components'
 import TranslateButton from '@renderer/components/TranslateButton'
 import { isFunctionCallingModel, isVisionModel, isWebSearchModel } from '@renderer/config/models'
 import db from '@renderer/databases'
@@ -32,14 +33,12 @@ import { Assistant, FileType, KnowledgeBase, MCPServer, Message, Model, Topic } 
 import { classNames, delay, getFileExtension } from '@renderer/utils'
 import { getFilesFromDropEvent } from '@renderer/utils/input'
 import { documentExts, imageExts, textExts } from '@shared/config/constant'
-import { Button, Popconfirm, Tooltip } from 'antd'
-import TextArea, { TextAreaRef } from 'antd/es/input/TextArea'
 import Logger from 'electron-log/renderer'
 import { debounce, isEmpty } from 'lodash'
 import React, { CSSProperties, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import styled from 'styled-components'
+import './Inputbar.css'
 
 import NarrowLayout from '../Messages/NarrowLayout'
 import AttachmentButton from './AttachmentButton'
@@ -51,6 +50,7 @@ import MentionModelsInput from './MentionModelsInput'
 import NewContextButton from './NewContextButton'
 import SendMessageButton from './SendMessageButton'
 import TokenCount from './TokenCount'
+
 interface Props {
   assistant: Assistant
   setActiveTopic: (topic: Topic) => void
@@ -76,7 +76,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic, topic }) =
   const [expended, setExpend] = useState(false)
   const [estimateTokenCount, setEstimateTokenCount] = useState(0)
   const [contextCount, setContextCount] = useState({ current: 0, max: 0 })
-  const textareaRef = useRef<TextAreaRef>(null)
+  const textareaRef = useRef<any>(null)
   const [files, setFiles] = useState<FileType[]>(_files)
   const { t } = useTranslation()
   const containerRef = useRef(null)
@@ -132,7 +132,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic, topic }) =
   _files = files
 
   const resizeTextArea = useCallback(() => {
-    const textArea = textareaRef.current?.resizableTextArea?.textArea
+    const textArea = textareaRef.current?.input
     if (textArea) {
       // 如果已经手动设置了高度,则不自动调整
       if (textareaHeight) {
@@ -226,7 +226,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic, topic }) =
     const isEnterPressed = event.keyCode == 13
 
     if (event.key === '@') {
-      const textArea = textareaRef.current?.resizableTextArea?.textArea
+      const textArea = textareaRef.current?.input
       if (textArea) {
         const cursorPosition = textArea.selectionStart
         const textBeforeCursor = text.substring(0, cursorPosition)
@@ -350,7 +350,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic, topic }) =
   const onToggleExpended = () => {
     const isExpended = !expended
     setExpend(isExpended)
-    const textArea = textareaRef.current?.resizableTextArea?.textArea
+    const textArea = textareaRef.current?.input
 
     if (textArea) {
       if (isExpended) {
@@ -370,7 +370,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic, topic }) =
     setText(newText)
 
     // Check if @ was deleted
-    const textArea = textareaRef.current?.resizableTextArea?.textArea
+    const textArea = textareaRef.current?.input
     if (textArea) {
       const cursorPosition = textArea.selectionStart
       const textBeforeCursor = newText.substring(0, cursorPosition)
@@ -474,7 +474,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic, topic }) =
     e.preventDefault()
     setIsDragging(true)
     startDragY.current = e.clientY
-    const textArea = textareaRef.current?.resizableTextArea?.textArea
+    const textArea = textareaRef.current?.input
     if (textArea) {
       startHeight.current = textArea.offsetHeight
     }
@@ -489,7 +489,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic, topic }) =
       const maxHeightInPixels = viewportHeight * 0.7
 
       const newHeight = Math.min(maxHeightInPixels, Math.max(startHeight.current + delta, 30))
-      const textArea = textareaRef.current?.resizableTextArea?.textArea
+      const textArea = textareaRef.current?.input
       if (textArea) {
         textArea.style.height = `${newHeight}px`
         setExpend(newHeight == maxHeightInPixels)
@@ -587,7 +587,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic, topic }) =
   }
 
   const onMentionModel = (model: Model, fromKeyboard: boolean = false) => {
-    const textArea = textareaRef.current?.resizableTextArea?.textArea
+    const textArea = textareaRef.current?.input
     if (textArea) {
       if (fromKeyboard) {
         const cursorPosition = textArea.selectionStart
@@ -656,7 +656,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic, topic }) =
     }
     setTextareaHeight(undefined)
     requestAnimationFrame(() => {
-      const textArea = textareaRef.current?.resizableTextArea?.textArea
+      const textArea = textareaRef.current?.input
       if (textArea) {
         textArea.style.height = 'auto'
         const contentHeight = textArea.scrollHeight
@@ -666,251 +666,192 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic, topic }) =
   }
 
   return (
-    <Container onDragOver={handleDragOver} onDrop={handleDrop} className="inputbar">
-      <NarrowLayout style={{ width: '100%' }}>
-        <InputBarContainer
-          id="inputbar"
-          className={classNames('inputbar-container', inputFocus && 'focus')}
-          ref={containerRef}>
+    <div 
+      className={classNames('rb-inputbar', {
+        'rb-inputbar-expanded': expended,
+        'rb-inputbar-dragging': isDragging
+      })}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      ref={containerRef}
+    >
+      <NarrowLayout className="rb-inputbar-wrapper">
+        <div className={classNames('rb-inputbar-container', { 'rb-inputbar-focus': inputFocus })}>
           <AttachmentPreview files={files} setFiles={setFiles} />
           <MentionModelsInput selectedModels={mentionModels} onRemoveModel={handleRemoveModel} />
-          <Textarea
-            value={text}
-            onChange={onChange}
-            onKeyDown={handleKeyDown}
-            placeholder={isTranslating ? t('chat.input.translating') : t('chat.input.placeholder')}
-            autoFocus
-            contextMenu="true"
-            variant="borderless"
-            spellCheck={false}
-            rows={textareaRows}
-            ref={textareaRef}
-            style={{
-              fontSize,
-              height: textareaHeight ? `${textareaHeight}px` : undefined
-            }}
-            styles={{ textarea: TextareaStyle }}
-            onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
-              setInputFocus(true)
-              const textArea = e.target
-              if (textArea) {
-                const length = textArea.value.length
-                textArea.setSelectionRange(length, length)
-              }
-            }}
-            onBlur={() => setInputFocus(false)}
-            onInput={onInput}
-            disabled={searching}
-            onPaste={(e) => onPaste(e.nativeEvent)}
-            onClick={() => searching && dispatch(setSearching(false))}
-          />
-          <DragHandle onMouseDown={handleDragStart}>
-            <HolderOutlined />
-          </DragHandle>
-          <Toolbar>
-            <ToolbarMenu>
-              <Tooltip placement="top" title={t('chat.input.new_topic', { Command: newTopicShortcut })} arrow>
-                <ToolbarButton type="text" onClick={addNewTopic}>
+          
+          <div className="rb-inputbar-main">
+            <Input.TextArea 
+              className="rb-inputbar-textarea"
+              value={text}
+              onChange={onChange}
+              onKeyDown={handleKeyDown}
+              placeholder={isTranslating ? t('chat.input.translating') : t('chat.input.placeholder')}
+              autoFocus
+              spellCheck={false}
+              rows={textareaRows}
+              ref={textareaRef}
+              style={{
+                fontSize,
+                height: textareaHeight ? `${textareaHeight}px` : undefined
+              }}
+              onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
+                setInputFocus(true)
+                const textArea = e.target
+                if (textArea) {
+                  const length = textArea.value.length
+                  textArea.setSelectionRange(length, length)
+                }
+              }}
+              onBlur={() => setInputFocus(false)}
+              onInput={onInput}
+              disabled={searching}
+              onPaste={(e) => onPaste(e.nativeEvent)}
+              onClick={() => searching && dispatch(setSearching(false))}
+            />
+            
+            <div 
+              className="rb-inputbar-resize-handle" 
+              onMouseDown={handleDragStart}
+            >
+              <HolderOutlined />
+            </div>
+          </div>
+          
+          <div className="rb-inputbar-toolbar">
+            <div className="rb-inputbar-toolbar-menu">
+              <Tooltip placement="top" title={t('chat.input.new_topic', { Command: newTopicShortcut })}>
+                <Button 
+                  className="rb-inputbar-tool-btn" 
+                  type="text" 
+                  onClick={addNewTopic}
+                >
                   <FormOutlined />
-                </ToolbarButton>
+                </Button>
               </Tooltip>
-              <AttachmentButton model={model} files={files} setFiles={setFiles} ToolbarButton={ToolbarButton} />
+              
+              <AttachmentButton 
+                model={model} 
+                files={files} 
+                setFiles={setFiles} 
+                buttonClass="rb-inputbar-tool-btn"
+              />
+              
               <MentionModelsButton
                 mentionModels={mentionModels}
                 onMentionModel={(model) => onMentionModel(model, mentionFromKeyboard)}
-                ToolbarButton={ToolbarButton}
+                buttonClass="rb-inputbar-tool-btn"
               />
-              <Tooltip placement="top" title={t('chat.input.web_search')} arrow>
-                <ToolbarButton type="text" onClick={onEnableWebSearch}>
-                  <GlobalOutlined
-                    style={{ color: assistant.enableWebSearch ? 'var(--color-link)' : 'var(--color-icon)' }}
-                  />
-                </ToolbarButton>
+              
+              <Tooltip placement="top" title={t('chat.input.web_search')}>
+                <Button 
+                  className={classNames('rb-inputbar-tool-btn', { 'active': assistant.enableWebSearch })}
+                  type="text" 
+                  onClick={onEnableWebSearch}
+                >
+                  <GlobalOutlined />
+                </Button>
               </Tooltip>
+              
               {showKnowledgeIcon && (
                 <KnowledgeBaseButton
                   selectedBases={selectedKnowledgeBases}
                   onSelect={handleKnowledgeBaseSelect}
-                  ToolbarButton={ToolbarButton}
+                  buttonClass="rb-inputbar-tool-btn"
                   disabled={files.length > 0}
                 />
               )}
+              
               {showMCPToolsIcon && (
                 <MCPToolsButton
                   enabledMCPs={enabledMCPs}
                   toggelEnableMCP={toggelEnableMCP}
-                  ToolbarButton={ToolbarButton}
+                  buttonClass="rb-inputbar-tool-btn"
                 />
               )}
-              <Tooltip placement="top" title={t('chat.input.clear', { Command: cleanTopicShortcut })} arrow>
+              
+              <Tooltip placement="top" title={t('chat.input.clear', { Command: cleanTopicShortcut })}>
                 <Popconfirm
                   title={t('chat.input.clear.content')}
                   placement="top"
                   onConfirm={clearTopic}
                   okButtonProps={{ danger: true }}
                   icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
-                  okText={t('chat.input.clear.title')}>
-                  <ToolbarButton type="text">
+                  okText={t('chat.input.clear.title')}
+                >
+                  <Button className="rb-inputbar-tool-btn" type="text">
                     <ClearOutlined style={{ fontSize: 17 }} />
-                  </ToolbarButton>
+                  </Button>
                 </Popconfirm>
               </Tooltip>
-              <Tooltip placement="top" title={expended ? t('chat.input.collapse') : t('chat.input.expand')} arrow>
-                <ToolbarButton type="text" onClick={onToggleExpended}>
+              
+              <Tooltip placement="top" title={expended ? t('chat.input.collapse') : t('chat.input.expand')}>
+                <Button className="rb-inputbar-tool-btn" type="text" onClick={onToggleExpended}>
                   {expended ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
-                </ToolbarButton>
+                </Button>
               </Tooltip>
+              
               {textareaHeight && (
-                <Tooltip placement="top" title={t('chat.input.auto_resize')} arrow>
-                  <ToolbarButton type="text" onClick={resetHeight}>
+                <Tooltip placement="top" title={t('chat.input.auto_resize')}>
+                  <Button className="rb-inputbar-tool-btn" type="text" onClick={resetHeight}>
                     <ColumnHeightOutlined />
-                  </ToolbarButton>
+                  </Button>
                 </Tooltip>
               )}
-              <NewContextButton onNewContext={onNewContext} ToolbarButton={ToolbarButton} />
+              
+              <NewContextButton 
+                onNewContext={onNewContext} 
+                buttonClass="rb-inputbar-tool-btn" 
+              />
+              
               <TokenCount
                 estimateTokenCount={estimateTokenCount}
                 inputTokenCount={inputTokenCount}
                 contextCount={contextCount}
-                ToolbarButton={ToolbarButton}
+                buttonClass="rb-inputbar-tool-btn"
                 onClick={onNewContext}
               />
-            </ToolbarMenu>
-            <ToolbarMenu>
-              <TranslateButton text={text} onTranslated={onTranslated} isLoading={isTranslating} />
+            </div>
+            
+            <div className="rb-inputbar-toolbar-menu">
+              <TranslateButton 
+                text={text} 
+                onTranslated={onTranslated} 
+                isLoading={isTranslating} 
+                buttonClass="rb-inputbar-tool-btn" 
+              />
+              
               {loading && (
-                <Tooltip placement="top" title={t('chat.input.pause')} arrow>
-                  <ToolbarButton type="text" onClick={onPause} style={{ marginRight: -2, marginTop: 1 }}>
+                <Tooltip placement="top" title={t('chat.input.pause')}>
+                  <Button 
+                    className="rb-inputbar-tool-btn rb-inputbar-pause-btn" 
+                    type="text" 
+                    onClick={onPause}
+                  >
                     <PauseCircleOutlined style={{ color: 'var(--color-error)', fontSize: 20 }} />
-                  </ToolbarButton>
+                  </Button>
                 </Tooltip>
               )}
-              {!loading && <SendMessageButton sendMessage={sendMessage} disabled={loading || inputEmpty} />}
-            </ToolbarMenu>
-          </Toolbar>
-        </InputBarContainer>
+              
+              {!loading && (
+                <SendMessageButton 
+                  sendMessage={sendMessage} 
+                  disabled={loading || inputEmpty} 
+                />
+              )}
+            </div>
+          </div>
+        </div>
       </NarrowLayout>
-    </Container>
+      
+      {isMentionPopupOpen && (
+        <MentionModelsInput
+          onSelect={(model) => onMentionModel(model, mentionFromKeyboard)}
+          onClose={() => setIsMentionPopupOpen(false)}
+        />
+      )}
+    </div>
   )
 }
-
-// Add these styled components at the bottom
-const DragHandle = styled.div`
-  position: absolute;
-  top: -3px;
-  left: 0;
-  right: 0;
-  height: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: row-resize;
-  color: var(--color-icon);
-  opacity: 0;
-  transition: opacity 0.2s;
-  z-index: 1;
-
-  &:hover {
-    opacity: 1;
-  }
-
-  .anticon {
-    transform: rotate(90deg);
-    font-size: 14px;
-  }
-`
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-`
-
-const InputBarContainer = styled.div`
-  border: 0.5px solid var(--color-border);
-  transition: all 0.3s ease;
-  position: relative;
-  margin: 14px 20px;
-  margin-top: 12px;
-  border-radius: 15px;
-  padding-top: 6px; // 为拖动手柄留出空间
-  background-color: var(--color-background-opacity);
-`
-
-const TextareaStyle: CSSProperties = {
-  paddingLeft: 0,
-  padding: '4px 15px 8px' // 减小顶部padding
-}
-
-const Textarea = styled(TextArea)`
-  padding: 0;
-  border-radius: 0;
-  display: flex;
-  flex: 1;
-  font-family: Ubuntu;
-  resize: none !important;
-  overflow: auto;
-  width: 100%;
-  box-sizing: border-box;
-  &.ant-input {
-    line-height: 1.4;
-  }
-`
-
-const Toolbar = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  padding: 0 8px;
-  padding-bottom: 0;
-  margin-bottom: 4px;
-  height: 36px;
-`
-
-const ToolbarMenu = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 6px;
-`
-
-const ToolbarButton = styled(Button)`
-  width: 30px;
-  height: 30px;
-  font-size: 16px;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-  color: var(--color-icon);
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  padding: 0;
-  &.anticon,
-  &.iconfont {
-    transition: all 0.3s ease;
-    color: var(--color-icon);
-  }
-  .icon-a-addchat {
-    font-size: 18px;
-    margin-bottom: -2px;
-  }
-  &:hover {
-    background-color: var(--color-background-soft);
-    .anticon,
-    .iconfont {
-      color: var(--color-text-1);
-    }
-  }
-  &.active {
-    background-color: var(--color-primary) !important;
-    .anticon,
-    .iconfont {
-      color: var(--color-white-soft);
-    }
-    &:hover {
-      background-color: var(--color-primary);
-    }
-  }
-`
 
 export default Inputbar

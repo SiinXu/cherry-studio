@@ -1,0 +1,121 @@
+.rb-sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+  padding-bottom: 12px;
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  height: calc(100vh - var(--navbar-height));
+  -webkit-app-region: drag !important;
+  margin-top: var(--navbar-height);
+  background-color: var(--color-background);
+  border-right: 1px solid var(--color-border);
+  transition: width 0.2s ease-in-out;
+}
+
+.rb-sidebar.collapsed {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  border-right: none;
+}
+
+.rb-sidebar-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.rb-sidebar-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.rb-sidebar-avatar {
+  width: 31px;
+  height: 31px;
+  padding: 0;
+  border-radius: 20%;
+  background-color: var(--color-background-soft);
+  border: 0.5px solid var(--color-border);
+  overflow: hidden;
+  -webkit-app-region: none;
+}
+
+.rb-sidebar-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rb-sidebar-emoji {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.rb-sidebar-menu {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0 8px;
+  margin: 0;
+  list-style: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.rb-sidebar-menu::-webkit-scrollbar {
+  display: none;
+}
+
+.rb-sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 8px;
+  margin-top: auto;
+}
+
+.rb-sidebar-icon {
+  width: 35px;
+  height: 35px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  -webkit-app-region: none;
+  border: 0.5px solid transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.rb-sidebar-icon .iconfont {
+  font-size: 20px;
+  color: var(--color-icon);
+}
+
+.rb-sidebar-icon:hover {
+  background-color: var(--color-background-mute);
+}
+
+.rb-sidebar-icon:hover .iconfont {
+  color: var(--color-icon-white);
+}
+
+.rb-sidebar-icon.active {
+  background-color: var(--color-background-mute);
+  border-color: var(--color-border);
+}
+
+.rb-sidebar-icon.active .iconfont {
+  color: var(--color-icon-white);
+} 

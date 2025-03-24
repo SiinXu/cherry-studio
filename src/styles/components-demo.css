@@ -1,0 +1,30 @@
+.components-demo {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.components-demo h1 {
+  margin-bottom: 24px;
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+}
+
+.demo-card {
+  margin-bottom: 24px;
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+} 

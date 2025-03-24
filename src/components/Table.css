@@ -1,0 +1,228 @@
+/* 表格容器 */
+.rb-table-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background-color: #fff;
+  border-radius: 4px;
+}
+
+/* 表格包装器 */
+.rb-table-wrapper {
+  overflow-x: auto;
+}
+
+/* 表格基础样式 */
+.rb-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+  font-size: 14px;
+}
+
+/* 表头 */
+.rb-table-header {
+  background-color: #f5f7fa;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.rb-table-header th {
+  padding: 12px 16px;
+  font-weight: 500;
+  color: #333;
+  white-space: nowrap;
+  background-color: #f5f7fa;
+  transition: background 0.3s ease;
+}
+
+/* 表格单元格 */
+.rb-table-cell {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e8e8e8;
+  transition: all 0.3s;
+}
+
+.rb-table-cell-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 表格行 */
+.rb-table-row {
+  transition: all 0.3s;
+}
+
+.rb-table-row:hover {
+  background-color: #f5f8ff;
+}
+
+/* 排序列 */
+.rb-table-column-sortable {
+  cursor: pointer;
+}
+
+.rb-table-column-sortable:hover {
+  background-color: #eee;
+}
+
+.rb-table-sort-icons {
+  display: inline-flex;
+  flex-direction: column;
+  margin-left: 4px;
+  line-height: 0;
+}
+
+.rb-table-sort-icon-up,
+.rb-table-sort-icon-down {
+  font-size: 8px;
+  color: #ccc;
+}
+
+.rb-table-sort-icon-active {
+  color: #4a86e8;
+}
+
+/* 边框样式 */
+.rb-table-bordered .rb-table {
+  border: 1px solid #e8e8e8;
+}
+
+.rb-table-bordered .rb-table-cell {
+  border-right: 1px solid #e8e8e8;
+}
+
+.rb-table-bordered .rb-table-header th {
+  border-right: 1px solid #e8e8e8;
+}
+
+/* 条纹样式 */
+.rb-table-striped .rb-table-row:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.rb-table-striped .rb-table-row:nth-child(even):hover {
+  background-color: #f5f8ff;
+}
+
+/* 大小变体 */
+.rb-table-sm .rb-table-cell,
+.rb-table-sm .rb-table-header th {
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+.rb-table-md .rb-table-cell,
+.rb-table-md .rb-table-header th {
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+.rb-table-lg .rb-table-cell,
+.rb-table-lg .rb-table-header th {
+  padding: 16px 24px;
+  font-size: 16px;
+}
+
+/* 空表格 */
+.rb-table-empty {
+  text-align: center;
+  color: #999;
+  padding: 32px 16px;
+}
+
+/* 加载状态 */
+.rb-table-loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.rb-table-loading-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  font-size: 14px;
+  color: #4a86e8;
+}
+
+/* 分页 */
+.rb-table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 16px 0;
+  flex-wrap: wrap;
+}
+
+.rb-pagination-btn {
+  min-width: 32px;
+  height: 32px;
+  margin: 0 4px;
+  padding: 0 8px;
+  background-color: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s;
+  outline: none;
+}
+
+.rb-pagination-btn:hover:not(:disabled) {
+  border-color: #4a86e8;
+  color: #4a86e8;
+}
+
+.rb-pagination-btn:disabled {
+  color: #d9d9d9;
+  cursor: not-allowed;
+}
+
+.rb-pagination-btn-active {
+  border-color: #4a86e8;
+  background-color: #4a86e8;
+  color: #fff;
+}
+
+.rb-pagination-btn-active:hover {
+  color: #fff;
+}
+
+.rb-pagination-ellipsis {
+  display: inline-block;
+  margin: 0 4px;
+  color: #d9d9d9;
+}
+
+.rb-pagination-jumper {
+  margin-left: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.rb-pagination-jumper-input {
+  width: 50px;
+  height: 32px;
+  margin: 0 8px;
+  text-align: center;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  outline: none;
+}
+
+.rb-pagination-jumper-input:focus {
+  border-color: #4a86e8;
+}
+
+.rb-pagination-info {
+  margin-left: 16px;
+  color: #999;
+} 

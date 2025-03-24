@@ -1,5 +1,5 @@
 import { FormOutlined, SearchOutlined } from '@ant-design/icons'
-import { Navbar, NavbarLeft, NavbarRight } from '@renderer/components/app/Navbar'
+import { Layout, Navigation, Button, Tooltip } from '../../../../../components'
 import { HStack } from '@renderer/components/Layout'
 import MinAppsPopover from '@renderer/components/Popups/MinAppsPopover'
 import SearchPopup from '@renderer/components/Popups/SearchPopup'
@@ -13,10 +13,9 @@ import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import { useAppDispatch } from '@renderer/store'
 import { setNarrowMode } from '@renderer/store/settings'
 import { Assistant, Topic } from '@renderer/types'
-import { Tooltip } from 'antd'
 import { t } from 'i18next'
 import { FC } from 'react'
-import styled from 'styled-components'
+import './Navbar.css'
 
 import SelectModelButton from './components/SelectModelButton'
 import UpdateAppButton from './components/UpdateAppButton'
@@ -56,106 +55,85 @@ const HeaderNavbar: FC<Props> = ({ activeAssistant }) => {
   }
 
   return (
-    <Navbar className="home-navbar">
-      {showAssistants && (
-        <NavbarLeft style={{ justifyContent: 'space-between', borderRight: 'none', padding: 0 }}>
-          <Tooltip title={t('navbar.hide_sidebar')} mouseEnterDelay={0.8}>
-            <NavbarIcon onClick={toggleShowAssistants} style={{ marginLeft: isMac ? 16 : 0 }}>
-              <i className="iconfont icon-hide-sidebar" />
-            </NavbarIcon>
-          </Tooltip>
-          <Tooltip title={t('settings.shortcuts.new_topic')} mouseEnterDelay={0.8}>
-            <NavbarIcon onClick={() => EventEmitter.emit(EVENT_NAMES.ADD_NEW_TOPIC)}>
-              <FormOutlined />
-            </NavbarIcon>
-          </Tooltip>
-        </NavbarLeft>
-      )}
-      <NavbarRight
-        style={{ justifyContent: 'space-between', paddingRight: isWindows ? 140 : 12, flex: 1 }}
-        className="home-navbar-right">
-        <HStack alignItems="center">
-          {!showAssistants && (
-            <Tooltip title={t('navbar.show_sidebar')} mouseEnterDelay={0.8}>
-              <NavbarIcon
-                onClick={() => toggleShowAssistants()}
-                style={{ marginRight: 8, marginLeft: isMac ? 4 : -12 }}>
-                <i className="iconfont icon-show-sidebar" />
-              </NavbarIcon>
+    <Layout.Header className="rb-navbar home-navbar">
+      <div className="rb-navbar-container">
+        {showAssistants && (
+          <div className="rb-navbar-left" style={{ justifyContent: 'space-between', borderRight: 'none', padding: 0 }}>
+            <Tooltip title={t('navbar.hide_sidebar')} placement="bottom">
+              <Button 
+                className="rb-navbar-icon" 
+                onClick={toggleShowAssistants} 
+                style={{ marginLeft: isMac ? 16 : 0 }}
+                type="text"
+              >
+                <i className="iconfont icon-hide-sidebar" />
+              </Button>
             </Tooltip>
-          )}
-          <SelectModelButton assistant={assistant} />
-        </HStack>
-        <HStack alignItems="center" gap={8}>
-          <UpdateAppButton />
-          <Tooltip title={t('chat.assistant.search.placeholder')} mouseEnterDelay={0.8}>
-            <NarrowIcon onClick={() => SearchPopup.show()}>
-              <SearchOutlined />
-            </NarrowIcon>
-          </Tooltip>
-          <Tooltip title={t('navbar.expand')} mouseEnterDelay={0.8}>
-            <NarrowIcon onClick={handleNarrowModeToggle}>
-              <i className="iconfont icon-icon-adaptive-width"></i>
-            </NarrowIcon>
-          </Tooltip>
-          {sidebarIcons.visible.includes('minapp') && (
-            <MinAppsPopover>
-              <Tooltip title={t('minapp.title')} mouseEnterDelay={0.8}>
-                <NarrowIcon>
-                  <i className="iconfont icon-appstore" />
-                </NarrowIcon>
+            <Tooltip title={t('settings.shortcuts.new_topic')} placement="bottom">
+              <Button 
+                className="rb-navbar-icon" 
+                onClick={() => EventEmitter.emit(EVENT_NAMES.ADD_NEW_TOPIC)}
+                type="text"
+              >
+                <FormOutlined />
+              </Button>
+            </Tooltip>
+          </div>
+        )}
+        <div 
+          className="rb-navbar-right"
+          style={{ justifyContent: 'space-between', paddingRight: isWindows ? 140 : 12, flex: 1 }}
+        >
+          <HStack alignItems="center">
+            {!showAssistants && (
+              <Tooltip title={t('navbar.show_sidebar')} placement="bottom">
+                <Button
+                  className="rb-navbar-icon"
+                  onClick={() => toggleShowAssistants()}
+                  style={{ marginRight: 8, marginLeft: isMac ? 4 : -12 }}
+                  type="text"
+                >
+                  <i className="iconfont icon-show-sidebar" />
+                </Button>
               </Tooltip>
-            </MinAppsPopover>
-          )}
-          {topicPosition === 'right' && (
-            <NarrowIcon onClick={toggleShowTopics}>
-              <i className={`iconfont icon-${showTopics ? 'show' : 'hide'}-sidebar`} />
-            </NarrowIcon>
-          )}
-        </HStack>
-      </NavbarRight>
-    </Navbar>
+            )}
+            <SelectModelButton assistant={assistant} />
+          </HStack>
+          <HStack alignItems="center" gap={8}>
+            <UpdateAppButton />
+            <Tooltip title={t('chat.assistant.search.placeholder')} placement="bottom">
+              <Button className="rb-navbar-icon rb-navbar-narrow-icon" onClick={() => SearchPopup.show()} type="text">
+                <SearchOutlined />
+              </Button>
+            </Tooltip>
+            <Tooltip title={t('navbar.expand')} placement="bottom">
+              <Button className="rb-navbar-icon rb-navbar-narrow-icon" onClick={handleNarrowModeToggle} type="text">
+                <i className="iconfont icon-icon-adaptive-width"></i>
+              </Button>
+            </Tooltip>
+            {sidebarIcons.visible.includes('minapp') && (
+              <MinAppsPopover>
+                <Tooltip title={t('minapp.title')} placement="bottom">
+                  <Button className="rb-navbar-icon rb-navbar-narrow-icon" type="text">
+                    <i className="iconfont icon-appstore" />
+                  </Button>
+                </Tooltip>
+              </MinAppsPopover>
+            )}
+            {topicPosition === 'right' && (
+              <Button 
+                className="rb-navbar-icon rb-navbar-narrow-icon" 
+                onClick={toggleShowTopics}
+                type="text"
+              >
+                <i className={`iconfont icon-${showTopics ? 'show' : 'hide'}-sidebar`} />
+              </Button>
+            )}
+          </HStack>
+        </div>
+      </div>
+    </Layout.Header>
   )
 }
-
-export const NavbarIcon = styled.div`
-  -webkit-app-region: none;
-  border-radius: 8px;
-  height: 30px;
-  padding: 0 7px;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  transition: all 0.2s ease-in-out;
-  cursor: pointer;
-  .iconfont {
-    font-size: 18px;
-    color: var(--color-icon);
-    &.icon-a-addchat {
-      font-size: 20px;
-    }
-    &.icon-a-darkmode {
-      font-size: 20px;
-    }
-    &.icon-appstore {
-      font-size: 20px;
-    }
-  }
-  .anticon {
-    color: var(--color-icon);
-    font-size: 16px;
-  }
-  &:hover {
-    background-color: var(--color-background-mute);
-    color: var(--color-icon-white);
-  }
-`
-
-const NarrowIcon = styled(NavbarIcon)`
-  @media (max-width: 1000px) {
-    display: none;
-  }
-`
 
 export default HeaderNavbar

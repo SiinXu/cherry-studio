@@ -1,0 +1,24 @@
+@import './styles/components.css';
+/* 其他样式... */
+
+/* 导入组件样式 */
+@import './components/Button.css';
+@import './components/Modal.css';
+/* 导入其他组件样式... */
+
+/* 全局样式 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #333;
+  background-color: #f5f5f5;
+}
+
+/* 其他全局样式... */ 

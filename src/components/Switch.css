@@ -1,0 +1,148 @@
+.rb-switch {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  font-size: 14px;
+  user-select: none;
+}
+
+.rb-switch-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.rb-switch-slider {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  background-color: #e0e0e0;
+  border-radius: 20px;
+  transition: all 0.3s;
+}
+
+.rb-switch-slider::before {
+  content: '';
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  border-radius: 50%;
+  transition: all 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 选中状态 */
+.rb-switch-checked .rb-switch-slider {
+  background-color: #4a86e8;
+}
+
+.rb-switch-checked .rb-switch-slider::before {
+  transform: translateX(16px);
+}
+
+/* 尺寸 */
+.rb-switch-sm .rb-switch-slider {
+  width: 28px;
+  height: 16px;
+}
+
+.rb-switch-sm .rb-switch-slider::before {
+  height: 12px;
+  width: 12px;
+}
+
+.rb-switch-sm .rb-switch-checked .rb-switch-slider::before {
+  transform: translateX(12px);
+}
+
+.rb-switch-sm .rb-switch-label {
+  font-size: 12px;
+}
+
+.rb-switch-md .rb-switch-slider {
+  width: 36px;
+  height: 20px;
+}
+
+.rb-switch-md .rb-switch-slider::before {
+  height: 16px;
+  width: 16px;
+}
+
+.rb-switch-md .rb-switch-label {
+  font-size: 14px;
+}
+
+.rb-switch-lg .rb-switch-slider {
+  width: 44px;
+  height: 24px;
+}
+
+.rb-switch-lg .rb-switch-slider::before {
+  height: 20px;
+  width: 20px;
+}
+
+.rb-switch-lg .rb-switch-checked .rb-switch-slider::before {
+  transform: translateX(20px);
+}
+
+.rb-switch-lg .rb-switch-label {
+  font-size: 16px;
+}
+
+/* 颜色 */
+.rb-switch-primary.rb-switch-checked .rb-switch-slider {
+  background-color: #4a86e8;
+}
+
+.rb-switch-secondary.rb-switch-checked .rb-switch-slider {
+  background-color: #6c757d;
+}
+
+.rb-switch-success.rb-switch-checked .rb-switch-slider {
+  background-color: #4caf50;
+}
+
+.rb-switch-error.rb-switch-checked .rb-switch-slider {
+  background-color: #f44336;
+}
+
+.rb-switch-warning.rb-switch-checked .rb-switch-slider {
+  background-color: #ff9800;
+}
+
+.rb-switch-info.rb-switch-checked .rb-switch-slider {
+  background-color: #2196f3;
+}
+
+/* 禁用状态 */
+.rb-switch-disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.rb-switch-disabled .rb-switch-slider {
+  background-color: #f5f5f5;
+}
+
+.rb-switch-disabled.rb-switch-checked .rb-switch-slider {
+  background-color: #b0bec5;
+}
+
+.rb-switch-disabled .rb-switch-slider::before {
+  background-color: #e0e0e0;
+  box-shadow: none;
+}
+
+/* 标签间距 */
+.rb-switch-label {
+  margin-left: 8px;
+  line-height: 1;
+} 

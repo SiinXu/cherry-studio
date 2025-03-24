@@ -1,0 +1,40 @@
+.rb-knowledge-selector {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.rb-knowledge-empty {
+  padding: 8px;
+}
+
+.rb-knowledge-search {
+  margin-bottom: 8px;
+}
+
+.rb-knowledge-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rb-knowledge-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.rb-knowledge-item:hover {
+  background-color: var(--color-background-soft);
+}
+
+.rb-knowledge-item.selected {
+  background-color: var(--color-primary-light);
+}
+
+.rb-knowledge-item-icon {
+  margin-right: 8px;
+  color: var(--color-primary);
+} 

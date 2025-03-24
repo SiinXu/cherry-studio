@@ -1,0 +1,44 @@
+.rb-chat {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  flex: 1;
+  justify-content: space-between;
+  background-color: var(--color-background);
+}
+
+.rb-chat-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: calc(100vh - var(--navbar-height));
+  flex: 1;
+}
+
+/* Message style variations */
+.rb-chat.default {
+  --message-max-width: 85%;
+  --message-border-radius: 12px;
+}
+
+.rb-chat.rounded {
+  --message-max-width: 85%;
+  --message-border-radius: 16px;
+}
+
+.rb-chat.bubble {
+  --message-max-width: 70%;
+  --message-border-radius: 20px;
+}
+
+@media (max-width: 768px) {
+  .rb-chat {
+    flex-direction: column;
+  }
+  
+  .rb-chat-main {
+    height: auto;
+    min-height: 0;
+    flex: 1;
+  }
+} 

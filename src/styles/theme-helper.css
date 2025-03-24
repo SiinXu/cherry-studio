@@ -1,0 +1,59 @@
+/* 主题辅助类 */
+
+/* 文字颜色 */
+.text-primary { color: #4a86e8 !important; }
+.text-secondary { color: #6c757d !important; }
+.text-success { color: #52c41a !important; }
+.text-warning { color: #faad14 !important; }
+.text-danger { color: #f5222d !important; }
+.text-info { color: #1890ff !important; }
+
+/* 背景颜色 */
+.bg-primary { background-color: #4a86e8 !important; }
+.bg-secondary { background-color: #6c757d !important; }
+.bg-success { background-color: #52c41a !important; }
+.bg-warning { background-color: #faad14 !important; }
+.bg-danger { background-color: #f5222d !important; }
+.bg-info { background-color: #1890ff !important; }
+.bg-light { background-color: #f8f9fa !important; }
+.bg-dark { background-color: #343a40 !important; }
+
+/* 边距 */
+.m-0 { margin: 0 !important; }
+.m-1 { margin: 0.25rem !important; }
+.m-2 { margin: 0.5rem !important; }
+.m-3 { margin: 1rem !important; }
+.m-4 { margin: 1.5rem !important; }
+.m-5 { margin: 3rem !important; }
+
+.mt-0 { margin-top: 0 !important; }
+.mt-1 { margin-top: 0.25rem !important; }
+.mt-2 { margin-top: 0.5rem !important; }
+.mt-3 { margin-top: 1rem !important; }
+.mt-4 { margin-top: 1.5rem !important; }
+.mt-5 { margin-top: 3rem !important; }
+
+.mb-0 { margin-bottom: 0 !important; }
+.mb-1 { margin-bottom: 0.25rem !important; }
+.mb-2 { margin-bottom: 0.5rem !important; }
+.mb-3 { margin-bottom: 1rem !important; }
+.mb-4 { margin-bottom: 1.5rem !important; }
+.mb-5 { margin-bottom: 3rem !important; }
+
+.p-0 { padding: 0 !important; }
+.p-1 { padding: 0.25rem !important; }
+.p-2 { padding: 0.5rem !important; }
+.p-3 { padding: 1rem !important; }
+.p-4 { padding: 1.5rem !important; }
+.p-5 { padding: 3rem !important; }
+
+/* 对齐 */
+.text-left { text-align: left !important; }
+.text-center { text-align: center !important; }
+.text-right { text-align: right !important; }
+
+/* 边框 */
+.border { border: 1px solid #e8e8e8 !important; }
+.border-0 { border: 0 !important; }
+.rounded { border-radius: 4px !important; }
+.rounded-circle { border-radius: 50% !important; } 

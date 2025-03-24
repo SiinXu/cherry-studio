@@ -1,0 +1,166 @@
+.rb-card {
+  position: relative;
+  background-color: #fff;
+  border-radius: 8px;
+  transition: all 0.3s;
+  overflow: hidden;
+}
+
+.rb-card-bordered {
+  border: 1px solid #e8e8e8;
+}
+
+.rb-card-hoverable:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.rb-card-shadow {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 变体 */
+.rb-card-default {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.rb-card-outlined {
+  border: 1px solid #e0e0e0;
+  box-shadow: none;
+}
+
+.rb-card-flat {
+  box-shadow: none;
+}
+
+/* 阴影级别 */
+.rb-card-elevation-1 {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.rb-card-elevation-2 {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.rb-card-elevation-3 {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.rb-card-elevation-4 {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.rb-card-elevation-5 {
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* 卡片头部 */
+.rb-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.rb-card-head-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.rb-card-head-extra {
+  font-size: 14px;
+  color: #1890ff;
+}
+
+/* 卡片正文 */
+.rb-card-body {
+  padding: 16px;
+}
+
+/* 卡片头部（带头像的） */
+.rb-card-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+}
+
+.rb-card-avatar {
+  margin-right: 16px;
+}
+
+.rb-card-header-content {
+  flex: 1;
+}
+
+.rb-card-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.rb-card-subtitle {
+  font-size: 14px;
+  color: #666;
+}
+
+.rb-card-action {
+  margin-left: 16px;
+}
+
+/* 卡片内容 */
+.rb-card-content {
+  padding: 16px;
+}
+
+/* 卡片操作 */
+.rb-card-actions {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-top: 1px solid #e8e8e8;
+  gap: 8px;
+}
+
+.rb-card-actions-start {
+  justify-content: flex-start;
+}
+
+.rb-card-actions-end {
+  justify-content: flex-end;
+}
+
+.rb-card-actions-between {
+  justify-content: space-between;
+}
+
+.rb-card-actions > * {
+  margin: 0 4px;
+}
+
+/* 卡片媒体 */
+.rb-card-media {
+  position: relative;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 200px;
+}
+
+.rb-card-media-title {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  background-color: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.rb-card-media:empty {
+  padding-top: 56.25%; /* 16:9 纵横比 */
+} 

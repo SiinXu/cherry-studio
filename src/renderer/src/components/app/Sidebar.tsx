@@ -1,326 +1,155 @@
 import {
-  ExperimentOutlined,
-  FileSearchOutlined,
-  FolderOutlined,
-  PictureOutlined,
-  QuestionCircleOutlined,
+  AppstoreOutlined,
+  BookOutlined,
+  ClockCircleOutlined,
+  FileOutlined,
+  HomeOutlined,
+  SettingOutlined,
   TranslationOutlined
-} from '@ant-design/icons'
-import { isMac } from '@renderer/config/constant'
-import { AppLogo, UserAvatar } from '@renderer/config/env'
-import { useTheme } from '@renderer/context/ThemeProvider'
-import useAvatar from '@renderer/hooks/useAvatar'
-import { useMinapps } from '@renderer/hooks/useMinapps'
-import useNavBackgroundColor from '@renderer/hooks/useNavBackgroundColor'
-import { modelGenerating, useRuntime } from '@renderer/hooks/useRuntime'
-import { useSettings } from '@renderer/hooks/useSettings'
-import { isEmoji } from '@renderer/utils'
-import type { MenuProps } from 'antd'
-import { Tooltip } from 'antd'
-import { Avatar } from 'antd'
-import { Dropdown } from 'antd'
-import { FC } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useLocation, useNavigate } from 'react-router-dom'
-import styled from 'styled-components'
-
-import DragableList from '../DragableList'
-import MinAppIcon from '../Icons/MinAppIcon'
-import MinApp from '../MinApp'
-import UserPopup from '../Popups/UserPopup'
+} from '@ant-design/icons';
+import { Layout, Navigation, Button, Tooltip, Menu } from '../../../../../components';
+import { useSettings } from '@renderer/hooks/useSettings';
+import { useShortcut } from '@renderer/hooks/useShortcuts';
+import { useShowAssistants } from '@renderer/hooks/useStore';
+import { useUserProfile } from '@renderer/hooks/useUserProfile';
+import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService';
+import { NavigationService } from '@renderer/services/NavigationService';
+import { useAppDispatch } from '@renderer/store';
+import { setTheme } from '@renderer/store/settings';
+import { t } from 'i18next';
+import { FC, useCallback, useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import './Sidebar.css';
 
 const Sidebar: FC = () => {
-  const { pathname } = useLocation()
-  const avatar = useAvatar()
-  const { minappShow } = useRuntime()
-  const { t } = useTranslation()
-  const navigate = useNavigate()
-  const { sidebarIcons } = useSettings()
-  const { theme, toggleTheme } = useTheme()
-  const { pinned } = useMinapps()
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { showAssistants } = useShowAssistants();
+  const { sidebarIcons, theme } = useSettings();
+  const { userProfile } = useUserProfile();
+  const dispatch = useAppDispatch();
+  const [showContextMenu, setShowContextMenu] = useState(false);
 
-  const onEditUser = () => UserPopup.show()
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      setShowContextMenu(true);
+    };
 
-  const backgroundColor = useNavBackgroundColor()
+    document.addEventListener('contextmenu', handleContextMenu);
+    return () => document.removeEventListener('contextmenu', handleContextMenu);
+  }, []);
 
-  const showPinnedApps = pinned.length > 0 && sidebarIcons.visible.includes('minapp')
+  useShortcut('toggle_theme', () => {
+    dispatch(setTheme(theme === 'dark' ? 'light' : 'dark'));
+  });
 
-  const to = async (path: string) => {
-    await modelGenerating()
-    navigate(path)
-  }
+  const handleNavigate = useCallback((path: string) => {
+    navigate(path);
+  }, [navigate]);
 
-  const onOpenDocs = () => {
-    MinApp.start({
-      id: 'docs',
-      name: t('docs.title'),
-      url: 'https://docs.cherry-ai.com/',
-      logo: AppLogo
-    })
-  }
+  const handleOpenDocs = useCallback(() => {
+    NavigationService.openDocs();
+  }, []);
 
-  return (
-    <Container id="app-sidebar" style={{ backgroundColor, zIndex: minappShow ? 10000 : 'initial' }}>
-      {isEmoji(avatar) ? (
-        <EmojiAvatar onClick={onEditUser}>{avatar}</EmojiAvatar>
-      ) : (
-        <AvatarImg src={avatar || UserAvatar} draggable={false} className="nodrag" onClick={onEditUser} />
-      )}
-      <MainMenusContainer>
-        <Menus onClick={MinApp.onClose}>
-          <MainMenus />
-        </Menus>
-        {showPinnedApps && (
-          <AppsContainer>
-            <Divider />
-            <Menus>
-              <PinnedApps />
-            </Menus>
-          </AppsContainer>
-        )}
-      </MainMenusContainer>
-      <Menus>
-        <Tooltip title={t('docs.title')} mouseEnterDelay={0.8} placement="right">
-          <Icon
-            theme={theme}
-            onClick={onOpenDocs}
-            className={minappShow && MinApp.app?.url === 'https://docs.cherry-ai.com/' ? 'active' : ''}>
-            <QuestionCircleOutlined />
-          </Icon>
-        </Tooltip>
-        <Tooltip title={t('settings.theme.title')} mouseEnterDelay={0.8} placement="right">
-          <Icon theme={theme} onClick={() => toggleTheme()}>
-            {theme === 'dark' ? (
-              <i className="iconfont icon-theme icon-dark1" />
-            ) : (
-              <i className="iconfont icon-theme icon-theme-light" />
-            )}
-          </Icon>
-        </Tooltip>
-        <Tooltip title={t('settings.title')} mouseEnterDelay={0.8} placement="right">
-          <StyledLink
-            onClick={async () => {
-              minappShow && (await MinApp.close())
-              await modelGenerating()
-              await to('/settings/provider')
-            }}>
-            <Icon theme={theme} className={pathname.startsWith('/settings') && !minappShow ? 'active' : ''}>
-              <i className="iconfont icon-setting" />
-            </Icon>
-          </StyledLink>
-        </Tooltip>
-      </Menus>
-    </Container>
-  )
-}
+  const handleEditProfile = useCallback(() => {
+    EventEmitter.emit(EVENT_NAMES.EDIT_USER_PROFILE);
+  }, []);
 
-const MainMenus: FC = () => {
-  const { t } = useTranslation()
-  const { pathname } = useLocation()
-  const { sidebarIcons } = useSettings()
-  const { minappShow } = useRuntime()
-  const navigate = useNavigate()
-  const { theme } = useTheme()
-
-  const isRoute = (path: string): string => (pathname === path && !minappShow ? 'active' : '')
-  const isRoutes = (path: string): string => (pathname.startsWith(path) && !minappShow ? 'active' : '')
-
-  const iconMap = {
-    assistants: <i className="iconfont icon-chat" />,
-    agents: <i className="iconfont icon-business-smart-assistant" />,
-    paintings: <PictureOutlined style={{ fontSize: 16 }} />,
-    translate: <TranslationOutlined />,
-    minapp: <i className="iconfont icon-appstore" />,
-    knowledge: <FileSearchOutlined />,
-    files: <FolderOutlined />,
-    demo: <ExperimentOutlined style={{ fontSize: 16 }} />
-  }
-
-  const pathMap = {
-    assistants: '/',
-    agents: '/agents',
-    paintings: '/paintings',
-    translate: '/translate',
-    minapp: '/apps',
-    knowledge: '/knowledge',
-    files: '/files',
-    demo: '/demo'
-  }
-
-  return sidebarIcons.visible.map((icon) => {
-    const path = pathMap[icon]
-    const isActive = path === '/' ? isRoute(path) : isRoutes(path)
-
-    return (
-      <Tooltip key={icon} title={t(`${icon}.title`)} mouseEnterDelay={0.8} placement="right">
-        <StyledLink
-          onClick={async () => {
-            minappShow && (await MinApp.close())
-            await modelGenerating()
-            navigate(path)
-          }}>
-          <Icon theme={theme} className={isActive}>
-            {iconMap[icon]}
-          </Icon>
-        </StyledLink>
-      </Tooltip>
-    )
-  })
-}
-
-const PinnedApps: FC = () => {
-  const { pinned, updatePinnedMinapps } = useMinapps()
-  const { t } = useTranslation()
-  const { minappShow } = useRuntime()
-  const { theme } = useTheme()
+  const menuItems = [
+    {
+      key: '/',
+      icon: <HomeOutlined />,
+      label: t('sidebar.home'),
+      onClick: () => handleNavigate('/')
+    },
+    {
+      key: '/agents',
+      icon: <AppstoreOutlined />,
+      label: t('sidebar.agents'),
+      onClick: () => handleNavigate('/agents')
+    },
+    {
+      key: '/files',
+      icon: <FileOutlined />,
+      label: t('sidebar.files'),
+      onClick: () => handleNavigate('/files')
+    },
+    {
+      key: '/history',
+      icon: <ClockCircleOutlined />,
+      label: t('sidebar.history'),
+      onClick: () => handleNavigate('/history')
+    },
+    {
+      key: '/knowledge',
+      icon: <BookOutlined />,
+      label: t('sidebar.knowledge'),
+      onClick: () => handleNavigate('/knowledge')
+    },
+    {
+      key: '/translate',
+      icon: <TranslationOutlined />,
+      label: t('sidebar.translate'),
+      onClick: () => handleNavigate('/translate')
+    },
+    {
+      key: '/settings',
+      icon: <SettingOutlined />,
+      label: t('sidebar.settings'),
+      onClick: () => handleNavigate('/settings')
+    }
+  ];
 
   return (
-    <DragableList list={pinned} onUpdate={updatePinnedMinapps} listStyle={{ marginBottom: 5 }}>
-      {(app) => {
-        const menuItems: MenuProps['items'] = [
-          {
-            key: 'togglePin',
-            label: t('minapp.sidebar.remove.title'),
-            onClick: () => {
-              const newPinned = pinned.filter((item) => item.id !== app.id)
-              updatePinnedMinapps(newPinned)
-            }
-          }
-        ]
-        const isActive = minappShow && MinApp.app?.id === app.id
-        return (
-          <Tooltip key={app.id} title={app.name} mouseEnterDelay={0.8} placement="right">
-            <StyledLink>
-              <Dropdown menu={{ items: menuItems }} trigger={['contextMenu']}>
-                <Icon theme={theme} onClick={() => MinApp.start(app)} className={isActive ? 'active' : ''}>
-                  <MinAppIcon size={20} app={app} style={{ borderRadius: 6 }} />
-                </Icon>
-              </Dropdown>
-            </StyledLink>
+    <Layout.Sidebar className="rb-sidebar" collapsed={!showAssistants}>
+      <div className="rb-sidebar-container">
+        <div className="rb-sidebar-header">
+          <Tooltip title={t('profile.edit')} placement="right">
+            <Button 
+              className="rb-sidebar-avatar" 
+              onClick={handleEditProfile}
+              type="text"
+            >
+              {userProfile?.avatar?.startsWith('emoji:') ? (
+                <span className="rb-sidebar-emoji">{userProfile.avatar.replace('emoji:', '')}</span>
+              ) : (
+                <img src={userProfile?.avatar} alt="avatar" />
+              )}
+            </Button>
           </Tooltip>
-        )
-      }}
-    </DragableList>
-  )
-}
+        </div>
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 8px 0;
-  padding-bottom: 12px;
-  width: var(--sidebar-width);
-  min-width: var(--sidebar-width);
-  height: ${isMac ? 'calc(100vh - var(--navbar-height))' : '100vh'};
-  -webkit-app-region: drag !important;
-  margin-top: ${isMac ? 'var(--navbar-height)' : 0};
-`
+        <Menu
+          className="rb-sidebar-menu"
+          selectedKeys={[pathname]}
+          items={menuItems}
+          mode="vertical"
+        />
 
-const AvatarImg = styled(Avatar)`
-  width: 31px;
-  height: 31px;
-  background-color: var(--color-background-soft);
-  margin-bottom: ${isMac ? '12px' : '12px'};
-  margin-top: ${isMac ? '0px' : '2px'};
-  border: none;
-  cursor: pointer;
-`
+        <div className="rb-sidebar-footer">
+          <Tooltip title={t('sidebar.docs')} placement="right">
+            <Button
+              className="rb-sidebar-icon"
+              onClick={handleOpenDocs}
+              type="text"
+            >
+              <i className="iconfont icon-docs" />
+            </Button>
+          </Tooltip>
+          <Tooltip title={t('sidebar.theme')} placement="right">
+            <Button
+              className="rb-sidebar-icon"
+              onClick={() => dispatch(setTheme(theme === 'dark' ? 'light' : 'dark'))}
+              type="text"
+            >
+              <i className={`iconfont icon-a-${theme}mode`} />
+            </Button>
+          </Tooltip>
+        </div>
+      </div>
+    </Layout.Sidebar>
+  );
+};
 
-const EmojiAvatar = styled.div`
-  width: 31px;
-  height: 31px;
-  background-color: var(--color-background-soft);
-  margin-bottom: ${isMac ? '12px' : '12px'};
-  margin-top: ${isMac ? '0px' : '2px'};
-  border-radius: 20%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  cursor: pointer;
-  -webkit-app-region: none;
-  border: 0.5px solid var(--color-border);
-  font-size: 20px;
-`
-
-const MainMenusContainer = styled.div`
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  overflow: hidden;
-`
-
-const Menus = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-`
-
-const Icon = styled.div<{ theme: string }>`
-  width: 35px;
-  height: 35px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 50%;
-  -webkit-app-region: none;
-  border: 0.5px solid transparent;
-  .iconfont,
-  .anticon {
-    color: var(--color-icon);
-    font-size: 20px;
-    text-decoration: none;
-  }
-  .anticon {
-    font-size: 17px;
-  }
-  &:hover {
-    background-color: ${({ theme }) => (theme === 'dark' ? 'var(--color-black)' : 'var(--color-white)')};
-    opacity: 0.8;
-    cursor: pointer;
-    .iconfont,
-    .anticon {
-      color: var(--color-icon-white);
-    }
-  }
-  &.active {
-    background-color: ${({ theme }) => (theme === 'dark' ? 'var(--color-black)' : 'var(--color-white)')};
-    border: 0.5px solid var(--color-border);
-    .iconfont,
-    .anticon {
-      color: var(--color-icon-white);
-    }
-  }
-`
-
-const StyledLink = styled.div`
-  text-decoration: none;
-  -webkit-app-region: none;
-  &* {
-    user-select: none;
-  }
-`
-
-const AppsContainer = styled.div`
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  overflow-y: auto;
-  overflow-x: hidden;
-  margin-bottom: 10px;
-  -webkit-app-region: none;
-  &::-webkit-scrollbar {
-    display: none;
-  }
-`
-
-const Divider = styled.div`
-  width: 50%;
-  margin: 8px 0;
-  border-bottom: 0.5px solid var(--color-border);
-`
-
-export default Sidebar
+export default Sidebar;
