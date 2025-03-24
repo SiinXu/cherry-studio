@@ -233,7 +233,8 @@
       "topics.prompt.tips": "话题提示词: 针对当前话题提供额外的补充提示词",
       "topics.title": "话题",
       "topics.unpinned": "取消固定",
-      "translate": "翻译"
+      "translate": "翻译",
+      "topics.duplicate_to": "复制到"
     },
     "code_block": {
       "collapse": "收起",
