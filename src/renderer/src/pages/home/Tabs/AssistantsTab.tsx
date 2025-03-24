@@ -231,27 +231,26 @@ const Assistants: FC<AssistantsTabProps> = ({
 
     return (
       <Draggable key={group.id} draggableId={group.id} index={index}>
-        {(provided) => (
+        {(provided, snapshot) => (
           <GroupContainer
             ref={provided.innerRef}
             {...provided.draggableProps}
-            style={{
-              ...provided.draggableProps.style,
-              margin: '0 0 8px 0'
-            }}
+            data-groupid={group.id}
             onDragOver={(e) => handleAssistantDragOver(e, group.id)}
             onDragLeave={handleAssistantDragLeave}
             onDrop={(e) => handleAssistantDrop(e, group.id)}
-            className={dropTargetRef.current === group.id ? 'drag-over' : ''}>
-            <GroupHeader className="group-header-style">
-              <div onClick={(e) => toggleGroupExpanded(group.id, e)} style={{ display: 'flex', flex: 1 }}>
-                <GroupTitle>
-                  <GroupIcon>{isExpanded ? <DownOutlined /> : <RightOutlined />}</GroupIcon>
-                  {group.name}
-                  <GroupCount>({groupAssistants.length})</GroupCount>
-                </GroupTitle>
-              </div>
+            className={`${dropTargetRef.current === group.id ? 'drag-over' : ''} ${snapshot.isDragging ? 'dragging' : ''}`}
+            style={provided.draggableProps.style}>
+            <GroupHeader onClick={(e) => toggleGroupExpanded(group.id, e)} className="group-header-style">
+              <GroupTitle>
+                <GroupIcon>{isExpanded ? <DownOutlined /> : <RightOutlined />}</GroupIcon>
+                <div>{group.name}</div>
+                <GroupCount>{groupAssistants.length}</GroupCount>
+              </GroupTitle>
               <GroupActions className="group-actions">
+                <span {...provided.dragHandleProps} className="drag-handle" onClick={(e) => e.stopPropagation()}>
+                  <HolderOutlined />
+                </span>
                 <EditOutlined onClick={(e) => handleEditGroup(group, e)} />
                 <DeleteOutlined
                   className="delete-icon"
@@ -260,12 +259,9 @@ const Assistants: FC<AssistantsTabProps> = ({
                     handleDeleteGroup(group.id)
                   }}
                 />
-                <div className="drag-handle" {...provided.dragHandleProps}>
-                  <HolderOutlined />
-                </div>
               </GroupActions>
             </GroupHeader>
-            <GroupContent className={isExpanded ? 'expanded' : 'collapsed'} isEmpty={groupAssistants.length === 0}>
+            <GroupContent className={isExpanded ? 'expanded' : 'collapsed'}>
               {safeMap(groupAssistants, (assistant) => (
                 <div
                   key={assistant.id}
@@ -274,8 +270,9 @@ const Assistants: FC<AssistantsTabProps> = ({
                   onDragEnd={handleAssistantDragEnd}
                   className="assistant-item-wrapper">
                   <AssistantItem
+                    key={assistant.id}
                     assistant={assistant}
-                    isActive={assistant.id === activeAssistant.id}
+                    isActive={assistant.id === activeAssistant?.id}
                     onSwitch={setActiveAssistant}
                     onDelete={(assistant) => {
                       const remaining = assistants.filter((a) => a.id !== assistant.id)
@@ -293,7 +290,7 @@ const Assistants: FC<AssistantsTabProps> = ({
                   />
                 </div>
               ))}
-              {groupAssistants.length === 0 && <div>{t('assistants.group.empty')}</div>}
+              {groupAssistants.length === 0 && <div className="empty-group">{t('assistants.group.empty')}</div>}
             </GroupContent>
           </GroupContainer>
         )}
@@ -346,8 +343,21 @@ const Assistants: FC<AssistantsTabProps> = ({
                       <AssistantItem
                         key={assistant.id}
                         assistant={assistant}
-                        active={assistant.id === activeAssistant?.id}
-                        onClick={() => setActiveAssistant(assistant)}
+                        isActive={assistant.id === activeAssistant?.id}
+                        onSwitch={setActiveAssistant}
+                        onDelete={(assistant) => {
+                          const remaining = assistants.filter((a) => a.id !== assistant.id)
+                          if (assistant.id === activeAssistant?.id) {
+                            const newActive = remaining[remaining.length - 1]
+                            newActive ? setActiveAssistant(newActive) : onCreateDefaultAssistant()
+                          }
+                          removeAssistant(assistant.id)
+                        }}
+                        addAgent={addAgent}
+                        addAssistant={addAssistant}
+                        onCreateDefaultAssistant={onCreateDefaultAssistant}
+                        onMoveToGroup={updateAssistantGroup}
+                        groups={groups}
                       />
                     </div>
                   ))}
@@ -374,8 +384,21 @@ const Assistants: FC<AssistantsTabProps> = ({
                 <AssistantItem
                   key={assistant.id}
                   assistant={assistant}
-                  active={assistant.id === activeAssistant?.id}
-                  onClick={() => setActiveAssistant(assistant)}
+                  isActive={assistant.id === activeAssistant?.id}
+                  onSwitch={setActiveAssistant}
+                  onDelete={(assistant) => {
+                    const remaining = assistants.filter((a) => a.id !== assistant.id)
+                    if (assistant.id === activeAssistant?.id) {
+                      const newActive = remaining[remaining.length - 1]
+                      newActive ? setActiveAssistant(newActive) : onCreateDefaultAssistant()
+                    }
+                    removeAssistant(assistant.id)
+                  }}
+                  addAgent={addAgent}
+                  addAssistant={addAssistant}
+                  onCreateDefaultAssistant={onCreateDefaultAssistant}
+                  onMoveToGroup={updateAssistantGroup}
+                  groups={groups}
                 />
               ))}
               <AddAssistantItem onClick={onCreateAssistant}>
@@ -421,41 +444,63 @@ const Assistants: FC<AssistantsTabProps> = ({
 
 export default Assistants
 
-const GroupContent = styled.div<{ isEmpty?: boolean }>`
-  padding: ${(props) => (props.isEmpty ? '12px 16px' : '12px 0')};
-  color: ${(props) => (props.isEmpty ? 'var(--color-text-3)' : 'inherit')};
+const GroupContent = styled.div`
+  padding-left: 20px;
+  overflow: hidden;
+  &.expanded {
+    display: block;
+  }
+  &.collapsed {
+    display: none;
+  }
+
+  .empty-group {
+    padding: 8px 12px;
+    color: var(--color-text-3);
+    font-size: 13px;
+  }
 `
 
 const ActionButtons = styled.div`
   display: flex;
   gap: 10px;
-  margin-bottom: 16px;
-  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  button {
+    flex: 1;
+  }
 `
 
 const CreateButton = styled.button`
+  height: 34px;
+  border-radius: 6px;
+  border: none;
+  background-color: var(--color-primary);
+  color: #fff;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  background-color: var(--color-bg-2);
-  border: 1px dashed var(--color-border);
-  color: var(--color-text-2);
-  border-radius: 8px;
-  padding: 10px 16px;
-  cursor: pointer;
-  width: 100%;
+  gap: 6px;
   transition: all 0.3s;
-
   &:hover {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-    background-color: var(--color-primary-bg);
+    background-color: #05d47b;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: #fff;
   }
 `
 
 const GroupCreateButton = styled(CreateButton)`
-  border-style: dashed;
+  background-color: var(--color-neutral-5);
+  color: var(--color-text-1);
+  &:hover {
+    background-color: var(--color-neutral-6);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: var(--color-primary);
+  }
 `
 
 const AssistantName = styled.div`
@@ -483,33 +528,35 @@ const AddAssistantItem = styled.div`
 `
 
 const UngroupedSection = styled.div<{ $enableGroup: boolean }>`
-  margin-bottom: 16px;
-  max-height: ${(props) => (props.$enableGroup ? 'calc(100vh - 250px)' : 'none')};
-  overflow-y: auto;
-  padding: 8px 0;
+  padding: 8px;
   border-radius: 8px;
-  transition: all 0.2s;
-
-  &.drag-over {
-    background-color: var(--color-primary-bg);
-    border: 1px dashed var(--color-primary);
-  }
+  min-height: 60px;
+  overflow-y: auto;
+  max-height: ${(props) => (props.$enableGroup ? '300px' : 'none')};
 
   .section-title {
-    margin: 0 0 12px 8px;
-    color: var(--color-text-3);
     font-size: 13px;
+    color: var(--color-text-3);
+    margin: 5px 8px;
+    padding-left: 8px;
   }
 
-  .assistant-item-wrapper {
-    margin-bottom: 8px;
+  &.drag-over {
+    background-color: var(--color-bg-3);
+  }
+
+  .assistant-item-wrapper[draggable='true'] {
+    cursor: grab;
+    &:active {
+      cursor: grabbing;
+    }
   }
 `
 
 const SectionDivider = styled.div`
   height: 1px;
   background-color: var(--color-border);
-  margin: 16px 0;
+  margin: 8px 0;
 `
 
 const Container = styled.div`
@@ -518,23 +565,10 @@ const Container = styled.div`
   padding: 0 16px 16px;
   box-sizing: border-box;
 
-  .assistant-item-wrapper[draggable='true'] {
-    cursor: grab;
-    &:active {
-      cursor: grabbing;
-    }
-  }
-
   /* 解决拖拽时的白边问题 */
   [draggable] {
     -webkit-user-drag: element;
     user-select: none;
-  }
-
-  .groups-container {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
   }
 `
 
@@ -549,16 +583,13 @@ const GroupsContainer = styled.div`
 `
 
 const GroupContainer = styled.div<{ isDragging?: boolean }>`
-  margin-bottom: 16px;
+  margin-bottom: 4px;
+  position: relative;
+  border-radius: 6px;
   background-color: var(--color-bg-1);
-  border-radius: 8px;
   overflow: hidden;
   border: 1px solid var(--color-border);
-  opacity: ${(props) => (props.isDragging ? 0.5 : 1)};
-  box-shadow: ${(props) => (props.isDragging ? '0 5px 10px rgba(0, 0, 0, 0.1)' : 'none')};
-  transition:
-    opacity 0.2s,
-    box-shadow 0.2s;
+  transition: all 0.2s ease;
 
   &.drag-over {
     background-color: var(--color-bg-3);
@@ -574,10 +605,17 @@ const GroupContainer = styled.div<{ isDragging?: boolean }>`
 const GroupHeader = styled.div`
   display: flex;
   align-items: center;
-  padding: 12px 16px;
+  justify-content: space-between;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--color-border);
   background-color: var(--color-bg-2);
-  position: relative;
+  cursor: pointer;
+  &:hover {
+    .group-actions {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
 `
 
 const GroupTitle = styled.div`
@@ -586,11 +624,12 @@ const GroupTitle = styled.div`
   display: flex;
   align-items: center;
   color: var(--color-text-1);
+  font-size: 14px;
 `
 
 const GroupIcon = styled.span`
   margin-right: 8px;
-  font-size: 16px;
+  font-size: 14px;
   color: var(--color-text-3);
 `
 
@@ -602,16 +641,30 @@ const GroupCount = styled.span`
 `
 
 const GroupActions = styled.div`
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s;
   display: flex;
   gap: 8px;
 
-  .anticon {
-    font-size: 16px;
-    color: var(--color-text-3);
-    cursor: pointer;
+  .drag-handle {
+    cursor: grab;
+    display: flex;
+    align-items: center;
 
-    &:hover {
-      color: var(--color-primary);
+    &:active {
+      cursor: grabbing;
     }
+  }
+
+  .anticon {
+    cursor: pointer;
+    color: var(--color-text-3);
+    &:hover {
+      color: var(--color-text-1);
+    }
+  }
+  .delete-icon:hover {
+    color: var(--color-error);
   }
 `
