@@ -463,15 +463,25 @@ const Container = styled.div`
     -webkit-user-drag: element;
     user-select: none;
   }
+
+  .assistants-list {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow-y: auto;
+  }
 `
 
 const GroupsContainer = styled.div`
   flex: 1;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 
   .assistant-groups-container {
     display: flex;
     flex-direction: column;
+    flex: 1;
   }
 `
 
@@ -480,6 +490,9 @@ const GroupContainer = styled.div<{ isDragging?: boolean }>`
   position: relative;
   border-radius: 6px;
   transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 
   &.drag-over {
     background-color: var(--color-bg-3);
@@ -565,8 +578,13 @@ const GroupActions = styled.div`
 const GroupContent = styled.div`
   padding-left: 20px;
   overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
   &.expanded {
-    display: block;
+    display: flex;
   }
   &.collapsed {
     display: none;
@@ -650,7 +668,9 @@ const UngroupedSection = styled.div<{ $enableGroup: boolean }>`
   border-radius: 8px;
   min-height: 60px;
   overflow-y: auto;
-  max-height: ${(props) => (props.$enableGroup ? '300px' : 'none')};
+  max-height: ${(props) => (props.$enableGroup ? 'calc(30vh - 60px)' : 'none')};
+  flex-shrink: ${(props) => (props.$enableGroup ? 0 : 1)};
+  flex-grow: ${(props) => (props.$enableGroup ? 0 : 1)};
 
   .section-title {
     font-size: 13px;
