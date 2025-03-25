@@ -38,6 +38,7 @@ import {
   topicToMarkdown
 } from '@renderer/utils/export'
 import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
+import { hasTopicPendingRequests } from '@renderer/utils/queue'
 import { Dropdown, Form, Input, MenuProps, Modal, Tooltip } from 'antd'
 import dayjs from 'dayjs'
 import { findIndex } from 'lodash'
@@ -302,6 +303,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
             className={isActive ? 'active' : ''}
             onClick={() => onSwitchTopic(topic)}
             style={{ borderRadius }}>
+            {isPending(topic.id) && !isActive && <PendingIndicator />}
             <TopicName className="name" title={topicName}>
               {topicName}
             </TopicName>
@@ -858,6 +860,7 @@ const TopicListItem = styled.div`
   font-family: Ubuntu;
   cursor: pointer;
   border: 0.5px solid transparent;
+  position: relative;
   .menu {
     opacity: 0;
     color: var(--color-text-3);
@@ -990,5 +993,17 @@ const TopicAddName = styled.div`
   -webkit-box-orient: vertical;
   overflow: hidden;
   font-size: 13px;
+`
+const PendingIndicator = styled.div.attrs({
+  className: 'animation-pulse'
+})`
+  --pulse-size: 5px;
+  width: 5px;
+  height: 5px;
+  position: absolute;
+  left: 3px;
+  top: 15px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
 `
 export default Topics

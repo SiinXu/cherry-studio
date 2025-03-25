@@ -9,10 +9,11 @@ import { getDefaultModel, getDefaultTopic } from '@renderer/services/AssistantSe
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import { Assistant, AssistantGroup } from '@renderer/types'
 import { uuid } from '@renderer/utils'
+import { hasTopicPendingRequests } from '@renderer/utils/queue'
 import { Dropdown } from 'antd'
 import { ItemType } from 'antd/es/menu/interface'
 import { omit } from 'lodash'
-import { FC, useCallback } from 'react'
+import { FC, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
@@ -48,6 +49,17 @@ const AssistantItem: FC<AssistantItemProps> = ({
   const { removeAllTopics } = useAssistant(assistant.id) // 使用当前助手的ID
   const { clickAssistantToShowTopic, topicPosition, showAssistantIcon } = useSettings()
   const defaultModel = getDefaultModel()
+
+  const [isPending, setIsPending] = useState(false)
+  useEffect(() => {
+    if (isActive) {
+      setIsPending(false)
+    }
+    const hasPending = assistant.topics.some((topic) => hasTopicPendingRequests(topic.id))
+    if (hasPending) {
+      setIsPending(true)
+    }
+  }, [isActive, assistant.topics])
 
   const getMenuItems = useCallback(
     (assistant: Assistant): ItemType[] => {
@@ -163,7 +175,13 @@ const AssistantItem: FC<AssistantItemProps> = ({
     <Dropdown menu={{ items: getMenuItems(assistant) }} trigger={['contextMenu']}>
       <Container onClick={handleSwitch} className={isActive ? 'active' : ''}>
         <AssistantNameRow className="name" title={fullAssistantName}>
-          {showAssistantIcon && <ModelAvatar model={assistant.model || defaultModel} size={22} />}
+          {showAssistantIcon && (
+            <ModelAvatar
+              model={assistant.model || defaultModel}
+              size={22}
+              className={isPending && !isActive ? 'animation-pulse' : ''}
+            />
+          )}
           <AssistantName className="text-nowrap">{showAssistantIcon ? assistantName : fullAssistantName}</AssistantName>
         </AssistantNameRow>
         {isActive && (
