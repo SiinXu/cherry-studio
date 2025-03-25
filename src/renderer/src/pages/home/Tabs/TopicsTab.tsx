@@ -17,6 +17,7 @@ import {
 import type { DropResult } from '@hello-pangea/dnd'
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
 import CopyIcon from '@renderer/components/Icons/CopyIcon'
+import ObsidianExportPopup from '@renderer/components/Popups/ObsidianExportPopup'
 import PromptPopup from '@renderer/components/Popups/PromptPopup'
 import Scrollbar from '@renderer/components/Scrollbar'
 import { isMac } from '@renderer/config/constant'
@@ -89,6 +90,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   const dropTargetRef = useRef<string | null>(null)
   const [deletingTopicId, setDeletingTopicId] = useState<string | null>(null)
   const deleteTimerRef = useRef<NodeJS.Timeout>()
+  const [pendingTopics, setPendingTopics] = useState<Set<string>>(new Set())
   // 根据配置决定是否使用分组
   // 当分组功能关闭时，所有话题都视为未分组
   const ungroupedTopics = enableTopicsGroup ? safeFilter(assistant.topics, (topic) => !topic.groupId) : assistant.topics
@@ -281,8 +283,14 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   )
   const onSwitchTopic = useCallback(
     async (topic: Topic) => {
+      setPendingTopics((prev) => new Set([...prev, topic.id]))
       await modelGenerating()
       setActiveTopic(topic)
+      setPendingTopics((prev) => {
+        const newSet = new Set(prev)
+        newSet.delete(topic.id)
+        return newSet
+      })
     },
     [setActiveTopic]
   )
@@ -304,7 +312,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
             className={isActive ? 'active' : ''}
             onClick={() => onSwitchTopic(topic)}
             style={{ borderRadius }}>
-            {isPending(topic.id) && !isActive && <PendingIndicator />}
+            {pendingTopics.has(topic.id) && !isActive && <PendingIndicator />}
             <TopicName className="name" title={topicName}>
               {topicName}
             </TopicName>
