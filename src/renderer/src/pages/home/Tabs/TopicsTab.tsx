@@ -32,13 +32,14 @@ import { Assistant, Topic, TopicGroup } from '@renderer/types'
 import { droppableReorder } from '@renderer/utils'
 import { copyTopicAsMarkdown } from '@renderer/utils/copy'
 import {
+  exportMarkdownToJoplin,
   exportMarkdownToNotion,
+  exportMarkdownToSiyuan,
   exportMarkdownToYuque,
   exportTopicAsMarkdown,
   topicToMarkdown
 } from '@renderer/utils/export'
 import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
-import { hasTopicPendingRequests } from '@renderer/utils/queue'
 import { Dropdown, Form, Input, MenuProps, Modal, Tooltip } from 'antd'
 import dayjs from 'dayjs'
 import { findIndex } from 'lodash'
@@ -536,6 +537,30 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
               onClick: async () => {
                 const markdown = await topicToMarkdown(topic)
                 exportMarkdownToYuque(topic.name, markdown)
+              }
+            },
+            {
+              label: t('chat.topics.export.obsidian'),
+              key: 'obsidian',
+              onClick: async () => {
+                const markdown = await topicToMarkdown(topic)
+                await ObsidianExportPopup.show({ title: topic.name, markdown, processingMethod: '3' })
+              }
+            },
+            {
+              label: t('chat.topics.export.joplin'),
+              key: 'joplin',
+              onClick: async () => {
+                const markdown = await topicToMarkdown(topic)
+                exportMarkdownToJoplin(topic.name, markdown)
+              }
+            },
+            {
+              label: t('chat.topics.export.siyuan'),
+              key: 'siyuan',
+              onClick: async () => {
+                const markdown = await topicToMarkdown(topic)
+                exportMarkdownToSiyuan(topic.name, markdown)
               }
             }
           ]

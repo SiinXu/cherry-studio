@@ -2,6 +2,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { TRANSLATE_PROMPT } from '@renderer/config/prompts'
 import { CodeStyleVarious, LanguageVarious, ThemeMode, TranslateLanguageVarious } from '@renderer/types'
 
+import { WebDAVSyncState } from './backup'
+
 export type SendMessageShortcut = 'Enter' | 'Shift+Enter' | 'Ctrl+Enter' | 'Command+Enter'
 
 export type SidebarIcon = 'assistants' | 'agents' | 'paintings' | 'translate' | 'minapp' | 'knowledge' | 'files'
@@ -15,6 +17,8 @@ export const DEFAULT_SIDEBAR_ICONS: SidebarIcon[] = [
   'knowledge',
   'files'
 ]
+
+export interface NutstoreSyncRuntime extends WebDAVSyncState {}
 
 export interface SettingsState {
   showAssistants: boolean
@@ -40,7 +44,7 @@ export interface SettingsState {
   pasteLongTextAsFile: boolean
   pasteLongTextThreshold: number
   clickAssistantToShowTopic: boolean
-  manualUpdateCheck: boolean
+  autoCheckUpdate: boolean
   renderInputMessageAsMarkdown: boolean
   codeShowLineNumbers: boolean
   codeCollapsible: boolean
@@ -90,6 +94,12 @@ export interface SettingsState {
   obsidianValut: string
   obsidianTages: string
   readClipboardAtStartup: boolean
+  defaultObsidianVault: string | null
+  // 思源笔记配置
+  siyuanApiUrl: string | null
+  siyuanToken: string | null
+  siyuanBoxId: string | null
+  siyuanRootPath: string | null
 }
 
 export type MultiModelMessageStyle = 'horizontal' | 'vertical' | 'fold' | 'grid'
@@ -118,7 +128,7 @@ const initialState: SettingsState = {
   pasteLongTextAsFile: false,
   pasteLongTextThreshold: 1500,
   clickAssistantToShowTopic: false,
-  manualUpdateCheck: false,
+  autoCheckUpdate: true,
   renderInputMessageAsMarkdown: false,
   codeShowLineNumbers: false,
   codeCollapsible: false,
@@ -157,14 +167,20 @@ const initialState: SettingsState = {
   yuqueUrl: '',
   yuqueRepoId: '',
   messageNavigation: false,
-  joplinToken: null,
-  joplinUrl: null,
+  joplinToken: '',
+  joplinUrl: '',
   forceDollarMathInMarkdown: false,
   markdownExportPath: '',
   obsidianFolder: '',
   obsidianValut: '',
   obsidianTages: '',
-  readClipboardAtStartup: false
+  readClipboardAtStartup: false,
+  defaultObsidianVault: null,
+  // 思源笔记配置
+  siyuanApiUrl: null,
+  siyuanToken: null,
+  siyuanBoxId: null,
+  siyuanRootPath: null
 }
 
 const settingsSlice = createSlice({
@@ -235,14 +251,14 @@ const settingsSlice = createSlice({
     setPasteLongTextAsFile: (state, action: PayloadAction<boolean>) => {
       state.pasteLongTextAsFile = action.payload
     },
+    setAutoCheckUpdate: (state, action: PayloadAction<boolean>) => {
+      state.autoCheckUpdate = action.payload
+    },
     setRenderInputMessageAsMarkdown: (state, action: PayloadAction<boolean>) => {
       state.renderInputMessageAsMarkdown = action.payload
     },
     setClickAssistantToShowTopic: (state, action: PayloadAction<boolean>) => {
       state.clickAssistantToShowTopic = action.payload
-    },
-    setManualUpdateCheck: (state, action: PayloadAction<boolean>) => {
-      state.manualUpdateCheck = action.payload
     },
     setWebdavHost: (state, action: PayloadAction<string>) => {
       state.webdavHost = action.payload
@@ -360,10 +376,10 @@ const settingsSlice = createSlice({
     setMessageNavigation: (state, action: PayloadAction<boolean>) => {
       state.messageNavigation = action.payload
     },
-    setJoplinToken: (state, action: PayloadAction<string | null>) => {
+    setJoplinToken: (state, action: PayloadAction<string>) => {
       state.joplinToken = action.payload
     },
-    setJoplinUrl: (state, action: PayloadAction<string | null>) => {
+    setJoplinUrl: (state, action: PayloadAction<string>) => {
       state.joplinUrl = action.payload
     },
     setForceDollarMathInMarkdown: (state, action: PayloadAction<boolean>) => {
@@ -383,6 +399,21 @@ const settingsSlice = createSlice({
     },
     setReadClipboardAtStartup: (state, action: PayloadAction<boolean>) => {
       state.readClipboardAtStartup = action.payload
+    },
+    setSiyuanApiUrl: (state, action: PayloadAction<string>) => {
+      state.siyuanApiUrl = action.payload
+    },
+    setSiyuanToken: (state, action: PayloadAction<string>) => {
+      state.siyuanToken = action.payload
+    },
+    setSiyuanBoxId: (state, action: PayloadAction<string>) => {
+      state.siyuanBoxId = action.payload
+    },
+    setSiyuanRootPath: (state, action: PayloadAction<string>) => {
+      state.siyuanRootPath = action.payload
+    },
+    setDefaultObsidianVault: (state, action: PayloadAction<string>) => {
+      state.defaultObsidianVault = action.payload
     }
   }
 })
@@ -411,9 +442,9 @@ export const {
   setTopicPosition,
   setShowTopicTime,
   setPasteLongTextAsFile,
+  setAutoCheckUpdate,
   setRenderInputMessageAsMarkdown,
   setClickAssistantToShowTopic,
-  setManualUpdateCheck,
   setWebdavHost,
   setWebdavUser,
   setWebdavPass,
@@ -456,7 +487,12 @@ export const {
   setObsidianFolder,
   setObsidianValut,
   setObsidianTages,
-  setReadClipboardAtStartup
+  setReadClipboardAtStartup,
+  setSiyuanApiUrl,
+  setSiyuanToken,
+  setSiyuanBoxId,
+  setSiyuanRootPath,
+  setDefaultObsidianVault
 } = settingsSlice.actions
 
 export default settingsSlice.reducer
