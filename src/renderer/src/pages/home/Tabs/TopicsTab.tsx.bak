@@ -57,9 +57,6 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   const { assistant, removeTopic, updateTopic, addTopic } = useAssistant(_assistant.id)
   const { t } = useTranslation()
   const { showTopicTime, topicPosition, enableTopicsGroup } = useSettings()
-
-  // 定义判断主题是否处于等待状态的函数
-  const isPending = (topicId: string) => hasTopicPendingRequests(topicId)
   const {
     groups: topicGroups,
     addGroup,
