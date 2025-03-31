@@ -54,8 +54,7 @@ export class WindowService {
       visualEffectState: 'active',
       titleBarStyle: isLinux ? 'default' : 'hidden',
       titleBarOverlay: theme === 'dark' ? titleBarOverlayDark : titleBarOverlayLight,
-      backgroundColor: isMac || isWin ? undefined : theme === 'dark' ? '#181818' : '#FFFFFF',
-      backgroundMaterial: 'acrylic',
+      backgroundColor: isMac ? undefined : theme === 'dark' ? '#181818' : '#FFFFFF',
       trafficLightPosition: { x: 8, y: 12 },
       ...(process.platform === 'linux' ? { icon } : {}),
       webPreferences: {
@@ -163,6 +162,25 @@ export class WindowService {
       this.wasFullScreen = false
       mainWindow.webContents.send('fullscreen-status-changed', false)
     })
+
+    // set the zoom factor again when the window is going to resize
+    //
+    // this is a workaround for the known bug that
+    // the zoom factor is reset to cached value when window is resized after routing to other page
+    // see: https://github.com/electron/electron/issues/10572
+    //
+    mainWindow.on('will-resize', () => {
+      mainWindow.webContents.setZoomFactor(configManager.getZoomFactor())
+    })
+
+    // ARCH: as `will-resize` is only for Win & Mac,
+    // linux has the same problem, use `resize` listener instead
+    // but `resize` will fliker the ui
+    if (isLinux) {
+      mainWindow.on('resize', () => {
+        mainWindow.webContents.setZoomFactor(configManager.getZoomFactor())
+      })
+    }
 
     // 添加Escape键退出全屏的支持
     mainWindow.webContents.on('before-input-event', (event, input) => {

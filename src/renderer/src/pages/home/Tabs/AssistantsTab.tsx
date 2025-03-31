@@ -1,22 +1,49 @@
 import {
+  ClearOutlined,
+  CloseOutlined,
   DeleteOutlined,
   DownOutlined,
   EditOutlined,
   FolderAddOutlined,
+  FolderOpenOutlined,
   HolderOutlined,
   LoadingOutlined,
   PlusOutlined,
-  RightOutlined
+  PushpinOutlined,
+  QuestionCircleOutlined,
+  RetweetOutlined,
+  RightOutlined,
+  UploadOutlined
 } from '@ant-design/icons'
-import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd'
-import { useAgents } from '@renderer/hooks/useAgents'
-import { useAssistants } from '@renderer/hooks/useAssistant'
+import type { DropResult } from '@hello-pangea/dnd'
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
+import CopyIcon from '@renderer/components/Icons/CopyIcon'
+import PromptPopup from '@renderer/components/Popups/PromptPopup'
+import Scrollbar from '@renderer/components/Scrollbar'
+import { isMac } from '@renderer/config/constant'
+import { useAssistant, useAssistants } from '@renderer/hooks/useAssistant'
+import { modelGenerating } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
-import { useAppSelector } from '@renderer/store'
+import { useAssistantGroups } from '@renderer/hooks/useAssistant'
+import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
+import store from '@renderer/store'
+import { addAssistant as addAssistantAction } from '@renderer/store/assistants'
+import { setGenerating } from '@renderer/store/runtime'
 import { Assistant, AssistantGroup } from '@renderer/types'
 import { droppableReorder } from '@renderer/utils'
-import { Alert, Form, Input, Modal, Spin } from 'antd'
-import { FC, useEffect, useRef, useState } from 'react'
+import { copyAssistantAsMarkdown } from '@renderer/utils/copy'
+import {
+  exportMarkdownToJoplin,
+  exportMarkdownToSiyuan,
+  exportMarkdownToYuque,
+  exportAssistantAsMarkdown,
+  assistantToMarkdown
+} from '@renderer/utils/export'
+import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
+import { Dropdown, Form, Input, MenuProps, Modal, Spin, Tooltip } from 'antd'
+import dayjs from 'dayjs'
+import { findIndex } from 'lodash'
+import { FC, startTransition, useCallback, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { v4 as uuid } from 'uuid'
@@ -28,17 +55,6 @@ interface AssistantsTabProps {
   setActiveAssistant: (assistant: Assistant) => void
   onCreateAssistant: () => void
   onCreateDefaultAssistant: () => void
-}
-
-// 自定义 safeFilter 和 safeMap 函数实现，避免import错误
-function safeFilter<T>(arr: T[] | null | undefined, predicate: (value: T, index: number, array: T[]) => boolean): T[] {
-  if (!Array.isArray(arr)) return []
-  return arr.filter(predicate)
-}
-
-function safeMap<T, U>(arr: T[] | null | undefined, callback: (value: T, index: number, array: T[]) => U): U[] {
-  if (!Array.isArray(arr)) return []
-  return arr.map(callback)
 }
 
 const Assistants: FC<AssistantsTabProps> = ({
@@ -214,7 +230,7 @@ const Assistants: FC<AssistantsTabProps> = ({
     const reorderedGroups = droppableReorder<AssistantGroup>([...groups], source.index, destination.index)
 
     // 更新Redux中的分组顺序
-    updateGroupsOrder(reorderedGroups)
+    updateGroupsOrder(reorderedGroups.map((g) => g.id))
 
     // 可以选择性地存储分组顺序到localStorage
     try {

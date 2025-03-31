@@ -22,7 +22,7 @@ import PaintingsPage from './pages/paintings/PaintingsPage'
 import SettingsPage from './pages/settings/SettingsPage'
 import TranslatePage from './pages/translate/TranslatePage'
 
-const App: FC = () => {
+function App(): React.ReactElement {
   console.log('App组件开始渲染')
 
   return (
