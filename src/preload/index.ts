@@ -1,7 +1,8 @@
+import type { ExtractChunkData } from '@cherrystudio/embedjs-interfaces'
 import { electronAPI } from '@electron-toolkit/preload'
-import type { ExtractChunkData } from '@llm-tools/embedjs-interfaces'
 import { FileType, KnowledgeBaseParams, KnowledgeItem, MCPServer, Shortcut, WebDavConfig } from '@types'
 import { contextBridge, ipcRenderer, OpenDialogOptions, shell } from 'electron'
+import { CreateDirectoryOptions } from 'webdav'
 
 // Custom APIs for renderer
 const api = {
@@ -34,7 +35,10 @@ const api = {
     backupToWebdav: (data: string, webdavConfig: WebDavConfig) =>
       ipcRenderer.invoke('backup:backupToWebdav', data, webdavConfig),
     restoreFromWebdav: (webdavConfig: WebDavConfig) => ipcRenderer.invoke('backup:restoreFromWebdav', webdavConfig),
-    listWebdavFiles: (webdavConfig: WebDavConfig) => ipcRenderer.invoke('backup:listWebdavFiles', webdavConfig)
+    listWebdavFiles: (webdavConfig: WebDavConfig) => ipcRenderer.invoke('backup:listWebdavFiles', webdavConfig),
+    checkConnection: (webdavConfig: WebDavConfig) => ipcRenderer.invoke('backup:checkConnection', webdavConfig),
+    createDirectory: (webdavConfig: WebDavConfig, path: string, options?: CreateDirectoryOptions) =>
+      ipcRenderer.invoke('backup:createDirectory', webdavConfig, path, options)
   },
   file: {
     select: (options?: OpenDialogOptions) => ipcRenderer.invoke('file:select', options),
@@ -116,15 +120,13 @@ const api = {
       ipcRenderer.invoke('aes:decrypt', encryptedData, iv, secretKey)
   },
   mcp: {
-    listServers: () => ipcRenderer.invoke('mcp:list-servers'),
-    addServer: (server: MCPServer) => ipcRenderer.invoke('mcp:add-server', server),
-    updateServer: (server: MCPServer) => ipcRenderer.invoke('mcp:update-server', server),
-    deleteServer: (serverName: string) => ipcRenderer.invoke('mcp:delete-server', serverName),
-    setServerActive: (name: string, isActive: boolean) =>
-      ipcRenderer.invoke('mcp:set-server-active', { name, isActive }),
-    listTools: (serverName?: string) => ipcRenderer.invoke('mcp:list-tools', serverName),
-    callTool: (params: { client: string; name: string; args: any }) => ipcRenderer.invoke('mcp:call-tool', params),
-    cleanup: () => ipcRenderer.invoke('mcp:cleanup')
+    removeServer: (server: MCPServer) => ipcRenderer.invoke('mcp:remove-server', server),
+    restartServer: (server: MCPServer) => ipcRenderer.invoke('mcp:restart-server', server),
+    stopServer: (server: MCPServer) => ipcRenderer.invoke('mcp:stop-server', server),
+    listTools: (server: MCPServer) => ipcRenderer.invoke('mcp:list-tools', server),
+    callTool: ({ server, name, args }: { server: MCPServer; name: string; args: any }) =>
+      ipcRenderer.invoke('mcp:call-tool', { server, name, args }),
+    getInstallInfo: () => ipcRenderer.invoke('mcp:get-install-info')
   },
   shell: {
     openExternal: shell.openExternal
@@ -143,7 +145,24 @@ const api = {
   isBinaryExist: (name: string) => ipcRenderer.invoke('app:is-binary-exist', name),
   getBinaryPath: (name: string) => ipcRenderer.invoke('app:get-binary-path', name),
   installUVBinary: () => ipcRenderer.invoke('app:install-uv-binary'),
-  installBunBinary: () => ipcRenderer.invoke('app:install-bun-binary')
+  installBunBinary: () => ipcRenderer.invoke('app:install-bun-binary'),
+  protocol: {
+    onReceiveData: (callback: (data: { url: string; params: any }) => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, data: { url: string; params: any }) => {
+        callback(data)
+      }
+      ipcRenderer.on('protocol-data', listener)
+      return () => {
+        ipcRenderer.off('protocol-data', listener)
+      }
+    }
+  },
+  nutstore: {
+    getSSOUrl: () => ipcRenderer.invoke('nutstore:get-sso-url'),
+    decryptToken: (token: string) => ipcRenderer.invoke('nutstore:decrypt-token', token),
+    getDirectoryContents: (token: string, path: string) =>
+      ipcRenderer.invoke('nutstore:get-directory-contents', token, path)
+  }
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
@@ -153,6 +172,11 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)
+    contextBridge.exposeInMainWorld('obsidian', {
+      getVaults: () => ipcRenderer.invoke('obsidian:get-vaults'),
+      getFolders: (vaultName: string) => ipcRenderer.invoke('obsidian:get-files', vaultName),
+      getFiles: (vaultName: string) => ipcRenderer.invoke('obsidian:get-files', vaultName)
+    })
   } catch (error) {
     console.error(error)
   }

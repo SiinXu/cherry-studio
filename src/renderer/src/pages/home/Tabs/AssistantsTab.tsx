@@ -457,11 +457,23 @@ const Container = styled.div`
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  padding: 10px;
+`
 
-  /* 解决拖拽时的白边问题 */
-  [draggable] {
-    -webkit-user-drag: element;
-    user-select: none;
+const AssistantAddItem = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 7px 12px;
+  position: relative;
+  padding-right: 35px;
+  font-family: Ubuntu;
+  border-radius: var(--list-item-border-radius);
+  border: 0.5px solid transparent;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--color-background-soft);
   }
 
   .assistants-list {

@@ -2,6 +2,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { TRANSLATE_PROMPT } from '@renderer/config/prompts'
 import { CodeStyleVarious, LanguageVarious, ThemeMode, TranslateLanguageVarious } from '@renderer/types'
 
+import { WebDAVSyncState } from './backup'
+
 export type SendMessageShortcut = 'Enter' | 'Shift+Enter' | 'Ctrl+Enter' | 'Command+Enter'
 
 export type SidebarIcon = 'assistants' | 'agents' | 'paintings' | 'translate' | 'minapp' | 'knowledge' | 'files'
@@ -15,6 +17,8 @@ export const DEFAULT_SIDEBAR_ICONS: SidebarIcon[] = [
   'knowledge',
   'files'
 ]
+
+export interface NutstoreSyncRuntime extends WebDAVSyncState {}
 
 export interface SettingsState {
   showAssistants: boolean
@@ -40,7 +44,7 @@ export interface SettingsState {
   pasteLongTextAsFile: boolean
   pasteLongTextThreshold: number
   clickAssistantToShowTopic: boolean
-  manualUpdateCheck: boolean
+  autoCheckUpdate: boolean
   renderInputMessageAsMarkdown: boolean
   codeShowLineNumbers: boolean
   codeCollapsible: boolean
@@ -48,6 +52,7 @@ export interface SettingsState {
   mathEngine: 'MathJax' | 'KaTeX'
   messageStyle: 'plain' | 'bubble'
   codeStyle: CodeStyleVarious
+  foldDisplayMode: 'expanded' | 'compact'
   gridColumns: number
   gridPopoverTrigger: 'hover' | 'click'
   // 是否显示助手图标
@@ -75,21 +80,25 @@ export interface SettingsState {
   notionDatabaseID: string | null
   notionApiKey: string | null
   notionPageNameKey: string | null
+  markdownExportPath: string | null
+  forceDollarMathInMarkdown: boolean
+  useTopicNamingForMessageTitle: boolean
   thoughtAutoCollapse: boolean
   notionAutoSplit: boolean
   notionSplitSize: number
   yuqueToken: string | null
   yuqueUrl: string | null
   yuqueRepoId: string | null
-  messageNavigation: boolean
   joplinToken: string | null
   joplinUrl: string | null
-  forceDollarMathInMarkdown: boolean
-  markdownExportPath: string
-  obsidianFolder: string
-  obsidianValut: string
-  obsidianTages: string
-  readClipboardAtStartup: boolean
+  defaultObsidianVault: string | null
+  // 思源笔记配置
+  siyuanApiUrl: string | null
+  siyuanToken: string | null
+  siyuanBoxId: string | null
+  siyuanRootPath: string | null
+  maxKeepAliveMinapps: number
+  showOpenedMinappsInSidebar: boolean
 }
 
 export type MultiModelMessageStyle = 'horizontal' | 'vertical' | 'fold' | 'grid'
@@ -117,8 +126,8 @@ const initialState: SettingsState = {
   showAssistantIcon: false,
   pasteLongTextAsFile: false,
   pasteLongTextThreshold: 1500,
-  clickAssistantToShowTopic: false,
-  manualUpdateCheck: false,
+  clickAssistantToShowTopic: true,
+  autoCheckUpdate: true,
   renderInputMessageAsMarkdown: false,
   codeShowLineNumbers: false,
   codeCollapsible: false,
@@ -126,8 +135,10 @@ const initialState: SettingsState = {
   mathEngine: 'KaTeX',
   messageStyle: 'plain',
   codeStyle: 'auto',
+  foldDisplayMode: 'expanded',
   gridColumns: 2,
-  gridPopoverTrigger: 'hover',
+  gridPopoverTrigger: 'click',
+  messageNavigation: 'none',
   webdavHost: '',
   webdavUser: '',
   webdavPass: '',
@@ -150,21 +161,25 @@ const initialState: SettingsState = {
   notionDatabaseID: '',
   notionApiKey: '',
   notionPageNameKey: 'Name',
+  markdownExportPath: null,
+  forceDollarMathInMarkdown: false,
+  useTopicNamingForMessageTitle: false,
   thoughtAutoCollapse: true,
   notionAutoSplit: false,
   notionSplitSize: 90,
   yuqueToken: '',
   yuqueUrl: '',
   yuqueRepoId: '',
-  messageNavigation: false,
-  joplinToken: null,
-  joplinUrl: null,
-  forceDollarMathInMarkdown: false,
-  markdownExportPath: '',
-  obsidianFolder: '',
-  obsidianValut: '',
-  obsidianTages: '',
-  readClipboardAtStartup: false
+  joplinToken: '',
+  joplinUrl: '',
+  defaultObsidianVault: null,
+  // 思源笔记配置初始值
+  siyuanApiUrl: null,
+  siyuanToken: null,
+  siyuanBoxId: null,
+  siyuanRootPath: null,
+  maxKeepAliveMinapps: 3,
+  showOpenedMinappsInSidebar: true
 }
 
 const settingsSlice = createSlice({
@@ -235,14 +250,14 @@ const settingsSlice = createSlice({
     setPasteLongTextAsFile: (state, action: PayloadAction<boolean>) => {
       state.pasteLongTextAsFile = action.payload
     },
+    setAutoCheckUpdate: (state, action: PayloadAction<boolean>) => {
+      state.autoCheckUpdate = action.payload
+    },
     setRenderInputMessageAsMarkdown: (state, action: PayloadAction<boolean>) => {
       state.renderInputMessageAsMarkdown = action.payload
     },
     setClickAssistantToShowTopic: (state, action: PayloadAction<boolean>) => {
       state.clickAssistantToShowTopic = action.payload
-    },
-    setManualUpdateCheck: (state, action: PayloadAction<boolean>) => {
-      state.manualUpdateCheck = action.payload
     },
     setWebdavHost: (state, action: PayloadAction<string>) => {
       state.webdavHost = action.payload
@@ -273,6 +288,9 @@ const settingsSlice = createSlice({
     },
     setMathEngine: (state, action: PayloadAction<'MathJax' | 'KaTeX'>) => {
       state.mathEngine = action.payload
+    },
+    setFoldDisplayMode: (state, action: PayloadAction<'expanded' | 'compact'>) => {
+      state.foldDisplayMode = action.payload
     },
     setGridColumns: (state, action: PayloadAction<number>) => {
       state.gridColumns = action.payload
@@ -333,6 +351,15 @@ const settingsSlice = createSlice({
     setNotionPageNameKey: (state, action: PayloadAction<string>) => {
       state.notionPageNameKey = action.payload
     },
+    setmarkdownExportPath: (state, action: PayloadAction<string | null>) => {
+      state.markdownExportPath = action.payload
+    },
+    setForceDollarMathInMarkdown: (state, action: PayloadAction<boolean>) => {
+      state.forceDollarMathInMarkdown = action.payload
+    },
+    setUseTopicNamingForMessageTitle: (state, action: PayloadAction<boolean>) => {
+      state.useTopicNamingForMessageTitle = action.payload
+    },
     setThoughtAutoCollapse: (state, action: PayloadAction<boolean>) => {
       state.thoughtAutoCollapse = action.payload
     },
@@ -351,38 +378,35 @@ const settingsSlice = createSlice({
     setYuqueUrl: (state, action: PayloadAction<string>) => {
       state.yuqueUrl = action.payload
     },
-    setEnableAssistantGroup: (state, action: PayloadAction<boolean>) => {
-      state.enableAssistantGroup = action.payload
-    },
-    setEnableTopicsGroup: (state, action: PayloadAction<boolean>) => {
-      state.enableTopicsGroup = action.payload
-    },
-    setMessageNavigation: (state, action: PayloadAction<boolean>) => {
-      state.messageNavigation = action.payload
-    },
-    setJoplinToken: (state, action: PayloadAction<string | null>) => {
+    setJoplinToken: (state, action: PayloadAction<string>) => {
       state.joplinToken = action.payload
     },
-    setJoplinUrl: (state, action: PayloadAction<string | null>) => {
+    setJoplinUrl: (state, action: PayloadAction<string>) => {
       state.joplinUrl = action.payload
     },
-    setForceDollarMathInMarkdown: (state, action: PayloadAction<boolean>) => {
-      state.forceDollarMathInMarkdown = action.payload
+    setSiyuanApiUrl: (state, action: PayloadAction<string>) => {
+      state.siyuanApiUrl = action.payload
     },
-    setmarkdownExportPath: (state, action: PayloadAction<string>) => {
-      state.markdownExportPath = action.payload
+    setSiyuanToken: (state, action: PayloadAction<string>) => {
+      state.siyuanToken = action.payload
     },
-    setObsidianFolder: (state, action: PayloadAction<string>) => {
-      state.obsidianFolder = action.payload
+    setSiyuanBoxId: (state, action: PayloadAction<string>) => {
+      state.siyuanBoxId = action.payload
     },
-    setObsidianValut: (state, action: PayloadAction<string>) => {
-      state.obsidianValut = action.payload
+    setSiyuanRootPath: (state, action: PayloadAction<string>) => {
+      state.siyuanRootPath = action.payload
     },
-    setObsidianTages: (state, action: PayloadAction<string>) => {
-      state.obsidianTages = action.payload
+    setMessageNavigation: (state, action: PayloadAction<'none' | 'buttons' | 'anchor'>) => {
+      state.messageNavigation = action.payload
     },
-    setReadClipboardAtStartup: (state, action: PayloadAction<boolean>) => {
-      state.readClipboardAtStartup = action.payload
+    setDefaultObsidianVault: (state, action: PayloadAction<string>) => {
+      state.defaultObsidianVault = action.payload
+    },
+    setMaxKeepAliveMinapps: (state, action: PayloadAction<number>) => {
+      state.maxKeepAliveMinapps = action.payload
+    },
+    setShowOpenedMinappsInSidebar: (state, action: PayloadAction<boolean>) => {
+      state.showOpenedMinappsInSidebar = action.payload
     }
   }
 })
@@ -411,9 +435,9 @@ export const {
   setTopicPosition,
   setShowTopicTime,
   setPasteLongTextAsFile,
+  setAutoCheckUpdate,
   setRenderInputMessageAsMarkdown,
   setClickAssistantToShowTopic,
-  setManualUpdateCheck,
   setWebdavHost,
   setWebdavUser,
   setWebdavPass,
@@ -424,6 +448,7 @@ export const {
   setCodeCollapsible,
   setCodeWrappable,
   setMathEngine,
+  setFoldDisplayMode,
   setGridColumns,
   setGridPopoverTrigger,
   setMessageStyle,
@@ -442,21 +467,25 @@ export const {
   setNotionDatabaseID,
   setNotionApiKey,
   setNotionPageNameKey,
+  setmarkdownExportPath,
+  setForceDollarMathInMarkdown,
+  setUseTopicNamingForMessageTitle,
   setThoughtAutoCollapse,
   setNotionAutoSplit,
   setNotionSplitSize,
   setYuqueToken,
   setYuqueRepoId,
   setYuqueUrl,
-  setMessageNavigation,
   setJoplinToken,
   setJoplinUrl,
-  setForceDollarMathInMarkdown,
-  setmarkdownExportPath,
-  setObsidianFolder,
-  setObsidianValut,
-  setObsidianTages,
-  setReadClipboardAtStartup
+  setMessageNavigation,
+  setDefaultObsidianVault,
+  setSiyuanApiUrl,
+  setSiyuanToken,
+  setSiyuanBoxId,
+  setSiyuanRootPath,
+  setMaxKeepAliveMinapps,
+  setShowOpenedMinappsInSidebar
 } = settingsSlice.actions
 
 export default settingsSlice.reducer
