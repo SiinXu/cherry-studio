@@ -1,9 +1,7 @@
 import { electronApp, optimizer } from '@electron-toolkit/utils'
-import { replaceDevtoolsFont } from '@main/utils/windowUtil'
-import { app, ipcMain } from 'electron'
+import { app } from 'electron'
 import installExtension, { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS } from 'electron-devtools-installer'
 
-import { registerIpc } from './ipc'
 import { configManager } from './services/ConfigManager'
 import { CHERRY_STUDIO_PROTOCOL, handleProtocolUrl, registerProtocolClient } from './services/ProtocolClient'
 import { registerShortcuts } from './services/ShortcutService'

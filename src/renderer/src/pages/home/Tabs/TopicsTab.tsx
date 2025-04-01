@@ -17,6 +17,7 @@ import {
 import type { DropResult } from '@hello-pangea/dnd'
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
 import CopyIcon from '@renderer/components/Icons/CopyIcon'
+import ObsidianExportPopup from '@renderer/components/Popups/ObsidianExportPopup'
 import PromptPopup from '@renderer/components/Popups/PromptPopup'
 import Scrollbar from '@renderer/components/Scrollbar'
 import { isMac } from '@renderer/config/constant'
@@ -33,17 +34,18 @@ import { droppableReorder } from '@renderer/utils'
 import { copyTopicAsMarkdown } from '@renderer/utils/copy'
 import {
   exportMarkdownToJoplin,
+  exportMarkdownToNotion,
   exportMarkdownToSiyuan,
   exportMarkdownToYuque,
   exportTopicAsMarkdown,
   topicToMarkdown
 } from '@renderer/utils/export'
-import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
 import { hasTopicPendingRequests } from '@renderer/utils/queue'
+import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
 import { Dropdown, Form, Input, MenuProps, Modal, Tooltip } from 'antd'
 import dayjs from 'dayjs'
 import { findIndex } from 'lodash'
-import { FC, startTransition, useCallback, useMemo, useRef, useState } from 'react'
+import { FC, startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { v4 as uuid } from 'uuid'
@@ -606,6 +608,75 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
       enableTopicsGroup
     ]
   )
+
+  // 根据配置决定是否使用分组
+  const ungroupedTopics = enableTopicsGroup ? safeFilter(assistant.topics, (topic) => !topic.groupId) : assistant.topics
+
+  // 获取分组下的话题列表
+  const getGroupTopics = (groupId: string) => {
+    return safeFilter(assistant.topics, (topic) => topic.groupId === groupId)
+  }
+
+  // 处理编辑分组
+  const handleEditGroup = (group: TopicGroup, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setCurrentGroup(group)
+    form.setFieldsValue({
+      name: group.name,
+      description: group.description
+    })
+    setGroupModalVisible(true)
+  }
+
+  // 处理删除分组
+  const handleDeleteGroup = (groupId: string) => {
+    window.modal.confirm({
+      title: t('topics.group.delete.title'),
+      content: t('topics.group.delete.content'),
+      okButtonProps: { danger: true },
+      centered: true,
+      onOk: () => {
+        // 将该分组下的话题移至未分组
+        assistant.topics.forEach((topic) => {
+          if (topic.groupId === groupId) {
+            updateTopicGroup(topic.id, undefined)
+          }
+        })
+        // 删除分组
+        const newTopicGroups = topicGroups.filter((g) => g.id !== groupId)
+        updateGroupsOrder(newTopicGroups)
+      }
+    })
+  }
+
+  // 创建新话题
+  const handleCreateTopic = async () => {
+    await modelGenerating()
+    const defaultTopic = {
+      id: uuid(),
+      assistantId: assistant.id,
+      name: t('topics.new'),
+      prompt: '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      messages: []
+    }
+    store.dispatch(
+      addTopicAction({
+        assistantId: assistant.id,
+        topic: defaultTopic
+      })
+    )
+    setActiveTopic(defaultTopic)
+  }
+
+  // 创建新分组
+  const handleCreateGroup = () => {
+    setCurrentGroup(null)
+    form.resetFields()
+    setGroupModalVisible(true)
+  }
+
   return (
     <Container right={topicPosition === 'right'} className="topics-tab">
       {enableTopicsGroup ? (
