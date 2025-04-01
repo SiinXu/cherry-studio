@@ -23,7 +23,7 @@ import {
 import { setDefaultModel, setTopicNamingModel, setTranslateModel } from '@renderer/store/llm'
 import { Assistant, AssistantGroup, AssistantSettings, Model, Topic } from '@renderer/types'
 import { findIndex } from 'lodash'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { v4 as uuid } from 'uuid'
 
@@ -116,7 +116,10 @@ export function useAssistant(assistantId: string) {
     updateTopic: (topic: Topic) => dispatch(updateTopic({ assistantId: assistant.id, topic })),
     updateTopics: (topics: Topic[]) => dispatch(updateTopics({ assistantId: assistant.id, topics })),
     removeAllTopics: () => dispatch(removeAllTopics({ assistantId: assistant.id })),
-    setModel: (model: Model) => dispatch(setModel({ assistantId: assistant.id, model })),
+    setModel: useCallback(
+      (model: Model) => dispatch(setModel({ assistantId: assistant.id, model })),
+      [dispatch, assistant.id]
+    ),
     updateAssistant: (assistant: Assistant) => dispatch(updateAssistant(assistant)),
     updateAssistantSettings: (settings: Partial<AssistantSettings>) => {
       dispatch(updateAssistantSettings({ assistantId: assistant.id, settings }))

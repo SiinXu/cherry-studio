@@ -1,7 +1,7 @@
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { replaceDevtoolsFont } from '@main/utils/windowUtil'
 import { app, ipcMain } from 'electron'
-import installExtension, { REDUX_DEVTOOLS } from 'electron-devtools-installer'
+import installExtension, { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS } from 'electron-devtools-installer'
 import log from './utils/logger'
 
 import { registerIpc } from './ipc'
@@ -50,7 +50,7 @@ if (!app.requestSingleInstanceLock()) {
       replaceDevtoolsFont(mainWindow)
 
       if (process.env.NODE_ENV === 'development') {
-        installExtension(REDUX_DEVTOOLS)
+        installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
           .then((name) => log.info(`Added Extension: ${name}`))
           .catch((err) => log.error('An error occurred: ', err))
       }

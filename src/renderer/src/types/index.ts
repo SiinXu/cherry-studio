@@ -18,6 +18,7 @@ export type Assistant = {
   enableWebSearch?: boolean
   enableGenerateImage?: boolean
   groupId?: string
+  mcpServers?: MCPServer[]
 }
 
 export type AssistantGroup = {
@@ -386,6 +387,7 @@ export interface MCPServer {
   description?: string
   baseUrl?: string
   command?: string
+  registryUrl?: string
   args?: string[]
   env?: Record<string, string>
   isActive: boolean

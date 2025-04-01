@@ -77,6 +77,9 @@ export interface SettingsState {
   notionDatabaseID: string | null
   notionApiKey: string | null
   notionPageNameKey: string | null
+  markdownExportPath: string | null
+  forceDollarMathInMarkdown: boolean
+  useTopicNamingForMessageTitle: boolean
   thoughtAutoCollapse: boolean
   notionAutoSplit: boolean
   notionSplitSize: number
@@ -129,8 +132,8 @@ const initialState: SettingsState = {
   showTopicTime: true,
   showAssistantIcon: true,
   pasteLongTextAsFile: false,
-  pasteLongTextThreshold: 1000,
-  clickAssistantToShowTopic: false,
+  pasteLongTextThreshold: 1500,
+  clickAssistantToShowTopic: true,
   autoCheckUpdate: true,
   renderInputMessageAsMarkdown: false,
   codeShowLineNumbers: true,
@@ -160,10 +163,14 @@ const initialState: SettingsState = {
   narrowMode: false,
   enableQuickAssistant: true,
   clickTrayToShowQuickAssistant: false,
-  multiModelMessageStyle: 'separate',
-  notionDatabaseID: null,
-  notionApiKey: null,
-  notionPageNameKey: null,
+  readClipboardAtStartup: true,
+  multiModelMessageStyle: 'fold',
+  notionDatabaseID: '',
+  notionApiKey: '',
+  notionPageNameKey: 'Name',
+  markdownExportPath: null,
+  forceDollarMathInMarkdown: false,
+  useTopicNamingForMessageTitle: false,
   thoughtAutoCollapse: true,
   notionAutoSplit: true,
   notionSplitSize: 1000,
@@ -361,6 +368,15 @@ const settingsSlice = createSlice({
     setNotionPageNameKey: (state, action: PayloadAction<string | null>) => {
       state.notionPageNameKey = action.payload
     },
+    setmarkdownExportPath: (state, action: PayloadAction<string | null>) => {
+      state.markdownExportPath = action.payload
+    },
+    setForceDollarMathInMarkdown: (state, action: PayloadAction<boolean>) => {
+      state.forceDollarMathInMarkdown = action.payload
+    },
+    setUseTopicNamingForMessageTitle: (state, action: PayloadAction<boolean>) => {
+      state.useTopicNamingForMessageTitle = action.payload
+    },
     setThoughtAutoCollapse: (state, action: PayloadAction<boolean>) => {
       state.thoughtAutoCollapse = action.payload
     },
@@ -499,6 +515,9 @@ export const {
   setNotionDatabaseID,
   setNotionApiKey,
   setNotionPageNameKey,
+  setmarkdownExportPath,
+  setForceDollarMathInMarkdown,
+  setUseTopicNamingForMessageTitle,
   setThoughtAutoCollapse,
   setNotionAutoSplit,
   setNotionSplitSize,
