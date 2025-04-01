@@ -40,10 +40,10 @@ import {
   assistantToMarkdown
 } from '@renderer/utils/export'
 import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
-import { Dropdown, Form, Input, MenuProps, Modal, Spin, Tooltip } from 'antd'
+import { Dropdown, Form, Input, MenuProps, Modal, Spin, Tooltip, Alert } from 'antd'
 import dayjs from 'dayjs'
 import { findIndex } from 'lodash'
-import { FC, startTransition, useCallback, useMemo, useRef, useState } from 'react'
+import { FC, startTransition, useCallback, useMemo, useRef, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { v4 as uuid } from 'uuid'
@@ -73,13 +73,12 @@ const Assistants: FC<AssistantsTabProps> = ({
     removeAssistant,
     updateGroupsOrder
   } = useAssistants()
-  const { groups, isLoading, loadingError } = useAppSelector((state) => state.assistants) // 直接从store获取状态
+  const { groups, isLoading, loadingError } = useAppSelector((state) => state.assistants)
   const { enableAssistantGroup } = useSettings()
   const { addAgent } = useAgents()
   const [form] = Form.useForm()
   const [groupModalVisible, setGroupModalVisible] = useState(false)
   const [currentGroup, setCurrentGroup] = useState<AssistantGroup | null>(null)
-  // 从localStorage获取已保存的分组展开状态，如果没有则默认全部展开
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
     try {
       const savedState = localStorage.getItem('assistantGroups_expandedState')
@@ -90,7 +89,7 @@ const Assistants: FC<AssistantsTabProps> = ({
     } catch (e) {
       console.error('Error loading group expanded state:', e)
     }
-    return new Set(safeMap(groups, (g) => g.id)) // 默认展开所有分组
+    return new Set(safeMap(groups, (g) => g.id))
   })
   const [dragging, setDragging] = useState(false)
   const dropTargetRef = useRef<string | null>(null)

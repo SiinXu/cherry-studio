@@ -40,13 +40,14 @@ import {
 } from '@renderer/utils/export'
 import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
 import { hasTopicPendingRequests } from '@renderer/utils/queue'
-import { Dropdown, Form, Input, MenuProps, Modal, Tooltip } from 'antd'
+import { Dropdown, Form, Input, MenuProps, Modal, Tooltip, Alert, Spin } from 'antd'
 import dayjs from 'dayjs'
 import { findIndex } from 'lodash'
-import { FC, startTransition, useCallback, useMemo, useRef, useState } from 'react'
+import { FC, startTransition, useCallback, useMemo, useRef, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { v4 as uuid } from 'uuid'
+import { LoadingOutlined } from '@ant-design/icons'
 
 interface Props {
   assistant: Assistant
@@ -59,6 +60,8 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   const { assistant, removeTopic, updateTopic, addTopic } = useAssistant(_assistant.id)
   const { t } = useTranslation()
   const { showTopicTime, topicPosition, enableTopicsGroup } = useSettings()
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
 
   // 定义判断主题是否处于等待状态的函数
   const isPending = (topicId: string) => hasTopicPendingRequests(topicId)
@@ -97,6 +100,14 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   const pendingTopics = useMemo(() => {
     return new Set<string>()
   }, [])
+
+  // 错误处理和数据加载检查
+  useEffect(() => {
+    if (error) {
+      console.error('加载话题数据时出错:', error)
+      // 可以在这里添加错误通知或重试逻辑
+    }
+  }, [error])
 
   const handleGroupFormSubmit = async () => {
     try {
@@ -472,78 +483,91 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
 
   return (
     <Container>
-      <Header>
-        <Title>{t('topics.title')}</Title>
-        <Actions>
-          {enableTopicsGroup && (
-            <Tooltip title={t('topics.group.add.title')}>
-              <FolderAddOutlined onClick={handleCreateGroup} />
-            </Tooltip>
-          )}
-          <Tooltip title={t('topics.add')}>
-            <PlusOutlined onClick={handleCreateTopic} />
-          </Tooltip>
-        </Actions>
-      </Header>
-      <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragUpdate={handleDragUpdate}>
-        <Scrollbar>
-          <Content>
-            {enableTopicsGroup && topicGroups && topicGroups.length > 0 ? (
-              <Droppable droppableId="groups" type="group">
-                {(provided) => (
-                  <div ref={provided.innerRef} {...provided.droppableProps}>
-                    {topicGroups.map((group, index) => (
-                      <Draggable key={group.id} draggableId={group.id} index={index}>
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                          >
-                            {renderGroup(group)}
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
+      {error && (
+        <Alert message={t('common.loading_error')} description={error.message} type="error" showIcon />
+      )}
+
+      {isLoading ? (
+        <div style={{ textAlign: 'center', padding: '20px' }}>
+          <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
+          <div style={{ marginTop: '10px' }}>{t('common.loading')}</div>
+        </div>
+      ) : (
+        <>
+          <Header>
+            <Title>{t('topics.title')}</Title>
+            <Actions>
+              {enableTopicsGroup && (
+                <Tooltip title={t('topics.group.add.title')}>
+                  <FolderAddOutlined onClick={handleCreateGroup} />
+                </Tooltip>
+              )}
+              <Tooltip title={t('topics.add')}>
+                <PlusOutlined onClick={handleCreateTopic} />
+              </Tooltip>
+            </Actions>
+          </Header>
+          <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragUpdate={handleDragUpdate}>
+            <Scrollbar>
+              <Content>
+                {enableTopicsGroup && topicGroups && topicGroups.length > 0 ? (
+                  <Droppable droppableId="groups" type="group">
+                    {(provided) => (
+                      <div ref={provided.innerRef} {...provided.droppableProps}>
+                        {topicGroups.map((group, index) => (
+                          <Draggable key={group.id} draggableId={group.id} index={index}>
+                            {(provided) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                              >
+                                {renderGroup(group)}
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                ) : (
+                  <Droppable droppableId="ungrouped" type="topic">
+                    {(provided) => (
+                      <div ref={provided.innerRef} {...provided.droppableProps}>
+                        {assistant.topics.map((topic, index) => renderTopicItem(topic, index, ''))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
                 )}
-              </Droppable>
-            ) : (
-              <Droppable droppableId="ungrouped" type="topic">
-                {(provided) => (
-                  <div ref={provided.innerRef} {...provided.droppableProps}>
-                    {assistant.topics.map((topic, index) => renderTopicItem(topic, index, ''))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            )}
-          </Content>
-        </Scrollbar>
-      </DragDropContext>
-      <Modal
-        title={currentGroup ? t('topics.group.edit.title') : t('topics.group.add.title')}
-        open={groupModalVisible}
-        onOk={handleGroupFormSubmit}
-        onCancel={() => {
-          setGroupModalVisible(false)
-          form.resetFields()
-        }}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="name"
-            label={t('topics.group.name')}
-            rules={[{ required: true, message: t('topics.group.validation.name') }]}
+              </Content>
+            </Scrollbar>
+          </DragDropContext>
+          <Modal
+            title={currentGroup ? t('topics.group.edit.title') : t('topics.group.add.title')}
+            open={groupModalVisible}
+            onOk={handleGroupFormSubmit}
+            onCancel={() => {
+              setGroupModalVisible(false)
+              form.resetFields()
+            }}
           >
-            <Input placeholder={t('topics.group.name.placeholder')} />
-          </Form.Item>
-          <Form.Item name="description" label={t('topics.group.description')}>
-            <Input.TextArea placeholder={t('topics.group.description.placeholder')} />
-          </Form.Item>
-        </Form>
-      </Modal>
+            <Form form={form} layout="vertical">
+              <Form.Item
+                name="name"
+                label={t('topics.group.name')}
+                rules={[{ required: true, message: t('topics.group.validation.name') }]}
+              >
+                <Input placeholder={t('topics.group.name.placeholder')} />
+              </Form.Item>
+              <Form.Item name="description" label={t('topics.group.description')}>
+                <Input.TextArea placeholder={t('topics.group.description.placeholder')} />
+              </Form.Item>
+            </Form>
+          </Modal>
+        </>
+      )}
     </Container>
   )
 }
