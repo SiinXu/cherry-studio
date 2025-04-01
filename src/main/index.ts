@@ -44,47 +44,42 @@ if (!app.requestSingleInstanceLock()) {
 
       registerShortcuts(mainWindow)
 
-    if (process.env.NODE_ENV === 'development') {
-      installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
-        .then((name) => console.log(`Added Extension:  ${name}`))
-        .catch((err) => console.log('An error occurred: ', err))
+      if (process.env.NODE_ENV === 'development') {
+        installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
+          .then((name) => console.log(`Added Extension:  ${name}`))
+          .catch((err) => console.log('An error occurred: ', err))
+      }
+    } catch (error) {
+      console.error('Error during app startup:', error)
     }
+
+    registerProtocolClient(app)
+
+    // macOS specific: handle protocol when app is already running
+    app.on('open-url', (event, url) => {
+      event.preventDefault()
+      handleProtocolUrl(url)
+    })
+
+    // Listen for second instance
+    app.on('second-instance', (_event, argv) => {
+      windowService.showMainWindow()
+
+      // Protocol handler for Windows/Linux
+      // The commandLine is an array of strings where the last item might be the URL
+      const url = argv.find((arg) => arg.startsWith(CHERRY_STUDIO_PROTOCOL + '://'))
+      if (url) handleProtocolUrl(url)
+    })
+
+    app.on('browser-window-created', (_, window) => {
+      optimizer.watchWindowShortcuts(window)
+    })
+
+    app.on('before-quit', () => {
+      app.isQuitting = true
+    })
+
+    // In this file you can include the rest of your app"s specific main process
+    // code. You can also put them in separate files and require them here.
   })
-
-  registerProtocolClient(app)
-
-  // macOS specific: handle protocol when app is already running
-  app.on('open-url', (event, url) => {
-    event.preventDefault()
-    handleProtocolUrl(url)
-  })
-
-  registerProtocolClient(app)
-
-  // macOS specific: handle protocol when app is already running
-  app.on('open-url', (event, url) => {
-    event.preventDefault()
-    handleProtocolUrl(url)
-  })
-
-  // Listen for second instance
-  app.on('second-instance', (_event, argv) => {
-    windowService.showMainWindow()
-
-    // Protocol handler for Windows/Linux
-    // The commandLine is an array of strings where the last item might be the URL
-    const url = argv.find((arg) => arg.startsWith(CHERRY_STUDIO_PROTOCOL + '://'))
-    if (url) handleProtocolUrl(url)
-  })
-
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
-
-  app.on('before-quit', () => {
-    app.isQuitting = true
-  })
-
-  // In this file you can include the rest of your app"s specific main process
-  // code. You can also put them in separate files and require them here.
 }

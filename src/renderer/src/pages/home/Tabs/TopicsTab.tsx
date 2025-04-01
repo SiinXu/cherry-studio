@@ -55,17 +55,15 @@ interface Props {
 }
 const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic }) => {
   const { assistants } = useAssistants()
-  const { assistant, removeTopic, updateTopic, addTopic } = useAssistant(_assistant.id)
+  const { assistant, removeTopic, updateTopic } = useAssistant(_assistant.id)
   const { t } = useTranslation()
   const { showTopicTime, topicPosition, enableTopicsGroup } = useSettings()
 
-  // 定义判断主题是否处于等待状态的函数
-  const isPending = (topicId: string) => hasTopicPendingRequests(topicId)
+  // 从useCallback中定义的函数，不需要这个重复声明
   const {
     groups: topicGroups,
     addGroup,
     updateGroup,
-    removeGroup,
     updateTopicGroup,
     updateGroupsOrder
   } = useTopicGroups(_assistant.id)
@@ -103,8 +101,10 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
         pendingTopics.delete(topicId)
         return false
       }
-    })
-  }
+      return hasPending
+    },
+    [activeTopic.id, pendingTopics]
+  )
   const handleGroupFormSubmit = async () => {
     try {
       const values = await form.validateFields()

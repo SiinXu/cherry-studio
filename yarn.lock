@@ -2261,34 +2261,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@libsql/client@npm:^0.15.1":
-  version: 0.15.1
-  resolution: "@libsql/client@npm:0.15.1"
-  dependencies:
-    "@libsql/core": "npm:^0.15.1"
-    "@libsql/hrana-client": "npm:^0.7.0"
-    js-base64: "npm:^3.7.5"
-    libsql: "npm:^0.5.3"
-    promise-limit: "npm:^2.7.0"
-  checksum: 10c0/d9afcfc2c2f3c2b5f191cd9170e9997b528a4e22d52c6414eb93313957455f8b16df2a8d851790412099e684bd816c9e3c86868bff75c8899a75e19a3202b131
-  languageName: node
-  linkType: hard
-
 "@libsql/core@npm:^0.14.0":
   version: 0.14.0
   resolution: "@libsql/core@npm:0.14.0"
   dependencies:
     js-base64: "npm:^3.7.5"
   checksum: 10c0/327bb991cf191d5a9a9fc0cc1a17123f7ca88f222187a3bde845fbad8ceaeaa1f139882080e4b2969da57b83e576c52702572e2838d1743c6bff75f95e6f774a
-  languageName: node
-  linkType: hard
-
-"@libsql/core@npm:^0.15.1":
-  version: 0.15.1
-  resolution: "@libsql/core@npm:0.15.1"
-  dependencies:
-    js-base64: "npm:^3.7.5"
-  checksum: 10c0/c6d818c4024989d7b465170657c7d2ce05ea5508a60e26793835d7b94870d05a86eb9b8f1eb5ea4aa53ade009965581dd2b00aed98485c08b45847b2594b3da3
   languageName: node
   linkType: hard
 
@@ -2299,10 +2277,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@libsql/darwin-arm64@npm:0.5.3, @libsql/darwin-arm64@npm:^0.5.3":
+"@libsql/darwin-arm64@npm:0.5.3":
   version: 0.5.3
   resolution: "@libsql/darwin-arm64@npm:0.5.3"
-  checksum: 10c0/87f61a7f8576108448f1a3f6eb0438494f3e3b850a00e09f2ea8253575d23b73b59d0d46c155188a5562fd7c7490e51999c5a0dd0fb3006bf24232ae5c09b43d
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
@@ -2409,6 +2386,13 @@ __metadata:
 "@libsql/win32-x64-msvc@npm:0.4.7":
   version: 0.4.7
   resolution: "@libsql/win32-x64-msvc@npm:0.4.7"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@libsql/win32-x64-msvc@npm:0.5.3":
+  version: 0.5.3
+  resolution: "@libsql/win32-x64-msvc@npm:0.5.3"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
