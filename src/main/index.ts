@@ -51,8 +51,8 @@ if (!app.requestSingleInstanceLock()) {
 
       if (process.env.NODE_ENV === 'development') {
         installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
-          .then((name) => log.info(`Added Extension: ${name}`))
-          .catch((err) => log.error('An error occurred: ', err))
+          .then((name) => console.log(`Added Extension:  ${name}`))
+          .catch((err) => console.log('An error occurred: ', err))
       }
 
       ipcMain.handle('system:getDeviceType', () => {

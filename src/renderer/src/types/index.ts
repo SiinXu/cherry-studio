@@ -27,6 +27,7 @@ export type AssistantGroup = {
   description?: string
   createdAt: string
   updatedAt: string
+  mcpServers?: MCPServer[]
 }
 
 export type AssistantMessage = {
