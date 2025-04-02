@@ -481,7 +481,6 @@ const GroupsContainer = styled.div`
   .assistant-groups-container {
     display: flex;
     flex-direction: column;
-    flex: 1;
   }
 `
 
