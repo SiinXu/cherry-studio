@@ -32,7 +32,8 @@ import { Assistant, Topic, TopicGroup } from '@renderer/types'
 import { droppableReorder } from '@renderer/utils'
 import { copyTopicAsMarkdown } from '@renderer/utils/copy'
 import {
-  exportMarkdownToNotion,
+  exportMarkdownToJoplin,
+  exportMarkdownToSiyuan,
   exportMarkdownToYuque,
   exportTopicAsMarkdown,
   topicToMarkdown
@@ -42,7 +43,7 @@ import { hasTopicPendingRequests } from '@renderer/utils/queue'
 import { Dropdown, Form, Input, MenuProps, Modal, Tooltip } from 'antd'
 import dayjs from 'dayjs'
 import { findIndex } from 'lodash'
-import { FC, useCallback, useEffect, useRef, useState } from 'react'
+import { FC, startTransition, useCallback, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { v4 as uuid } from 'uuid'
@@ -90,52 +91,17 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   const [dragging, setDragging] = useState(false)
   const dropTargetRef = useRef<string | null>(null)
   const [deletingTopicId, setDeletingTopicId] = useState<string | null>(null)
-  const deleteTimerRef = useRef<NodeJS.Timeout>()
-  // 根据配置决定是否使用分组
-  // 当分组功能关闭时，所有话题都视为未分组
-  const ungroupedTopics = enableTopicsGroup ? safeFilter(assistant.topics, (topic) => !topic.groupId) : assistant.topics
-  // 分组话题
-  const getGroupTopics = (groupId: string) => {
-    return safeFilter(assistant.topics, (topic) => topic.groupId === groupId)
-  }
-  // 创建新话题
-  const handleCreateTopic = () => {
-    // 创建新话题
-    const newTopic: Topic = {
-      id: uuid(),
-      name: t('topics.new'),
-      assistantId: assistant.id,
-      groupId: undefined,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      messages: []
-    }
-    addTopic(newTopic)
-    setActiveTopic(newTopic)
-  }
-  // 分组管理函数
-  const handleCreateGroup = () => {
-    setCurrentGroup(null)
-    form.resetFields()
-    setGroupModalVisible(true)
-  }
-  const handleEditGroup = (group: TopicGroup, e: React.MouseEvent) => {
-    e.stopPropagation() // 阻止事件冒泡到toggle
-    setCurrentGroup(group)
-    form.setFieldsValue({
-      name: group.name,
-      description: group.description
-    })
-    setGroupModalVisible(true)
-  }
-  const handleDeleteGroup = (groupId: string) => {
-    window.modal.confirm({
-      title: t('topics.group.delete.title') || '删除分组',
-      content: t('topics.group.delete.content') || '确定要删除此分组吗？话题将被移动到未分组区域。',
-      okButtonProps: { danger: true },
-      centered: true,
-      onOk: () => {
-        removeGroup(groupId)
+  const deleteTimerRef = useRef<NodeJS.Timeout>(null)
+
+  const pendingTopics = useMemo(() => {
+    return new Set<string>()
+  }, [])
+  const isPending = useCallback(
+    (topicId: string) => {
+      const hasPending = hasTopicPendingRequests(topicId)
+      if (topicId === activeTopic.id && !hasPending) {
+        pendingTopics.delete(topicId)
+        return false
       }
     })
   }
@@ -283,8 +249,10 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   )
   const onSwitchTopic = useCallback(
     async (topic: Topic) => {
-      await modelGenerating()
-      setActiveTopic(topic)
+      // await modelGenerating()
+      startTransition(() => {
+        setActiveTopic(topic)
+      })
     },
     [setActiveTopic]
   )
@@ -462,7 +430,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
                 allowClear: true
               }
             })
-            prompt && updateTopic({ ...topic, prompt: prompt.trim() })
+            prompt !== null && updateTopic({ ...topic, prompt: prompt.trim() })
           }
         },
         {
@@ -539,6 +507,30 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
               onClick: async () => {
                 const markdown = await topicToMarkdown(topic)
                 exportMarkdownToYuque(topic.name, markdown)
+              }
+            },
+            {
+              label: t('chat.topics.export.obsidian'),
+              key: 'obsidian',
+              onClick: async () => {
+                const markdown = await topicToMarkdown(topic)
+                await ObsidianExportPopup.show({ title: topic.name, markdown, processingMethod: '3' })
+              }
+            },
+            {
+              label: t('chat.topics.export.joplin'),
+              key: 'joplin',
+              onClick: async () => {
+                const markdown = await topicToMarkdown(topic)
+                exportMarkdownToJoplin(topic.name, markdown)
+              }
+            },
+            {
+              label: t('chat.topics.export.siyuan'),
+              key: 'siyuan',
+              onClick: async () => {
+                const markdown = await topicToMarkdown(topic)
+                exportMarkdownToSiyuan(topic.name, markdown)
               }
             }
           ]
@@ -709,20 +701,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
 const Container = styled(Scrollbar)`
   display: flex;
   flex-direction: column;
-  padding-top: 11px;
-  user-select: none;
-  height: 100%;
-  .topic-item-wrapper[draggable='true'] {
-    cursor: grab;
-    &:active {
-      cursor: grabbing;
-    }
-  }
-  /* 解决拖拽时的白边问题 */
-  [draggable] {
-    -webkit-user-drag: element;
-    user-select: none;
-  }
+  padding: 10px;
 `
 const UngroupedSection = styled.div<{ $enableGroup?: boolean }>`
   padding: 8px;
@@ -851,8 +830,6 @@ const GroupContent = styled.div`
 `
 const TopicListItem = styled.div`
   padding: 7px 12px;
-  margin-left: 10px;
-  margin-right: 4px;
   border-radius: var(--list-item-border-radius);
   font-family: Ubuntu;
   font-size: 13px;
@@ -864,6 +841,7 @@ const TopicListItem = styled.div`
   cursor: pointer;
   border: 0.5px solid transparent;
   position: relative;
+  width: calc(var(--assistants-width) - 20px);
   .menu {
     opacity: 0;
     color: var(--color-text-3);
