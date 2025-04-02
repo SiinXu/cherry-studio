@@ -481,12 +481,11 @@ const GroupsContainer = styled.div`
   .assistant-groups-container {
     display: flex;
     flex-direction: column;
-    flex: 1;
   }
 `
 
 const GroupContainer = styled.div<{ isDragging?: boolean }>`
-  margin-bottom: 4px;
+  margin-bottom: 0px;
   position: relative;
   border-radius: 6px;
   transition: all 0.2s ease;

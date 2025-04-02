@@ -37,8 +37,8 @@ import {
   exportTopicAsMarkdown,
   topicToMarkdown
 } from '@renderer/utils/export'
-import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
 import { hasTopicPendingRequests } from '@renderer/utils/queue'
+import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
 import { Dropdown, Form, Input, MenuProps, Modal, Tooltip } from 'antd'
 import dayjs from 'dayjs'
 import { findIndex } from 'lodash'
