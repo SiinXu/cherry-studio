@@ -453,7 +453,7 @@ export default Assistants
 const Container = styled.div`
   height: 100%;
   overflow-y: auto;
-  padding: 0 16px 16px;
+  padding: 10px 16px 16px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;

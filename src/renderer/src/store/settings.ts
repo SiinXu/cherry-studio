@@ -52,6 +52,7 @@ export interface SettingsState {
   mathEngine: 'MathJax' | 'KaTeX'
   messageStyle: 'plain' | 'bubble'
   codeStyle: CodeStyleVarious
+  foldDisplayMode: 'expanded' | 'compact'
   gridColumns: number
   gridPopoverTrigger: 'hover' | 'click'
   // 是否显示助手图标
@@ -79,6 +80,9 @@ export interface SettingsState {
   notionDatabaseID: string | null
   notionApiKey: string | null
   notionPageNameKey: string | null
+  markdownExportPath: string | null
+  forceDollarMathInMarkdown: boolean
+  useTopicNamingForMessageTitle: boolean
   thoughtAutoCollapse: boolean
   notionAutoSplit: boolean
   notionSplitSize: number
@@ -88,8 +92,6 @@ export interface SettingsState {
   messageNavigation: boolean
   joplinToken: string | null
   joplinUrl: string | null
-  forceDollarMathInMarkdown: boolean
-  markdownExportPath: string
   obsidianFolder: string
   obsidianValut: string
   obsidianTages: string
@@ -100,6 +102,8 @@ export interface SettingsState {
   siyuanToken: string | null
   siyuanBoxId: string | null
   siyuanRootPath: string | null
+  maxKeepAliveMinapps: number
+  showOpenedMinappsInSidebar: boolean
 }
 
 export type MultiModelMessageStyle = 'horizontal' | 'vertical' | 'fold' | 'grid'
@@ -127,7 +131,7 @@ const initialState: SettingsState = {
   showAssistantIcon: false,
   pasteLongTextAsFile: false,
   pasteLongTextThreshold: 1500,
-  clickAssistantToShowTopic: false,
+  clickAssistantToShowTopic: true,
   autoCheckUpdate: true,
   renderInputMessageAsMarkdown: false,
   codeShowLineNumbers: false,
@@ -136,8 +140,9 @@ const initialState: SettingsState = {
   mathEngine: 'KaTeX',
   messageStyle: 'plain',
   codeStyle: 'auto',
+  foldDisplayMode: 'expanded',
   gridColumns: 2,
-  gridPopoverTrigger: 'hover',
+  gridPopoverTrigger: 'click',
   webdavHost: '',
   webdavUser: '',
   webdavPass: '',
@@ -160,6 +165,9 @@ const initialState: SettingsState = {
   notionDatabaseID: '',
   notionApiKey: '',
   notionPageNameKey: 'Name',
+  markdownExportPath: '',
+  forceDollarMathInMarkdown: false,
+  useTopicNamingForMessageTitle: false,
   thoughtAutoCollapse: true,
   notionAutoSplit: false,
   notionSplitSize: 90,
@@ -169,8 +177,6 @@ const initialState: SettingsState = {
   messageNavigation: false,
   joplinToken: '',
   joplinUrl: '',
-  forceDollarMathInMarkdown: false,
-  markdownExportPath: '',
   obsidianFolder: '',
   obsidianValut: '',
   obsidianTages: '',
@@ -180,7 +186,9 @@ const initialState: SettingsState = {
   siyuanApiUrl: null,
   siyuanToken: null,
   siyuanBoxId: null,
-  siyuanRootPath: null
+  siyuanRootPath: null,
+  maxKeepAliveMinapps: 3,
+  showOpenedMinappsInSidebar: true
 }
 
 const settingsSlice = createSlice({
@@ -290,6 +298,9 @@ const settingsSlice = createSlice({
     setMathEngine: (state, action: PayloadAction<'MathJax' | 'KaTeX'>) => {
       state.mathEngine = action.payload
     },
+    setFoldDisplayMode: (state, action: PayloadAction<'expanded' | 'compact'>) => {
+      state.foldDisplayMode = action.payload
+    },
     setGridColumns: (state, action: PayloadAction<number>) => {
       state.gridColumns = action.payload
     },
@@ -349,6 +360,15 @@ const settingsSlice = createSlice({
     setNotionPageNameKey: (state, action: PayloadAction<string>) => {
       state.notionPageNameKey = action.payload
     },
+    setmarkdownExportPath: (state, action: PayloadAction<string | null>) => {
+      state.markdownExportPath = action.payload
+    },
+    setForceDollarMathInMarkdown: (state, action: PayloadAction<boolean>) => {
+      state.forceDollarMathInMarkdown = action.payload
+    },
+    setUseTopicNamingForMessageTitle: (state, action: PayloadAction<boolean>) => {
+      state.useTopicNamingForMessageTitle = action.payload
+    },
     setThoughtAutoCollapse: (state, action: PayloadAction<boolean>) => {
       state.thoughtAutoCollapse = action.payload
     },
@@ -382,12 +402,6 @@ const settingsSlice = createSlice({
     setJoplinUrl: (state, action: PayloadAction<string>) => {
       state.joplinUrl = action.payload
     },
-    setForceDollarMathInMarkdown: (state, action: PayloadAction<boolean>) => {
-      state.forceDollarMathInMarkdown = action.payload
-    },
-    setmarkdownExportPath: (state, action: PayloadAction<string>) => {
-      state.markdownExportPath = action.payload
-    },
     setObsidianFolder: (state, action: PayloadAction<string>) => {
       state.obsidianFolder = action.payload
     },
@@ -414,6 +428,12 @@ const settingsSlice = createSlice({
     },
     setDefaultObsidianVault: (state, action: PayloadAction<string>) => {
       state.defaultObsidianVault = action.payload
+    },
+    setMaxKeepAliveMinapps: (state, action: PayloadAction<number>) => {
+      state.maxKeepAliveMinapps = action.payload
+    },
+    setShowOpenedMinappsInSidebar: (state, action: PayloadAction<boolean>) => {
+      state.showOpenedMinappsInSidebar = action.payload
     }
   }
 })
@@ -455,6 +475,7 @@ export const {
   setCodeCollapsible,
   setCodeWrappable,
   setMathEngine,
+  setFoldDisplayMode,
   setGridColumns,
   setGridPopoverTrigger,
   setMessageStyle,
@@ -473,6 +494,9 @@ export const {
   setNotionDatabaseID,
   setNotionApiKey,
   setNotionPageNameKey,
+  setmarkdownExportPath,
+  setForceDollarMathInMarkdown,
+  setUseTopicNamingForMessageTitle,
   setThoughtAutoCollapse,
   setNotionAutoSplit,
   setNotionSplitSize,
@@ -482,8 +506,6 @@ export const {
   setMessageNavigation,
   setJoplinToken,
   setJoplinUrl,
-  setForceDollarMathInMarkdown,
-  setmarkdownExportPath,
   setObsidianFolder,
   setObsidianValut,
   setObsidianTages,
@@ -492,7 +514,9 @@ export const {
   setSiyuanToken,
   setSiyuanBoxId,
   setSiyuanRootPath,
-  setDefaultObsidianVault
+  setDefaultObsidianVault,
+  setMaxKeepAliveMinapps,
+  setShowOpenedMinappsInSidebar
 } = settingsSlice.actions
 
 export default settingsSlice.reducer

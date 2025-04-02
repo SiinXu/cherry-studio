@@ -40,11 +40,12 @@ import {
   exportTopicAsMarkdown,
   topicToMarkdown
 } from '@renderer/utils/export'
+import { hasTopicPendingRequests } from '@renderer/utils/queue'
 import { safeFilter, safeMap } from '@renderer/utils/safeArrayUtils'
 import { Dropdown, Form, Input, MenuProps, Modal, Tooltip } from 'antd'
 import dayjs from 'dayjs'
 import { findIndex } from 'lodash'
-import { FC, useCallback, useEffect, useRef, useState } from 'react'
+import { FC, startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { v4 as uuid } from 'uuid'
@@ -89,15 +90,37 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   const [dragging, setDragging] = useState(false)
   const dropTargetRef = useRef<string | null>(null)
   const [deletingTopicId, setDeletingTopicId] = useState<string | null>(null)
-  const deleteTimerRef = useRef<NodeJS.Timeout>()
-  const [pendingTopics, setPendingTopics] = useState<Set<string>>(new Set())
+  const deleteTimerRef = useRef<NodeJS.Timeout | undefined>(undefined)
+
+  // 使用useMemo优化pending话题集合
+  const pendingTopics = useMemo(() => new Set<string>(), [])
+
+  // 判断话题是否处于pending状态的函数
+  const isPending = useCallback(
+    (topicId: string) => {
+      const hasPending = hasTopicPendingRequests(topicId)
+      if (topicId === activeTopic.id && !hasPending) {
+        pendingTopics.delete(topicId)
+        return false
+      }
+      if (hasPending) {
+        pendingTopics.add(topicId)
+        return true
+      }
+      return pendingTopics.has(topicId)
+    },
+    [activeTopic.id, pendingTopics]
+  )
+
   // 根据配置决定是否使用分组
   // 当分组功能关闭时，所有话题都视为未分组
   const ungroupedTopics = enableTopicsGroup ? safeFilter(assistant.topics, (topic) => !topic.groupId) : assistant.topics
+
   // 分组话题
   const getGroupTopics = (groupId: string) => {
     return safeFilter(assistant.topics, (topic) => topic.groupId === groupId)
   }
+
   // 创建新话题
   const handleCreateTopic = () => {
     // 创建新话题
@@ -113,6 +136,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
     addTopic(newTopic)
     setActiveTopic(newTopic)
   }
+
   // 分组管理函数
   const handleCreateGroup = () => {
     setCurrentGroup(null)
@@ -283,13 +307,9 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
   )
   const onSwitchTopic = useCallback(
     async (topic: Topic) => {
-      setPendingTopics((prev) => new Set([...prev, topic.id]))
       await modelGenerating()
-      setActiveTopic(topic)
-      setPendingTopics((prev) => {
-        const newSet = new Set(prev)
-        newSet.delete(topic.id)
-        return newSet
+      startTransition(() => {
+        setActiveTopic(topic)
       })
     },
     [setActiveTopic]
@@ -312,7 +332,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
             className={isActive ? 'active' : ''}
             onClick={() => onSwitchTopic(topic)}
             style={{ borderRadius }}>
-            {pendingTopics.has(topic.id) && !isActive && <PendingIndicator />}
+            {isPending(topic.id) && !isActive && <PendingIndicator />}
             <TopicName className="name" title={topicName}>
               {topicName}
             </TopicName>
@@ -468,7 +488,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic 
                 allowClear: true
               }
             })
-            prompt && updateTopic({ ...topic, prompt: prompt.trim() })
+            prompt !== null && updateTopic({ ...topic, prompt: prompt.trim() })
           }
         },
         {
@@ -881,8 +901,6 @@ const GroupContent = styled.div`
 `
 const TopicListItem = styled.div`
   padding: 7px 12px;
-  margin-left: 10px;
-  margin-right: 4px;
   border-radius: var(--list-item-border-radius);
   font-family: Ubuntu;
   font-size: 13px;
@@ -894,6 +912,7 @@ const TopicListItem = styled.div`
   cursor: pointer;
   border: 0.5px solid transparent;
   position: relative;
+  width: calc(var(--assistants-width) - 20px);
   .menu {
     opacity: 0;
     color: var(--color-text-3);
@@ -1027,16 +1046,15 @@ const TopicAddName = styled.div`
   overflow: hidden;
   font-size: 13px;
 `
-const PendingIndicator = styled.div.attrs({
-  className: 'animation-pulse'
-})`
-  --pulse-size: 5px;
-  width: 5px;
-  height: 5px;
+const PendingIndicator = styled.div`
   position: absolute;
-  left: 3px;
-  top: 15px;
+  left: 5px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background-color: var(--color-primary);
+  transform: translateY(-50%);
+  animation: pulse 1.5s ease-in-out infinite;
 `
 export default Topics

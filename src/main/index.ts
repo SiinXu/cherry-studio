@@ -1,8 +1,7 @@
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { replaceDevtoolsFont } from '@main/utils/windowUtil'
 import { app, ipcMain } from 'electron'
-import installExtension, { REDUX_DEVTOOLS } from 'electron-devtools-installer'
-import log from './utils/logger'
+import installExtension, { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS } from 'electron-devtools-installer'
 
 import { registerIpc } from './ipc'
 import { configManager } from './services/ConfigManager'
@@ -10,6 +9,7 @@ import { CHERRY_STUDIO_PROTOCOL, handleProtocolUrl, registerProtocolClient } fro
 import { registerShortcuts } from './services/ShortcutService'
 import { TrayService } from './services/TrayService'
 import { windowService } from './services/WindowService'
+import log from './utils/logger'
 
 // Check for single instance lock
 if (!app.requestSingleInstanceLock()) {
@@ -50,10 +50,11 @@ if (!app.requestSingleInstanceLock()) {
       replaceDevtoolsFont(mainWindow)
 
       if (process.env.NODE_ENV === 'development') {
-        installExtension(REDUX_DEVTOOLS)
+        installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
           .then((name) => log.info(`Added Extension: ${name}`))
           .catch((err) => log.error('An error occurred: ', err))
       }
+
       ipcMain.handle('system:getDeviceType', () => {
         return process.platform === 'darwin' ? 'mac' : process.platform === 'win32' ? 'windows' : 'linux'
       })
@@ -61,14 +62,6 @@ if (!app.requestSingleInstanceLock()) {
       log.error('Error during app initialization:', error)
       app.quit()
     }
-  })
-
-  registerProtocolClient(app)
-
-  // macOS specific: handle protocol when app is already running
-  app.on('open-url', (event, url) => {
-    event.preventDefault()
-    handleProtocolUrl(url)
   })
 
   registerProtocolClient(app)
