@@ -3,9 +3,10 @@ import { EMOJI_GENERATOR_PROMPT, SEARCH_SUMMARY_PROMPT } from '@renderer/config/
 import i18n from '@renderer/i18n'
 import store from '@renderer/store'
 import { setGenerating } from '@renderer/store/runtime'
-import { Assistant, MCPTool, Message, Model, Provider, Suggestion } from '@renderer/types'
+import { Assistant, Message, Model, Provider, Suggestion } from '@renderer/types'
 import { formatMessageError, isAbortError } from '@renderer/utils/error'
 import { withGenerateImage } from '@renderer/utils/formats'
+import { filterMCPTools } from '@renderer/utils/mcp-tools'
 import { cloneDeep, findLast, isEmpty } from 'lodash'
 
 import AiProvider from '../providers/AiProvider'
@@ -100,16 +101,8 @@ export async function fetchChatCompletion({
 
     const lastUserMessage = findLast(messages, (m) => m.role === 'user')
     // Get MCP tools
-    const mcpTools: MCPTool[] = []
     const enabledMCPs = lastUserMessage?.enabledMCPs
-
-    if (enabledMCPs && enabledMCPs.length > 0) {
-      for (const mcpServer of enabledMCPs) {
-        const tools = await window.api.mcp.listTools(mcpServer)
-        console.debug('tools', tools)
-        mcpTools.push(...tools)
-      }
-    }
+    const mcpTools = filterMCPTools(undefined, enabledMCPs)
 
     await AI.completions({
       messages: filterUsefulMessages(filterContextMessages(messages)),

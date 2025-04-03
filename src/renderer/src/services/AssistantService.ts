@@ -16,7 +16,8 @@ export function getDefaultAssistant(): Assistant {
     prompt: '',
     topics: [getDefaultTopic('default')],
     messages: [],
-    type: 'assistant'
+    type: 'assistant',
+    mcpTools: []
   }
 }
 
