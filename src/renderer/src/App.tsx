@@ -1,7 +1,6 @@
 import '@renderer/databases'
 
 import store, { persistor } from '@renderer/store'
-import { FC } from 'react'
 import { Provider } from 'react-redux'
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import { PersistGate } from 'redux-persist/integration/react'
@@ -22,9 +21,7 @@ import PaintingsPage from './pages/paintings/PaintingsPage'
 import SettingsPage from './pages/settings/SettingsPage'
 import TranslatePage from './pages/translate/TranslatePage'
 
-const App: FC = () => {
-  console.log('App组件开始渲染')
-
+function App(): React.ReactElement {
   return (
     <Provider store={store}>
       <StyleSheetManager>
