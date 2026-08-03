@@ -4,6 +4,7 @@ import i18n from '@renderer/i18n/resolver'
 import { toast } from '@renderer/services/toast'
 import { formatApiKeys, splitApiKeyString } from '@renderer/utils/api'
 import type { ApiKeyEntry } from '@shared/data/types/provider'
+import { isHttpHeaderByteString } from '@shared/utils/api'
 import { debounce } from 'es-toolkit/compat'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
@@ -85,6 +86,14 @@ function toApiKeyEntries(value: string, apiKeysData: ApiKeysData | undefined): A
   return [...nextEntries, ...untouchedDisabledEntries]
 }
 
+function hasNewNonByteStringApiKey(existingKeys: ApiKeyEntry[], nextKeys: ApiKeyEntry[]) {
+  const existingValuesById = new Map(existingKeys.map((entry) => [entry.id, entry.key.trim()]))
+
+  return nextKeys.some(
+    (entry) => !isHttpHeaderByteString(entry.key) && existingValuesById.get(entry.id) !== entry.key.trim()
+  )
+}
+
 function createApiKeyValue(serverApiKey: string): ApiKeyValue {
   return {
     serverApiKey,
@@ -135,11 +144,13 @@ export function useProviderApiKey(providerId: string) {
       if (!provider) {
         return
       }
-      if ([...value].some((character) => character.charCodeAt(0) > 0xff)) {
+
+      const nextApiKeys = toApiKeyEntries(value, apiKeysData)
+      if (hasNewNonByteStringApiKey(apiKeysData?.keys ?? [], nextApiKeys)) {
         throw new Error('API key contains characters unsupported by HTTP headers')
       }
 
-      await updateApiKeys(toApiKeyEntries(value, apiKeysData))
+      await updateApiKeys(nextApiKeys)
     },
     [apiKeysData, provider, updateApiKeys]
   )

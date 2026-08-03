@@ -156,6 +156,75 @@ describe('useProviderApiKey', () => {
     expect(result.current.hasPendingSync).toBe(true)
   })
 
+  it('allows one legacy non-ByteString key to be repaired while another remains unchanged', async () => {
+    apiKeysData = {
+      keys: [
+        { id: 'legacy-one', key: 'sk-旧一', isEnabled: true },
+        { id: 'legacy-two', key: 'sk-旧二', isEnabled: true }
+      ]
+    }
+
+    const { result } = renderHook(() => useProviderApiKey('openai'))
+
+    act(() => {
+      result.current.setInputApiKey('sk-repaired,sk-旧二')
+    })
+
+    await act(async () => {
+      vi.runAllTimers()
+    })
+
+    expect(updateApiKeysMock).toHaveBeenCalledWith([
+      { id: 'legacy-one', key: 'sk-repaired', isEnabled: true },
+      { id: 'legacy-two', key: 'sk-旧二', isEnabled: true }
+    ])
+  })
+
+  it('allows a legacy non-ByteString key to be removed while another remains unchanged', async () => {
+    apiKeysData = {
+      keys: [
+        { id: 'legacy-one', key: 'sk-旧一', isEnabled: true },
+        { id: 'legacy-two', key: 'sk-旧二', isEnabled: true }
+      ]
+    }
+
+    const { result } = renderHook(() => useProviderApiKey('openai'))
+
+    act(() => {
+      result.current.setInputApiKey('sk-旧二')
+    })
+
+    await act(async () => {
+      vi.runAllTimers()
+    })
+
+    expect(updateApiKeysMock).toHaveBeenCalledWith([{ id: 'legacy-two', key: 'sk-旧二', isEnabled: true }])
+  })
+
+  it('allows other keys to change while preserving a whitespace-wrapped disabled legacy key', async () => {
+    apiKeysData = {
+      keys: [
+        { id: 'enabled-key', key: 'sk-current', isEnabled: true },
+        { id: 'legacy-disabled', key: ' sk-旧 ', isEnabled: false, label: 'Legacy' }
+      ]
+    }
+
+    const { result } = renderHook(() => useProviderApiKey('openai'))
+
+    act(() => {
+      result.current.setInputApiKey('sk-repaired')
+    })
+
+    await act(async () => {
+      vi.runAllTimers()
+    })
+
+    expect(updateApiKeysMock).toHaveBeenCalledWith([
+      { id: 'enabled-key', key: 'sk-repaired', isEnabled: true },
+      { id: 'legacy-disabled', key: ' sk-旧 ', isEnabled: false, label: 'Legacy' }
+    ])
+  })
+
   it('commits the current input immediately when requested', async () => {
     const { result } = renderHook(() => useProviderApiKey('openai'))
 

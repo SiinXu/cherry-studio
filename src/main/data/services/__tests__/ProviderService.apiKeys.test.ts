@@ -87,6 +87,51 @@ describe('ProviderService API keys', () => {
     expect(keys.filter((entry) => entry.key === 'sk-new')).toHaveLength(1)
   })
 
+  it('rejects API key values that cannot be represented in HTTP headers across mutation paths', async () => {
+    expect(
+      captureError(() =>
+        providerService.create({
+          providerId: 'unsafe-create',
+          name: 'Unsafe Create',
+          apiKeys: [{ id: 'unsafe-create-key', key: 'sk-密钥', isEnabled: true }]
+        })
+      )
+    ).toMatchObject({ code: ErrorCode.VALIDATION_ERROR })
+
+    await seedProvider()
+
+    expect(captureError(() => providerService.addApiKey('openai', 'sk-密钥'))).toMatchObject({
+      code: ErrorCode.VALIDATION_ERROR
+    })
+    expect(captureError(() => providerService.updateApiKey('openai', 'key-a', { key: 'sk-密钥' }))).toMatchObject({
+      code: ErrorCode.VALIDATION_ERROR
+    })
+    expect(
+      captureError(() =>
+        providerService.replaceApiKeys('openai', [{ id: 'unsafe-replace-key', key: 'sk-密钥', isEnabled: true }])
+      )
+    ).toMatchObject({ code: ErrorCode.VALIDATION_ERROR })
+
+    expect(await readApiKeys()).toEqual([
+      { id: 'key-a', key: 'sk-a', label: 'A', isEnabled: true },
+      { id: 'key-b', key: 'sk-b', label: 'B', isEnabled: true },
+      { id: 'key-c', key: 'sk-c', label: 'C', isEnabled: false }
+    ])
+  })
+
+  it('reports legacy non-ByteString API keys before request header construction', async () => {
+    await dbh.db.insert(userProviderTable).values({
+      providerId: 'legacy-unsafe',
+      name: 'Legacy Unsafe',
+      orderKey: generateOrderKeyBetween(null, null),
+      apiKeys: [{ id: 'legacy-key', key: 'sk-密钥', isEnabled: true }]
+    })
+
+    expect(captureError(() => providerService.resolveApiKey('legacy-unsafe'))).toMatchObject({
+      code: ErrorCode.VALIDATION_ERROR
+    })
+  })
+
   it('preserves all API keys added by concurrent calls', async () => {
     await seedProvider()
 
@@ -248,6 +293,29 @@ describe('ProviderService API keys', () => {
       { id: 'key-a', key: 'sk-a', label: 'A', isEnabled: true },
       { id: 'key-b', key: 'sk-b', label: 'B', isEnabled: true },
       { id: 'key-c', key: 'sk-c', label: 'C', isEnabled: false }
+    ])
+  })
+
+  it('allows unchanged legacy non-ByteString keys during replacement so they can be repaired incrementally', async () => {
+    await dbh.db.insert(userProviderTable).values({
+      providerId: 'legacy-repair',
+      name: 'Legacy Repair',
+      orderKey: generateOrderKeyBetween(null, null),
+      apiKeys: [
+        { id: 'legacy-a', key: 'sk-旧一', isEnabled: true },
+        { id: 'legacy-b', key: 'sk-旧二', isEnabled: true }
+      ]
+    })
+
+    providerService.replaceApiKeys('legacy-repair', [
+      { id: 'legacy-a', key: 'sk-repaired', isEnabled: true },
+      { id: 'legacy-b', key: 'sk-旧二', isEnabled: false }
+    ])
+
+    const [row] = await dbh.db.select().from(userProviderTable).where(eq(userProviderTable.providerId, 'legacy-repair'))
+    expect(row.apiKeys).toEqual([
+      { id: 'legacy-a', key: 'sk-repaired', isEnabled: true },
+      { id: 'legacy-b', key: 'sk-旧二', isEnabled: false }
     ])
   })
 

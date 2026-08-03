@@ -24,6 +24,21 @@ export function formatApiKeys(value: string): string {
 }
 
 /**
+ * Whether Web IDL can convert every character to a `ByteString` for use in an
+ * HTTP header value. Fetch/undici throws before sending when a code unit is
+ * greater than 255, producing the otherwise opaque ByteString error.
+ */
+export function isHttpHeaderByteString(value: string): boolean {
+  for (let index = 0; index < value.length; index += 1) {
+    if (value.charCodeAt(index) > 0xff) {
+      return false
+    }
+  }
+
+  return true
+}
+
+/**
  * Splits an API key string into non-empty keys.
  *
  * Commas may be escaped as `\,` when they are part of a key value.

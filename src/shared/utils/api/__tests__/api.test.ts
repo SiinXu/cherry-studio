@@ -5,6 +5,7 @@ import {
   formatApiKeys,
   getTrailingApiVersion,
   hasApiVersion,
+  isHttpHeaderByteString,
   isWithTrailingSharp,
   joinApiKeyString,
   splitApiKeyString,
@@ -90,6 +91,18 @@ describe('api', () => {
 
     it('returns empty string unchanged', () => {
       expect(formatApiKeys('')).toBe('')
+    })
+  })
+
+  describe('isHttpHeaderByteString', () => {
+    it('accepts ASCII and Latin-1 values supported by Web IDL ByteString', () => {
+      expect(isHttpHeaderByteString('sk-plain')).toBe(true)
+      expect(isHttpHeaderByteString('sk-é')).toBe(true)
+    })
+
+    it('rejects characters that make Headers throw a ByteString conversion error', () => {
+      expect(isHttpHeaderByteString('sk-密钥')).toBe(false)
+      expect(isHttpHeaderByteString('sk-🔑')).toBe(false)
     })
   })
 

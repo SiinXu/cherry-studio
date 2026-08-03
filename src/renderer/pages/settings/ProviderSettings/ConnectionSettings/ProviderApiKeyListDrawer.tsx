@@ -5,6 +5,7 @@ import { useProviderApiKeys, useProviderMutations } from '@renderer/hooks/usePro
 import { toast } from '@renderer/services/toast'
 import { maskApiKey } from '@renderer/utils/api'
 import type { ApiKeyEntry } from '@shared/data/types/provider'
+import { isHttpHeaderByteString } from '@shared/utils/api'
 import { Check, Copy, Edit3, Minus, Plus, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -108,6 +109,11 @@ export default function ProviderApiKeyListDrawer({ providerId, open, onClose }: 
       const key = normalizeApiKeyValue(nextDraft.key)
       if (!key) {
         toast.warning(t('settings.provider.api.key.error.empty'))
+        return null
+      }
+
+      if (!isHttpHeaderByteString(key)) {
+        toast.warning(t('settings.provider.api_key.save_failed'))
         return null
       }
 

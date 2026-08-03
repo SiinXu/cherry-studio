@@ -39,7 +39,7 @@ import type {
   RuntimeApiFeatures
 } from '@shared/data/types/provider'
 import { DEFAULT_API_FEATURES, DEFAULT_PROVIDER_SETTINGS } from '@shared/data/types/provider'
-import { maskApiKey } from '@shared/utils/api'
+import { isHttpHeaderByteString, maskApiKey } from '@shared/utils/api'
 import { and, asc, eq, type SQLWrapper } from 'drizzle-orm'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -103,17 +103,52 @@ function assertManagedCherryAiProviderMutationAllowed(providerId: string, operat
   throw DataApiErrorFactory.invalidOperation(operation, 'managed CherryAI provider cannot be modified')
 }
 
-function normalizeApiKeyEntry(entry: ApiKeyEntry): ApiKeyEntry {
-  const key = entry.key.trim()
+const UNSUPPORTED_API_KEY_HEADER_MESSAGE = 'API key contains characters unsupported by HTTP headers'
+
+function normalizeApiKeyValue(value: string): string {
+  const key = value.trim()
   if (!key) {
     throw DataApiErrorFactory.validation({ key: ['API key cannot be empty'] })
   }
+
+  return key
+}
+
+function assertApiKeyHeaderCompatible(key: string): void {
+  if (!isHttpHeaderByteString(key)) {
+    throw DataApiErrorFactory.validation({ key: [UNSUPPORTED_API_KEY_HEADER_MESSAGE] })
+  }
+}
+
+function normalizeApiKeyEntry(entry: ApiKeyEntry): ApiKeyEntry {
+  const key = normalizeApiKeyValue(entry.key)
 
   return {
     id: entry.id,
     key,
     ...(entry.label ? { label: entry.label } : {}),
     isEnabled: entry.isEnabled
+  }
+}
+
+function assertApiKeyEntriesHeaderCompatible(apiKeys: ApiKeyEntry[]): void {
+  for (const entry of apiKeys) {
+    assertApiKeyHeaderCompatible(entry.key)
+  }
+}
+
+/**
+ * Reject newly introduced unsafe keys while allowing unchanged legacy values
+ * to remain long enough for users to disable, replace, or remove them one at a
+ * time through the full-list editor.
+ */
+function assertNoNewHeaderUnsafeApiKeys(existingApiKeys: ApiKeyEntry[], nextApiKeys: ApiKeyEntry[]): void {
+  const existingValuesById = new Map(existingApiKeys.map((entry) => [entry.id, entry.key.trim()]))
+
+  for (const entry of nextApiKeys) {
+    if (!isHttpHeaderByteString(entry.key) && existingValuesById.get(entry.id) !== entry.key) {
+      throw DataApiErrorFactory.validation({ key: [UNSUPPORTED_API_KEY_HEADER_MESSAGE] })
+    }
   }
 }
 
@@ -139,6 +174,7 @@ function toResolvedProviderApiKey(
   attribution: 'explicit' | 'matched',
   entry: ApiKeyEntry
 ): ResolvedProviderApiKey {
+  assertApiKeyHeaderCompatible(value)
   return {
     value,
     apiKeySelection: {
@@ -151,6 +187,7 @@ function toResolvedProviderApiKey(
 }
 
 function unknownCredential(value: string): ResolvedProviderApiKey {
+  assertApiKeyHeaderCompatible(value)
   return {
     value,
     apiKeySelection: { attribution: 'unknown' }
@@ -331,6 +368,9 @@ class ProviderService {
   create(dto: CreateProviderDto): Provider {
     assertManagedCherryAiProviderMutationAllowed(dto.providerId, `create provider ${dto.providerId}`)
 
+    const apiKeys = normalizeApiKeyEntries(dto.apiKeys ?? [])
+    assertApiKeyEntriesHeaderCompatible(apiKeys)
+
     const endpointConfigs = projectEndpointConfigOverrides(
       dto.endpointConfigs,
       dto.providerId,
@@ -357,7 +397,7 @@ class ProviderService {
             logoKey: logoCols.logoKey,
             endpointConfigs,
             defaultChatEndpoint,
-            apiKeys: dto.apiKeys ?? [],
+            apiKeys,
             authConfig: dto.authConfig ?? null,
             apiFeatures,
             providerSettings: dto.providerSettings ?? null,
@@ -610,6 +650,9 @@ class ProviderService {
   addApiKey(providerId: string, key: string, label?: string): Provider {
     assertManagedCherryAiProviderMutationAllowed(providerId, `add API key to provider ${providerId}`)
 
+    const normalizedKey = normalizeApiKeyValue(key)
+    assertApiKeyHeaderCompatible(normalizedKey)
+
     const db = application.get('DbService').getDb()
     const { provider, added } = db.transaction((tx) => {
       const [row] = tx
@@ -626,13 +669,13 @@ class ProviderService {
       const existingKeys = row.apiKeys ?? []
 
       // Skip if key value already exists
-      if (existingKeys.some((k) => k.key === key)) {
+      if (existingKeys.some((k) => k.key === normalizedKey)) {
         return { provider: rowToRuntimeProvider(row), added: false }
       }
 
       const newEntry = {
         id: uuidv4(),
-        key,
+        key: normalizedKey,
         ...(label ? { label } : {}),
         isEnabled: true
       }
@@ -667,6 +710,19 @@ class ProviderService {
     const normalizedApiKeys = normalizeApiKeyEntries(apiKeys)
     const db = application.get('DbService').getDb()
     const provider = db.transaction((tx) => {
+      const [existing] = tx
+        .select({ apiKeys: userProviderTable.apiKeys })
+        .from(userProviderTable)
+        .where(eq(userProviderTable.providerId, providerId))
+        .limit(1)
+        .all()
+
+      if (!existing) {
+        throw DataApiErrorFactory.notFound('Provider', providerId)
+      }
+
+      assertNoNewHeaderUnsafeApiKeys(existing.apiKeys ?? [], normalizedApiKeys)
+
       const [row] = tx
         .update(userProviderTable)
         .set({ apiKeys: normalizedApiKeys })
@@ -720,9 +776,9 @@ class ProviderService {
         throw DataApiErrorFactory.notFound('API key', keyId)
       }
 
-      const nextKeyValue = updates.key?.trim()
-      if (updates.key !== undefined && !nextKeyValue) {
-        throw DataApiErrorFactory.validation({ key: ['API key cannot be empty'] })
+      const nextKeyValue = updates.key !== undefined ? normalizeApiKeyValue(updates.key) : undefined
+      if (nextKeyValue !== undefined) {
+        assertApiKeyHeaderCompatible(nextKeyValue)
       }
 
       if (nextKeyValue && existingKeys.some((entry, index) => index !== keyIndex && entry.key === nextKeyValue)) {
