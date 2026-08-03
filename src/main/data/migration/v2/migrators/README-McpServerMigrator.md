@@ -37,7 +37,7 @@ All McpServer fields are mapped 1:1 at the Drizzle ORM level (camelCase property
 | `baseUrl` / `url` | `baseUrl` | Falls back from `url` if `baseUrl` is absent (legacy SSE servers) |
 | `command` | `command` | Nullable passthrough |
 | `registryUrl` | `registryUrl` | Nullable passthrough |
-| `args` | `args` | JSON array |
+| `args` | `args` | JSON array; builtin auto-install entries replace the removed `@cherry/mcp-auto-install` package token with `@mcpmarket/mcp-auto-install` while preserving all other arguments |
 | `env` | `env` | JSON object |
 | `headers` | `headers` | JSON object |
 | `provider` | `provider` | Nullable passthrough |
@@ -67,6 +67,7 @@ All McpServer fields are mapped 1:1 at the Drizzle ORM level (camelCase property
 - **Missing/empty/whitespace-only `name`**: Uses the generated `id` as the migrated name
 - **Duplicate `id`**: Second occurrence is skipped, first is kept
 - **Missing `isActive`**: Defaults to `false`
+- **Stale builtin auto-install package**: Replaces only the exact removed package token; command and custom arguments are preserved
 - **`undefined`/`null` optional fields**: Stored as `null` in SQLite
 
 ## Execution Order

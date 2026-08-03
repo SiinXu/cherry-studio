@@ -7,7 +7,7 @@
  * `src/main/ai/mcp/`), not hardcoded in the UI. It is parked here only as an interim home until
  * that v2 migration lands.
  */
-import { type BuiltinMcpServer, BuiltinMcpServerNames } from '@shared/utils/mcp'
+import { type BuiltinMcpServer, BuiltinMcpServerNames, MCP_AUTO_INSTALL_PACKAGE } from '@shared/utils/mcp'
 import { nanoid } from 'nanoid'
 
 const filesystemManualApprovalTools = ['write', 'edit', 'delete'] as const
@@ -37,7 +37,7 @@ export const builtinMcpServers: BuiltinMcpServer[] = [
     reference: 'https://docs.cherry-ai.com/advanced-basic/mcp/auto-install',
     type: 'inMemory',
     command: 'npx',
-    args: ['-y', '@mcpmarket/mcp-auto-install', 'connect', '--json'],
+    args: ['-y', MCP_AUTO_INSTALL_PACKAGE, 'connect', '--json'],
     isActive: false,
     provider: 'CherryAI',
     installSource: 'builtin',

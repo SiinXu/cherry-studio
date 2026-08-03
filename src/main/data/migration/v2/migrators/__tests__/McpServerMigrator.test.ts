@@ -1,3 +1,4 @@
+import { BuiltinMcpServerNames, MCP_AUTO_INSTALL_LEGACY_PACKAGE, MCP_AUTO_INSTALL_PACKAGE } from '@shared/utils/mcp'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { ReduxStateReader } from '../../utils/ReduxStateReader'
@@ -194,6 +195,38 @@ describe('McpServerMigrator', () => {
         'srv-whitespace-name',
         'srv-null-name'
       ])
+    })
+
+    it('repairs stale builtin auto-install args without overwriting other launch settings', async () => {
+      const ctx = createMockContext({
+        mcp: {
+          servers: [
+            {
+              id: 'auto-install',
+              name: BuiltinMcpServerNames.mcpAutoInstall,
+              type: 'inMemory',
+              command: 'bun',
+              args: ['x', MCP_AUTO_INSTALL_LEGACY_PACKAGE, 'connect', '--json', '--custom']
+            },
+            {
+              id: 'custom-server',
+              name: 'custom-server',
+              type: 'stdio',
+              command: 'npx',
+              args: ['-y', MCP_AUTO_INSTALL_LEGACY_PACKAGE]
+            }
+          ]
+        }
+      })
+
+      await migrator.prepare(ctx as any)
+      await migrator.execute(ctx as any)
+
+      expect(ctx.insertedRows[0]).toMatchObject({
+        command: 'bun',
+        args: ['x', MCP_AUTO_INSTALL_PACKAGE, 'connect', '--json', '--custom']
+      })
+      expect(ctx.insertedRows[1]?.args).toEqual(['-y', MCP_AUTO_INSTALL_LEGACY_PACKAGE])
     })
 
     it('should handle empty servers gracefully', async () => {

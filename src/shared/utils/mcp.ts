@@ -2,9 +2,12 @@ import type { ContentBlock } from '@modelcontextprotocol/sdk/types.js'
 import { ContentBlockSchema } from '@modelcontextprotocol/sdk/types.js'
 import type { McpServer } from '@shared/data/types/mcpServer'
 
+export const MCP_AUTO_INSTALL_LEGACY_PACKAGE = '@cherry/mcp-auto-install'
+export const MCP_AUTO_INSTALL_PACKAGE = '@mcpmarket/mcp-auto-install'
+
 export const BuiltinMcpServerNames = {
   flomo: '@cherry/flomo',
-  mcpAutoInstall: '@cherry/mcp-auto-install',
+  mcpAutoInstall: MCP_AUTO_INSTALL_LEGACY_PACKAGE,
   memory: '@cherry/memory',
   sequentialThinking: '@cherry/sequentialthinking',
   braveSearch: '@cherry/brave-search',

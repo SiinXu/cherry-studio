@@ -4,6 +4,7 @@
  * Transforms legacy Redux McpServer objects to SQLite mcp_server table rows.
  */
 
+import { normalizeMcpAutoInstallArgs } from '@data/db/mcpAutoInstallPackage'
 import type { InsertMcpServerRow } from '@data/db/schemas/mcpServer'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -56,7 +57,7 @@ export function transformMcpServer(source: Record<string, unknown>, index: numbe
       baseUrl: toNullable(source.baseUrl ?? source.url),
       command: toNullable(source.command),
       registryUrl: toNullable(source.registryUrl),
-      args: toNullable(source.args),
+      args: toNullable(normalizeMcpAutoInstallArgs(source.name, source.args)),
       env: toNullable(source.env),
       headers: toNullable(source.headers),
       provider: toNullable(source.provider),
