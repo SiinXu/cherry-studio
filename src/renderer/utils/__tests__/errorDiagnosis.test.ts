@@ -281,6 +281,28 @@ describe('ErrorDiagnosisService', () => {
       expect(callArgs.prompt).toContain('Network or proxy error')
     })
 
+    it('routes a Chromium ERR_MANDATORY_PROXY_CONFIGURATION_FAILED to network/proxy context', async () => {
+      mockFetchGenerate.mockResolvedValue(
+        JSON.stringify({ summary: 'x', category: 'proxy', explanation: 'x', steps: [] })
+      )
+
+      await diagnoseError(makeError({ message: 'net::ERR_MANDATORY_PROXY_CONFIGURATION_FAILED' }), 'en')
+
+      const callArgs = mockFetchGenerate.mock.calls[0][0]
+      expect(callArgs.prompt).toContain('Network or proxy error')
+    })
+
+    it('routes a socks-proxy-agent rejection to network/proxy context', async () => {
+      mockFetchGenerate.mockResolvedValue(
+        JSON.stringify({ summary: 'x', category: 'proxy', explanation: 'x', steps: [] })
+      )
+
+      await diagnoseError(makeError({ message: 'Socks5 proxy rejected connection' }), 'en')
+
+      const callArgs = mockFetchGenerate.mock.calls[0][0]
+      expect(callArgs.prompt).toContain('Network or proxy error')
+    })
+
     it('routes an undici ProxyAgent CONNECT failure to network/proxy context', async () => {
       mockFetchGenerate.mockResolvedValue(
         JSON.stringify({ summary: 'x', category: 'proxy', explanation: 'x', steps: [] })

@@ -1,7 +1,7 @@
 import type { SerializedError } from '@renderer/types/error'
 import { describe, expect, it } from 'vitest'
 
-import { classifyError } from '../errorClassifier'
+import { classifyError, isProxyErrorMessage } from '../errorClassifier'
 
 function makeError(overrides: Partial<SerializedError> = {}): SerializedError {
   return { name: 'Error', message: 'test error', stack: null, ...overrides }
@@ -321,6 +321,12 @@ describe('classifyError', () => {
     expect(result.category).toBe('proxy')
   })
 
+  it('classifies Chromium ERR_MANDATORY_PROXY_CONFIGURATION_FAILED as proxy', () => {
+    const result = classifyError(makeError({ message: 'net::ERR_MANDATORY_PROXY_CONFIGURATION_FAILED' }))
+    expect(result.category).toBe('proxy')
+    expect(result.navTarget).toBe('/settings/general')
+  })
+
   it('classifies a Chromium socket-to-proxies failure as proxy', () => {
     const result = classifyError(
       makeError({ message: 'Failed to establish a socket connection to proxies: PROXY 127.0.0.1:7890' })
@@ -367,5 +373,23 @@ describe('classifyError', () => {
   it('prioritizes finishReason over status code', () => {
     const result = classifyError(makeError({ finishReason: 'content-filter', statusCode: 500 }))
     expect(result.category).toBe('content')
+  })
+})
+
+describe('isProxyErrorMessage', () => {
+  it('treats a socks-proxy-agent rejection as a proxy transport failure', () => {
+    expect(isProxyErrorMessage('Socks5 proxy rejected connection')).toBe(true)
+  })
+
+  it('treats a qualified Chromium ERR_*PROXY* code as a proxy transport failure', () => {
+    expect(isProxyErrorMessage('net::ERR_MANDATORY_PROXY_CONFIGURATION_FAILED')).toBe(true)
+  })
+
+  it('does not treat a bare proxy mention as a transport failure', () => {
+    expect(isProxyErrorMessage('something proxy related')).toBe(false)
+  })
+
+  it('does not treat reverse-proxy configuration as a transport failure', () => {
+    expect(isProxyErrorMessage('reverse proxies are configured')).toBe(false)
   })
 })

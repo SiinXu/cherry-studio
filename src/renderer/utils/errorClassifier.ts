@@ -55,15 +55,20 @@ export function isMcpErrorMessage(message: string): boolean {
   )
 }
 
+// Chromium `ERR_*PROXY*` after case-folding, e.g. ERR_PROXY_* and ERR_MANDATORY_PROXY_*.
+const CHROMIUM_ERR_PROXY_RE = /(?:^|[^a-z0-9])err_(?:[a-z0-9]+_)*proxy(?:_|$|[^a-z0-9])/
+
 export function isProxyErrorMessage(message: string): boolean {
-  const msg = message.toLowerCase().replace(/_/g, ' ')
+  const lowered = message.toLowerCase()
+  const msg = lowered.replace(/_/g, ' ')
 
   return (
-    msg.includes('err proxy') ||
+    CHROMIUM_ERR_PROXY_RE.test(lowered) ||
     msg.includes('proxy connection') ||
     msg.includes('proxy response') ||
     msg.includes('proxy error') ||
     msg.includes('proxy refused') ||
+    msg.includes('proxy rejected') ||
     msg.includes('connection to proxies')
   )
 }
